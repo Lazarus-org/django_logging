@@ -3,6 +3,8 @@ import logging.config
 import os
 from typing import List, Dict, Optional
 
+from django_logging.filters.level_filter import LoggingLevelFilter
+
 
 class LogConfig:
     """
@@ -67,6 +69,7 @@ class LogManager:
                 "filename": log_file,
                 "formatter": "default",
                 "level": level,
+                "filters": [level.lower()]
             }
             for level, log_file in self.log_files.items()
         }
@@ -74,6 +77,14 @@ class LogManager:
             "class": "logging.StreamHandler",
             "formatter": "console",
             "level": "DEBUG",
+        }
+
+        filters = {
+            level.lower(): {
+                "()": LoggingLevelFilter,
+                "logging_level": getattr(logging, level),
+            }
+            for level in self.log_config.log_levels
         }
 
         loggers = {
@@ -88,6 +99,7 @@ class LogManager:
         config = {
             "version": 1,
             "handlers": handlers,
+            "filters": filters,
             "loggers": loggers,
             "root": {"level": "DEBUG", "handlers": list(handlers.keys())},
             "disable_existing_loggers": False,
