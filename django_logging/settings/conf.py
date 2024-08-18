@@ -23,6 +23,7 @@ class LogConfig:
             log_file_formats: Dict[str, Union[int, str]],
             console_level: str,
             console_format: Optional[Union[int, str]],
+            colorize_console: bool,
             log_date_format: str,
             log_email_notifier_enable: bool,
             log_email_notifier_log_levels: List[str],
@@ -34,7 +35,10 @@ class LogConfig:
         self.log_file_formats = self._resolve_file_formats(log_file_formats)
         self.log_date_format = log_date_format
         self.console_level = console_level
-        self.console_format = self.resolve_format(console_format)
+        self.colorize_console = colorize_console
+        self.console_format = self.resolve_format(
+            console_format, use_colors=self.colorize_console
+        )
         self.email_notifier_enable = log_email_notifier_enable
         self.email_notifier_log_levels = log_email_notifier_log_levels
         self.email_notifier_log_format = self.resolve_format(
@@ -55,10 +59,23 @@ class LogConfig:
             else:
                 resolved_formats[level] = FORMAT_OPTIONS[1]
 
+            colored_format = resolved_formats[level]
+            resolved_formats[level] = self.remove_ansi_escape_sequences(colored_format)
+
         return resolved_formats
 
     @staticmethod
-    def resolve_format(_format: Union[int, str]) -> str:
+    def remove_ansi_escape_sequences(log_message: str) -> str:
+        """
+        Remove ANSI escape sequences from log messages.
+        """
+        import re
+
+        ansi_escape = re.compile(r"(?:\x1B[@-_][0-?]*[ -/]*[@-~])")
+        return ansi_escape.sub("", log_message)
+
+    @staticmethod
+    def resolve_format(_format: Union[int, str], use_colors: bool = False) -> str:
         if _format:
             if isinstance(_format, int):
                 resolved_format = FORMAT_OPTIONS.get(_format, FORMAT_OPTIONS[1])
@@ -66,6 +83,10 @@ class LogConfig:
                 resolved_format = _format
         else:
             resolved_format = FORMAT_OPTIONS[1]
+
+        # If colors are not enabled, strip out color codes, if provided in formats
+        if not use_colors:
+            resolved_format = LogConfig.remove_ansi_escape_sequences(resolved_format)
 
         return resolved_format
 
@@ -156,6 +177,10 @@ class LogManager:
             "format": self.log_config.console_format,
             "datefmt": self.log_config.log_date_format,
         }
+        if self.log_config.colorize_console:
+            formatters["console"].update(
+                {"()": "django_logging.formatters.ColorizedFormatter"}
+            )
 
         formatters["email"] = {
             "format": self.log_config.email_notifier_log_format,

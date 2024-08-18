@@ -21,6 +21,7 @@ class DjangoLoggingConfig(AppConfig):
         log_file_formats = log_settings.get("LOG_FILE_FORMATS", {})
         console_level = log_settings.get("LOG_CONSOLE_LEVEL", "DEBUG")
         console_format = log_settings.get("LOG_CONSOLE_FORMAT")
+        colorize_console = log_settings.get("LOG_CONSOLE_COLORIZE", True)
         log_date_format = log_settings.get("LOG_DATE_FORMAT", "%Y-%m-%d %H:%M:%S")
         log_email_notifier = log_settings.get("LOG_EMAIL_NOTIFIER", {})
         log_email_notifier_enable = log_email_notifier.get("ENABLE", False)
@@ -37,6 +38,7 @@ class DjangoLoggingConfig(AppConfig):
             log_file_formats,
             console_level,
             console_format,
+            colorize_console,
             log_date_format,
             log_email_notifier_enable,
             log_email_notifier_log_levels,
