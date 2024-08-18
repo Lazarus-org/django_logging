@@ -1,8 +1,9 @@
 import logging
 import logging.config
 import os
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Union
 
+from django_logging.constants import FORMAT_OPTIONS
 from django_logging.filters.level_filter import LoggingLevelFilter
 
 
@@ -19,14 +20,54 @@ class LogConfig:
             self,
             log_levels: List[str],
             log_dir: str,
+            log_file_formats: Dict[str, Union[int, str]],
+            console_level: str,
+            console_format: Optional[Union[int, str]],
+            log_date_format: str,
             log_email_notifier_enable: bool,
             log_email_notifier_log_levels: List[str],
+            log_email_notifier_log_format: Union[int, str],
     ) -> None:
 
         self.log_levels = log_levels
         self.log_dir = log_dir
+        self.log_file_formats = self._resolve_file_formats(log_file_formats)
+        self.log_date_format = log_date_format
+        self.console_level = console_level
+        self.console_format = self.resolve_format(console_format)
         self.email_notifier_enable = log_email_notifier_enable
         self.email_notifier_log_levels = log_email_notifier_log_levels
+        self.email_notifier_log_format = self.resolve_format(
+            log_email_notifier_log_format
+        )
+
+    def _resolve_file_formats(self, log_file_formats: Dict[str, Union[int, str]]) -> Dict:
+        resolved_formats = {}
+        for level in self.log_levels:
+            format_option = log_file_formats.get(level, None)
+            if format_option:
+                if isinstance(format_option, int):
+                    resolved_formats[level] = FORMAT_OPTIONS.get(
+                        format_option, FORMAT_OPTIONS[1]
+                    )
+                else:
+                    resolved_formats[level] = format_option
+            else:
+                resolved_formats[level] = FORMAT_OPTIONS[1]
+
+        return resolved_formats
+
+    @staticmethod
+    def resolve_format(_format: Union[int, str]) -> str:
+        if _format:
+            if isinstance(_format, int):
+                resolved_format = FORMAT_OPTIONS.get(_format, FORMAT_OPTIONS[1])
+            else:
+                resolved_format = _format
+        else:
+            resolved_format = FORMAT_OPTIONS[1]
+
+        return resolved_format
 
 
 class LogManager:
@@ -72,7 +113,7 @@ class LogManager:
             level.lower(): {
                 "class": "logging.FileHandler",
                 "filename": log_file,
-                "formatter": "default",
+                "formatter": f"{level.lower()}",
                 "level": level,
                 "filters": [level.lower()]
             }
@@ -81,19 +122,18 @@ class LogManager:
         handlers["console"] = {
             "class": "logging.StreamHandler",
             "formatter": "console",
-            "level": "DEBUG",
+            "level": self.log_config.console_level,
         }
-
         email_handler = {
             f"email_{level.lower()}": {
                 "class": "django_logging.handlers.EmailHandler",
+                "formatter": "email",
                 "level": level,
                 "filters": [level.lower()],
             }
             for level in self.log_config.email_notifier_log_levels
             if level
         }
-
         if self.log_config.email_notifier_enable:
             handlers.update(email_handler)
 
@@ -103,6 +143,23 @@ class LogManager:
                 "logging_level": getattr(logging, level),
             }
             for level in self.log_config.log_levels
+        }
+
+        formatters = {
+            level.lower(): {
+                "format": self.log_config.log_file_formats[level],
+                "datefmt": self.log_config.log_date_format,
+            }
+            for level in self.log_config.log_levels
+        }
+        formatters["console"] = {
+            "format": self.log_config.console_format,
+            "datefmt": self.log_config.log_date_format,
+        }
+
+        formatters["email"] = {
+            "format": self.log_config.email_notifier_log_format,
+            "datefmt": self.log_config.log_date_format,
         }
 
         loggers = {
@@ -116,6 +173,7 @@ class LogManager:
 
         config = {
             "version": 1,
+            "formatters": formatters,
             "handlers": handlers,
             "filters": filters,
             "loggers": loggers,
