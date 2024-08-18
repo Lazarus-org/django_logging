@@ -45,7 +45,7 @@ class LogConfig:
             log_email_notifier_log_format
         )
 
-    def _resolve_file_formats(self, log_file_formats):
+    def _resolve_file_formats(self, log_file_formats: Dict[str, Union[int, str]]) -> Dict:
         resolved_formats = {}
         for level in self.log_levels:
             format_option = log_file_formats.get(level, None)
@@ -75,7 +75,7 @@ class LogConfig:
         return ansi_escape.sub("", log_message)
 
     @staticmethod
-    def resolve_format(_format: Union[int, str], use_colors: bool = False):
+    def resolve_format(_format: Union[int, str], use_colors: bool = False) -> str:
         if _format:
             if isinstance(_format, int):
                 resolved_format = FORMAT_OPTIONS.get(_format, FORMAT_OPTIONS[1])
