@@ -3,6 +3,8 @@ import logging.config
 import os
 from typing import List, Dict, Optional
 
+from django_logging.filters.level_filter import LoggingLevelFilter
+
 
 class LogConfig:
     """
@@ -17,9 +19,14 @@ class LogConfig:
             self,
             log_levels: List[str],
             log_dir: str,
+            log_email_notifier_enable: bool,
+            log_email_notifier_log_levels: List[str],
     ) -> None:
+
         self.log_levels = log_levels
         self.log_dir = log_dir
+        self.email_notifier_enable = log_email_notifier_enable
+        self.email_notifier_log_levels = log_email_notifier_log_levels
 
 
 class LogManager:
@@ -67,6 +74,7 @@ class LogManager:
                 "filename": log_file,
                 "formatter": "default",
                 "level": level,
+                "filters": [level.lower()]
             }
             for level, log_file in self.log_files.items()
         }
@@ -74,6 +82,27 @@ class LogManager:
             "class": "logging.StreamHandler",
             "formatter": "console",
             "level": "DEBUG",
+        }
+
+        email_handler = {
+            f"email_{level.lower()}": {
+                "class": "django_logging.handlers.EmailHandler",
+                "level": level,
+                "filters": [level.lower()],
+            }
+            for level in self.log_config.email_notifier_log_levels
+            if level
+        }
+
+        if self.log_config.email_notifier_enable:
+            handlers.update(email_handler)
+
+        filters = {
+            level.lower(): {
+                "()": LoggingLevelFilter,
+                "logging_level": getattr(logging, level),
+            }
+            for level in self.log_config.log_levels
         }
 
         loggers = {
@@ -88,6 +117,7 @@ class LogManager:
         config = {
             "version": 1,
             "handlers": handlers,
+            "filters": filters,
             "loggers": loggers,
             "root": {"level": "DEBUG", "handlers": list(handlers.keys())},
             "disable_existing_loggers": False,
