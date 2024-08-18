@@ -18,6 +18,12 @@ class DjangoLoggingConfig(AppConfig):
             "LOG_FILE_LEVELS", ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
         )
         log_dir = log_settings.get("LOG_DIR", os.path.join(os.getcwd(), "logs"))
+        log_email_notifier = log_settings.get("LOG_EMAIL_NOTIFIER", {})
+        log_email_notifier_enable = log_email_notifier.get("ENABLE", False)
+        log_email_notifier_log_levels = [
+            "ERROR" if log_email_notifier.get("NOTIFY_ERROR", False) else None,
+            "CRITICAL" if log_email_notifier.get("NOTIFY_CRITICAL", False) else None,
+        ]
 
         # Set the logging configuration
-        set_logging(log_levels, log_dir)
+        set_logging(log_levels, log_dir, log_email_notifier_enable, log_email_notifier_log_levels)
