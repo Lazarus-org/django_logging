@@ -1,0 +1,15 @@
+FORMAT_OPTIONS = {
+    1: "%(levelname)s | %(asctime)s | %(module)s | %(message)s",
+    2: "%(levelname)s | %(asctime)s | %(message)s",
+    3: "%(levelname)s | %(message)s",
+    4: "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    5: "%(levelname)s | %(message)s | [in %(pathname)s:%(lineno)d]",
+    6: "%(asctime)s | %(levelname)s | %(message)s",
+    7: "%(levelname)s | %(asctime)s | in %(module)s: %(message)s",
+    8: "%(levelname)s | %(message)s | [%(filename)s:%(lineno)d]",
+    9: "[%(asctime)s] | %(levelname)s | in %(module)s: %(message)s",
+    10: "%(asctime)s | %(processName)s | %(name)s | %(levelname)s | %(message)s",
+    11: "%(asctime)s | %(threadName)s | %(name)s | %(levelname)s | %(message)s",
+    12: "%(levelname)s | [%(asctime)s] | (%(filename)s:%(lineno)d) | %(message)s",
+    13: "%(levelname)s | [%(asctime)s] | {%(name)s} | (%(filename)s:%(lineno)d): %(message)s",
+}
