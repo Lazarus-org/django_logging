@@ -4,11 +4,12 @@ from django.conf import settings
 from django.template import engines
 from django.utils.timezone import now
 from django_logging.utils.email.notifier import send_email_async
+from django_logging.utils.get_config import use_email_notifier_template
 from django_logging.middleware import RequestLogMiddleware
 
 
 class EmailHandler(logging.Handler):
-    def __init__(self, include_html=False, *args, **kwargs):
+    def __init__(self, include_html=True, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.include_html = include_html
@@ -17,11 +18,8 @@ class EmailHandler(logging.Handler):
             # Attempt to retrieve the logging settings from the Django settings
             logging_settings = settings.DJANGO_LOGGING
 
-            self.include_html = logging_settings.get("LOG_EMAIL_NOTIFIER", {}).get("USE_TEMPLATE", include_html)
+            self.include_html = use_email_notifier_template()
 
-        except AttributeError:
-            logging.warning(
-                f"DJANGO_LOGGING settings not found. Using default include_html value: {self.include_html}.")
         except Exception as e:
             logging.error(f"An unexpected error occurred while initializing EmailHandler: {e}")
 
