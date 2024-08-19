@@ -8,7 +8,7 @@ from django_logging.middleware import RequestLogMiddleware
 
 
 class EmailHandler(logging.Handler):
-    def __init__(self, include_html=False, *args, **kwargs):
+    def __init__(self, include_html=True, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.include_html = include_html
@@ -19,9 +19,6 @@ class EmailHandler(logging.Handler):
 
             self.include_html = logging_settings.get("LOG_EMAIL_NOTIFIER", {}).get("USE_TEMPLATE", include_html)
 
-        except AttributeError:
-            logging.warning(
-                f"DJANGO_LOGGING settings not found. Using default include_html value: {self.include_html}.")
         except Exception as e:
             logging.error(f"An unexpected error occurred while initializing EmailHandler: {e}")
 
