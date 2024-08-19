@@ -47,7 +47,7 @@ def get_conf() -> Tuple[
     )
 
 
-def is_email_notifier_template_used() -> bool:
+def use_email_notifier_template() -> bool:
     """
     Check whether the email notifier should use a template based on Django settings.
 
