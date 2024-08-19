@@ -45,3 +45,27 @@ def get_conf() -> Tuple[
         log_email_notifier_log_levels,
         log_email_notifier_log_format,
     )
+
+
+def is_email_notifier_template_used() -> bool:
+    """
+    Check whether the email notifier should use a template based on Django settings.
+
+    Returns:
+        bool: True if the email notifier should use a template, False otherwise.
+    """
+    log_settings = getattr(settings, "DJANGO_LOGGING", {})
+    log_email_notifier = log_settings.get("LOG_EMAIL_NOTIFIER", {})
+    return log_email_notifier.get("USE_TEMPLATE", True)
+
+
+def is_initialization_message_enabled() -> bool:
+    """
+    Check if the initialization message for the logging system is enabled in Django settings.
+
+    Returns:
+        bool: True if an initialization message is specified, False otherwise. Defaults to True if not specified.
+    """
+    log_settings = getattr(settings, "DJANGO_LOGGING", {})
+    return log_settings.get("INITIALIZATION_MESSAGE", True)
+

@@ -1,3 +1,5 @@
+import os
+
 from django_logging.settings.conf import LogConfig, LogManager
 
 from typing import List, Optional, Union, Dict
@@ -14,7 +16,7 @@ def set_logging(
         log_email_notifier_enable: bool,
         log_email_notifier_log_levels: List[str],
         log_email_notifier_log_format: Union[int, str]
-):
+) -> None:
     """
     Sets up the logging configuration.
 
@@ -37,3 +39,25 @@ def set_logging(
     log_manager = LogManager(log_config)
     log_manager.create_log_files()
     log_manager.set_conf()
+
+    if os.environ.get("RUN_MAIN") == "true":
+        from django_logging.utils.get_config import is_initialization_message_enabled
+
+        if is_initialization_message_enabled():
+            from logging import getLogger
+            logger = getLogger(__name__)
+            logger.info(
+                "Logging initialized with the following configurations:\n"
+                "Log File levels: %s.\n"
+                "Log files are being written to: %s.\n"
+                "Console output level: %s.\n"
+                "Colorize console: %s.\n"
+                "Log date format: %s.\n"
+                "Email notifier enabled: %s.\n",
+                log_levels,
+                log_dir,
+                console_level or "default (DEBUG)",
+                colorize_console,
+                log_date_format,
+                log_email_notifier_enable,
+            )
