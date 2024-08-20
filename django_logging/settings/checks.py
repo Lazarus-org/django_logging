@@ -11,7 +11,7 @@ from django_logging.constants import (
     DEFAULT_LOG_CONSOLE_FORMAT,
     DEFAULT_LOG_CONSOLE_COLORIZE,
     DEFAULT_LOG_FILE_FORMATS,
-    DEFAULT_INITIALIZATION_MESSAGE_ENABLE
+    DEFAULT_INITIALIZATION_MESSAGE_ENABLE,
 )
 
 from django_logging.validators.config_validators import (
@@ -22,6 +22,7 @@ from django_logging.validators.config_validators import (
     validate_email_notifier,
     validate_boolean_setting,
 )
+from django_logging.validators.email_settings_validator import check_email_settings
 
 
 @register()
@@ -103,5 +104,8 @@ def check_logging_settings(app_configs: Dict[str, Any], **kwargs: Any) -> List[E
         "LOG_EMAIL_NOTIFIER", DEFAULT_LOG_EMAIL_NOTIFIER
     )
     errors.extend(validate_email_notifier(log_email_notifier))
+
+    if log_email_notifier.get("ENABLE", False):
+        errors.extend(check_email_settings())
 
     return errors

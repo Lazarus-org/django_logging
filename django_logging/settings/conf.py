@@ -3,7 +3,7 @@ import logging.config
 import os
 from typing import List, Dict, Optional, Union
 
-from django_logging.constants import FORMAT_OPTIONS
+from django_logging.constants import FORMAT_OPTIONS, DEFAULT_LOG_FILE_LEVELS
 from django_logging.filters.level_filter import LoggingLevelFilter
 
 
@@ -17,17 +17,17 @@ class LogConfig:
     """
 
     def __init__(
-            self,
-            log_levels: List[str],
-            log_dir: str,
-            log_file_formats: Dict[str, Union[int, str]],
-            console_level: str,
-            console_format: Optional[Union[int, str]],
-            colorize_console: bool,
-            log_date_format: str,
-            log_email_notifier_enable: bool,
-            log_email_notifier_log_levels: List[str],
-            log_email_notifier_log_format: Union[int, str],
+        self,
+        log_levels: List[str],
+        log_dir: str,
+        log_file_formats: Dict[str, Union[int, str]],
+        console_level: str,
+        console_format: Optional[Union[int, str]],
+        colorize_console: bool,
+        log_date_format: str,
+        log_email_notifier_enable: bool,
+        log_email_notifier_log_levels: List[str],
+        log_email_notifier_log_format: Union[int, str],
     ) -> None:
 
         self.log_levels = log_levels
@@ -45,7 +45,9 @@ class LogConfig:
             log_email_notifier_log_format
         )
 
-    def _resolve_file_formats(self, log_file_formats: Dict[str, Union[int, str]]) -> Dict:
+    def _resolve_file_formats(
+        self, log_file_formats: Dict[str, Union[int, str]]
+    ) -> Dict:
         resolved_formats = {}
         for level in self.log_levels:
             format_option = log_file_formats.get(level, None)
@@ -136,7 +138,7 @@ class LogManager:
                 "filename": log_file,
                 "formatter": f"{level.lower()}",
                 "level": level,
-                "filters": [level.lower()]
+                "filters": [level.lower()],
             }
             for level, log_file in self.log_files.items()
         }
@@ -163,7 +165,7 @@ class LogManager:
                 "()": LoggingLevelFilter,
                 "logging_level": getattr(logging, level),
             }
-            for level in self.log_config.log_levels
+            for level in DEFAULT_LOG_FILE_LEVELS
         }
 
         formatters = {
