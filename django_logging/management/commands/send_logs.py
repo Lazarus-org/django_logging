@@ -2,9 +2,13 @@ import os
 import shutil
 import tempfile
 import logging
+
+from django.core.exceptions import ImproperlyConfigured
 from django.core.mail import EmailMessage
 from django.core.management.base import BaseCommand
 from django.conf import settings
+
+from django_logging.validators.email_settings_validator import check_email_settings
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +46,9 @@ class Command(BaseCommand):
         """
         email = kwargs["email"]
 
-        log_dir = settings.DJANGO_LOGGING.get("LOG_DIR", os.path.join(os.getcwd(), "logs"))
+        log_dir = settings.DJANGO_LOGGING.get(
+            "LOG_DIR", os.path.join(os.getcwd(), "logs")
+        )
 
         if not os.path.exists(log_dir):
             self.stdout.write(
@@ -51,7 +57,7 @@ class Command(BaseCommand):
             logger.error(f'Log directory "{log_dir}" does not exist.')
             return
 
-        self.check_email_settings()
+        self.validate_email_settings()
 
         # Create a temporary file to store the zipped logs
         with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
@@ -84,24 +90,13 @@ class Command(BaseCommand):
             os.remove(zip_path)
             logger.info("Temporary zip file cleaned up successfully.")
 
-    def check_email_settings(self):
+    def validate_email_settings(self):
         """
         Check if all required email settings are present in the settings file.
 
-        Raises an exception if any of the required email settings are missing.
+        Raises ImproperlyConfigured if any of the required email settings are missing.
         """
-        required_settings = [
-            "EMAIL_HOST",
-            "EMAIL_PORT",
-            "EMAIL_HOST_USER",
-            "EMAIL_HOST_PASSWORD",
-            "EMAIL_USE_TLS",
-            "DEFAULT_FROM_EMAIL",
-        ]
-
-        for setting in required_settings:
-            if not getattr(settings, setting, None):
-                error_message = f"Missing required email setting: {setting}"
-                self.stdout.write(self.style.ERROR(error_message))
-                logger.error(f"Missing required email setting: {setting}")
-                raise Exception(error_message)
+        errors = check_email_settings()
+        if errors:
+            logger.error(errors)
+            raise ImproperlyConfigured(errors)
