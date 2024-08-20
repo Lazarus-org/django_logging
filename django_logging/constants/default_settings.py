@@ -1,0 +1,53 @@
+import os
+
+from django_logging.constants.config_types import (
+    LogFileFormatsType,
+    LOG_DIR_TYPE,
+    LOG_FILE_LEVELS_TYPE,
+    LOG_CONSOLE_FORMAT_TYPE,
+    LOG_CONSOLE_LEVEL_TYPE,
+    LOG_CONSOLE_COLORIZE_TYPE,
+    LOG_DATE_FORMAT_TYPE,
+    INITIALIZATION_MESSAGE_ENABLED_TYPE,
+    LogEmailNotifierType,
+)
+
+# Default directory for logs
+DEFAULT_LOG_DIR: LOG_DIR_TYPE = os.path.join(os.getcwd(), "logs")
+
+# Default log levels
+DEFAULT_LOG_FILE_LEVELS: LOG_FILE_LEVELS_TYPE = [
+    "DEBUG",
+    "INFO",
+    "WARNING",
+    "ERROR",
+    "CRITICAL",
+]
+
+
+# Default log date format
+DEFAULT_LOG_DATE_FORMAT: LOG_DATE_FORMAT_TYPE = "%Y-%m-%d %H:%M:%S"
+
+DEFAULT_INITIALIZATION_MESSAGE_ENABLED: INITIALIZATION_MESSAGE_ENABLED_TYPE = True
+
+DEFAULT_LOG_FILE_FORMATS: LogFileFormatsType = {
+    "DEBUG": 1,
+    "INFO": 1,
+    "WARNING": 1,
+    "ERROR": 1,
+    "CRITICAL": 1,
+}
+
+DEFAULT_LOG_CONSOLE_LEVEL: LOG_CONSOLE_LEVEL_TYPE = "DEBUG"
+
+DEFAULT_LOG_CONSOLE_FORMAT: LOG_CONSOLE_FORMAT_TYPE = 1
+
+DEFAULT_LOG_CONSOLE_COLORIZE: LOG_CONSOLE_COLORIZE_TYPE = True
+
+DEFAULT_LOG_EMAIL_NOTIFIER: LogEmailNotifierType = {
+    "ENABLE": False,
+    "NOTIFY_ERROR": False,
+    "NOTIFY_CRITICAL": False,
+    "LOG_FORMAT": 1,
+    "USE_TEMPLATE": True,
+}
