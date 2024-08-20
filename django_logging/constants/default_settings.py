@@ -1,6 +1,6 @@
 import os
 
-from django_logging.constants.config_types import (
+from django_logging.constants.settings_types import (
     LogFileFormatsType,
     LOG_DIR_TYPE,
     LOG_FILE_LEVELS_TYPE,
@@ -8,7 +8,7 @@ from django_logging.constants.config_types import (
     LOG_CONSOLE_LEVEL_TYPE,
     LOG_CONSOLE_COLORIZE_TYPE,
     LOG_DATE_FORMAT_TYPE,
-    INITIALIZATION_MESSAGE_ENABLED_TYPE,
+    INITIALIZATION_MESSAGE_ENABLE_TYPE,
     LogEmailNotifierType,
 )
 
@@ -28,7 +28,7 @@ DEFAULT_LOG_FILE_LEVELS: LOG_FILE_LEVELS_TYPE = [
 # Default log date format
 DEFAULT_LOG_DATE_FORMAT: LOG_DATE_FORMAT_TYPE = "%Y-%m-%d %H:%M:%S"
 
-DEFAULT_INITIALIZATION_MESSAGE_ENABLED: INITIALIZATION_MESSAGE_ENABLED_TYPE = True
+DEFAULT_INITIALIZATION_MESSAGE_ENABLE: INITIALIZATION_MESSAGE_ENABLE_TYPE = True
 
 DEFAULT_LOG_FILE_FORMATS: LogFileFormatsType = {
     "DEBUG": 1,
