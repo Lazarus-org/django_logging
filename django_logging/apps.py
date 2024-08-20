@@ -7,7 +7,7 @@ class DjangoLoggingConfig(AppConfig):
     name = "django_logging"
     verbose_name = _("Django Logging")
 
-    def ready(self):
+    def ready(self) -> None:
         from django_logging.utils.setup_logging import set_logging
         from django_logging.utils.get_config import get_conf
         conf = get_conf()
