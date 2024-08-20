@@ -1,0 +1,18 @@
+LOG_FORMAT_SPECIFIERS = [
+    "asctime",
+    "created",
+    "relativeCreated",
+    "msecs",
+    "levelname",
+    "levelno",
+    "name",
+    "module",
+    "filename",
+    "pathname",
+    "lineno",
+    "funcName",
+    "process",
+    "thread",
+    "threadName",
+    "message",
+]
