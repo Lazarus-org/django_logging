@@ -11,6 +11,7 @@ from django_logging.constants import (
     DEFAULT_LOG_CONSOLE_FORMAT,
     DEFAULT_LOG_CONSOLE_COLORIZE,
     DEFAULT_LOG_FILE_FORMATS,
+    DEFAULT_AUTO_INITIALIZATION_ENABLE,
     DEFAULT_INITIALIZATION_MESSAGE_ENABLE,
 )
 
@@ -91,12 +92,24 @@ def check_logging_settings(app_configs: Dict[str, Any], **kwargs: Any) -> List[E
     log_date_format = log_settings.get("LOG_DATE_FORMAT", DEFAULT_LOG_DATE_FORMAT)
     errors.extend(validate_date_format(log_date_format, "LOG_DATE_FORMAT"))
 
-    # Validate INITIALIZATION_MESSAGE
-    initialization_message = log_settings.get(
-        "INITIALIZATION_MESSAGE_ENABLED", DEFAULT_INITIALIZATION_MESSAGE_ENABLE
+    # Validate AUTO_INITIALIZATION_ENABLE
+    auto_initialization_enable = log_settings.get(
+        "AUTO_INITIALIZATION_ENABLE", DEFAULT_AUTO_INITIALIZATION_ENABLE
     )
     errors.extend(
-        validate_boolean_setting(initialization_message, "INITIALIZATION_MESSAGE")
+        validate_boolean_setting(
+            auto_initialization_enable, "AUTO_INITIALIZATION_ENABLE"
+        )
+    )
+
+    # Validate INITIALIZATION_MESSAGE_ENABLE
+    initialization_message_enable = log_settings.get(
+        "INITIALIZATION_MESSAGE_ENABLE", DEFAULT_INITIALIZATION_MESSAGE_ENABLE
+    )
+    errors.extend(
+        validate_boolean_setting(
+            initialization_message_enable, "INITIALIZATION_MESSAGE_ENABLE"
+        )
     )
 
     # Validate LOG_EMAIL_NOTIFIER

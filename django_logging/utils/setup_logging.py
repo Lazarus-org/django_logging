@@ -6,6 +6,7 @@ from django_logging.settings.conf import LogConfig, LogManager
 
 from typing import List, Optional, Union, Dict
 from django_logging.constants.ansi_colors import AnsiColors
+from django_logging.utils.get_config import is_auto_initialization_enabled
 
 
 def set_logging(
@@ -27,6 +28,9 @@ def set_logging(
         log_levels (List[str]): A list of log levels to configure.
         log_dir (str): The directory where log files will be stored.
     """
+    if not is_auto_initialization_enabled():
+        return
+
     try:
         log_config = LogConfig(
             log_levels,

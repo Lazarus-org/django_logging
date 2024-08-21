@@ -12,17 +12,7 @@ from django_logging.constants import (
     DEFAULT_LOG_CONSOLE_COLORIZE,
     DEFAULT_LOG_FILE_FORMATS,
     DEFAULT_INITIALIZATION_MESSAGE_ENABLE,
-)
-from django_logging.constants.settings_types import (
-    LogLevel,
-    LOG_DIR_TYPE,
-    LogFileFormatsType,
-    LOG_CONSOLE_FORMAT_TYPE,
-    LOG_CONSOLE_LEVEL_TYPE,
-    LOG_DATE_FORMAT_TYPE,
-    LOG_CONSOLE_COLORIZE_TYPE,
-    FormatOption,
-    LogEmailNotifierType,
+    DEFAULT_AUTO_INITIALIZATION_ENABLE,
 )
 
 
@@ -84,12 +74,26 @@ def use_email_notifier_template() -> bool:
     return log_email_notifier.get("USE_TEMPLATE", False)
 
 
-def is_initialization_message_enabled() -> bool:
+def is_auto_initialization_enabled() -> bool:
     """
-    Check if the initialization message for the logging system is enabled in Django settings.
+    Check if the AUTO_INITIALIZATION_ENABLE for the logging system is set to True in Django settings.
 
     Returns:
-        bool: True if an initialization message is specified, False otherwise.
+        bool: True if AUTO_INITIALIZATION_ENABLE, False otherwise.
+         Defaults to True if not specified.
+    """
+    log_settings = getattr(settings, "DJANGO_LOGGING", {})
+    return log_settings.get(
+        "AUTO_INITIALIZATION_ENABLE", DEFAULT_AUTO_INITIALIZATION_ENABLE
+    )
+
+
+def is_initialization_message_enabled() -> bool:
+    """
+    Check if the INITIALIZATION_MESSAGE_ENABLE is set to True in Django settings.
+
+    Returns:
+        bool: True if INITIALIZATION_MESSAGE_ENABLE is True, False otherwise.
          Defaults to True if not specified.
     """
     log_settings = getattr(settings, "DJANGO_LOGGING", {})
