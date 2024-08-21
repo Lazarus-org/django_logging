@@ -5,7 +5,7 @@ from typing import Optional, Dict
 from django.conf import settings
 
 from django_logging.constants.format_options import FORMAT_OPTIONS
-from django_logging.utils.email import send_email_async
+from django_logging.utils.email_notifier import send_email_async
 from django_logging.handlers import EmailHandler
 from django_logging.settings.conf import LogConfig
 
