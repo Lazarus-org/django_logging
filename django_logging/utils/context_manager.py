@@ -1,29 +1,64 @@
 from contextlib import contextmanager
+from logging import getLogger, Logger
+from typing import Dict
+from django.conf import settings
 
 from django_logging.settings.conf import LogConfig, LogManager
-from django_logging.utils.get_config import get_conf
-import logging
+from django_logging.utils.get_config import get_conf, is_auto_initialization_enabled
 
 
 @contextmanager
-def config_context() -> None:
+def config_context() -> LogManager:
+    """
+    Context manager to temporarily apply a custom logging configuration.
 
-    # Store the current logging configuration to restore it later
-    original_logging_config = logging.getLogger().manager.loggerDict.copy()
+    Raises:
+        ValueError: If 'django_logging' is in INSTALLED_APPS.
 
-    conf = get_conf()
+    Yields:
+        LogManager: The log manager instance with the custom configuration.
+    """
+    if is_auto_initialization_enabled():
+        raise ValueError(
+            "you most set 'AUTO_INITIALIZATION_ENABLE' to False in DJANGO_LOGGING in your settings"
+        )
+
+    logger = getLogger()
+    original_config = logger.manager.loggerDict.copy()
+    original_level = logger.level
+    original_handlers = logger.handlers.copy()
+
     try:
-
-        # Apply the new logging configuration
+        conf = get_conf()
         log_config = LogConfig(*conf)
         log_manager = LogManager(log_config)
-
         log_manager.create_log_files()
         log_manager.set_conf()
 
         yield log_manager
-
     finally:
-        # Revert back to the original logging configuration
-        logging.getLogger().manager.loggerDict.clear()
-        logging.getLogger().manager.loggerDict.update(original_logging_config)
+        _restore_logging_config(
+            logger, original_config, original_level, original_handlers
+        )
+
+
+def _restore_logging_config(
+    logger: Logger,
+    original_config: Dict[str, Logger],
+    original_level: int,
+    original_handlers: list,
+) -> None:
+    """
+    Restore the original logging configuration.
+
+    Args:
+        logger (Logger): The root logger instance.
+        original_config (Dict[str, Logger]): The original logger dictionary.
+        original_level (int): The original root logger level.
+        original_handlers (list): The original root logger handlers.
+    """
+    logger.manager.loggerDict.clear()
+    logger.manager.loggerDict.update(original_config)
+    logger.level = original_level
+    logger.handlers.clear()
+    logger.handlers.extend(original_handlers)
