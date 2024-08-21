@@ -3,7 +3,7 @@ import logging.config
 import os
 from typing import List, Dict, Optional, Union
 
-from django_logging.constants import FORMAT_OPTIONS, DEFAULT_LOG_FILE_LEVELS
+from django_logging.constants import FORMAT_OPTIONS, DefaultLoggingSettings
 from django_logging.filters.level_filter import LoggingLevelFilter
 
 
@@ -132,6 +132,7 @@ class LogManager:
 
     def set_conf(self) -> None:
         """Sets the logging configuration using the generated log files."""
+        defaults = DefaultLoggingSettings()
         handlers = {
             level.lower(): {
                 "class": "logging.FileHandler",
@@ -165,7 +166,7 @@ class LogManager:
                 "()": LoggingLevelFilter,
                 "logging_level": getattr(logging, level),
             }
-            for level in DEFAULT_LOG_FILE_LEVELS
+            for level in defaults.log_levels
         }
 
         formatters = {
