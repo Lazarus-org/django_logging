@@ -1,9 +1,19 @@
 import logging
 import logging.config
 import os
-from typing import List, Dict, Optional, Union
+from typing import List, Dict, Optional
 
 from django_logging.constants import FORMAT_OPTIONS, DefaultLoggingSettings
+from django_logging.constants.settings_types import (
+    LOG_LEVELS_TYPE,
+    LOG_DIR_TYPE,
+    LogFileFormatsType,
+    LOG_CONSOLE_FORMAT_TYPE,
+    LOG_DATE_FORMAT_TYPE,
+    LOG_CONSOLE_COLORIZE_TYPE,
+    FormatOption,
+    LogLevel,
+)
 from django_logging.filters.level_filter import LoggingLevelFilter
 
 
@@ -18,16 +28,16 @@ class LogConfig:
 
     def __init__(
         self,
-        log_levels: List[str],
-        log_dir: str,
-        log_file_formats: Dict[str, Union[int, str]],
-        console_level: str,
-        console_format: Optional[Union[int, str]],
-        colorize_console: bool,
-        log_date_format: str,
+        log_levels: LOG_LEVELS_TYPE,
+        log_dir: LOG_DIR_TYPE,
+        log_file_formats: LogFileFormatsType,
+        console_level: LOG_CONSOLE_FORMAT_TYPE,
+        console_format: FormatOption,
+        colorize_console: LOG_CONSOLE_COLORIZE_TYPE,
+        log_date_format: LOG_DATE_FORMAT_TYPE,
         log_email_notifier_enable: bool,
-        log_email_notifier_log_levels: List[str],
-        log_email_notifier_log_format: Union[int, str],
+        log_email_notifier_log_levels: LOG_LEVELS_TYPE,
+        log_email_notifier_log_format: FormatOption,
     ) -> None:
 
         self.log_levels = log_levels
@@ -45,9 +55,7 @@ class LogConfig:
             log_email_notifier_log_format
         )
 
-    def _resolve_file_formats(
-        self, log_file_formats: Dict[str, Union[int, str]]
-    ) -> Dict:
+    def _resolve_file_formats(self, log_file_formats: LogFileFormatsType) -> Dict:
         resolved_formats = {}
         for level in self.log_levels:
             format_option = log_file_formats.get(level, None)
@@ -77,7 +85,7 @@ class LogConfig:
         return ansi_escape.sub("", log_message)
 
     @staticmethod
-    def resolve_format(_format: Union[int, str], use_colors: bool = False) -> str:
+    def resolve_format(_format: FormatOption, use_colors: bool = False) -> str:
         if _format:
             if isinstance(_format, int):
                 resolved_format = FORMAT_OPTIONS.get(_format, FORMAT_OPTIONS[1])
@@ -118,7 +126,7 @@ class LogManager:
                 open(log_file_path, "w").close()
             self.log_files[log_level] = log_file_path
 
-    def get_log_file(self, log_level: str) -> Optional[str]:
+    def get_log_file(self, log_level: LogLevel) -> Optional[str]:
         """
         Retrieves the file path for a given log level.
 
@@ -132,7 +140,7 @@ class LogManager:
 
     def set_conf(self) -> None:
         """Sets the logging configuration using the generated log files."""
-        defaults = DefaultLoggingSettings()
+        default_settings = DefaultLoggingSettings()
         handlers = {
             level.lower(): {
                 "class": "logging.FileHandler",
@@ -166,7 +174,7 @@ class LogManager:
                 "()": LoggingLevelFilter,
                 "logging_level": getattr(logging, level),
             }
-            for level in defaults.log_levels
+            for level in default_settings.log_levels
         }
 
         formatters = {
