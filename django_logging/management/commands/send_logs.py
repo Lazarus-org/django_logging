@@ -9,6 +9,7 @@ from django.core.management.base import BaseCommand
 from django.conf import settings
 
 from django_logging.validators.email_settings_validator import check_email_settings
+from django_logging.constants import DefaultLoggingSettings
 
 logger = logging.getLogger(__name__)
 
@@ -46,8 +47,10 @@ class Command(BaseCommand):
         """
         email = kwargs["email"]
 
+        default_settings = DefaultLoggingSettings()
+
         log_dir = settings.DJANGO_LOGGING.get(
-            "LOG_DIR", os.path.join(os.getcwd(), "logs")
+            "LOG_DIR", os.path.join(os.getcwd(), default_settings.log_dir)
         )
 
         if not os.path.exists(log_dir):
@@ -86,9 +89,10 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR(f"Failed to send logs: {e}"))
             logger.error(f"Failed to send logs: {e}")
         finally:
-            # Clean up the temporary file
-            os.remove(zip_path)
-            logger.info("Temporary zip file cleaned up successfully.")
+            # Clean up the temporary file if exists
+            if os.path.exists(zip_path):
+                os.remove(zip_path)
+                logger.info("Temporary zip file cleaned up successfully.")
 
     def validate_email_settings(self):
         """
