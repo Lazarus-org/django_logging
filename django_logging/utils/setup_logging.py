@@ -2,24 +2,29 @@ import os
 
 from django.core.exceptions import ImproperlyConfigured
 
+from django_logging.constants.settings_types import (
+    LOG_LEVELS_TYPE, LOG_DIR_TYPE, LogFileFormatsType,
+    LOG_CONSOLE_LEVEL_TYPE, LOG_CONSOLE_FORMAT_TYPE,
+    LOG_CONSOLE_COLORIZE_TYPE, LOG_DATE_FORMAT_TYPE, FormatOption,
+)
 from django_logging.settings.conf import LogConfig, LogManager
 
-from typing import List, Optional, Union, Dict
+from typing import List
 from django_logging.constants.ansi_colors import AnsiColors
-from django_logging.utils.get_config import is_auto_initialization_enabled
+from django_logging.utils.get_config import is_auto_initialization_enabled, is_initialization_message_enabled
 
 
 def set_logging(
-    log_levels: List[str],
-    log_dir: str,
-    log_file_formats: Dict[str, Union[int, str]],
-    console_level: str,
-    console_format: Optional[Union[int, str]],
-    colorize_console: bool,
-    log_date_format: str,
+    log_levels: LOG_LEVELS_TYPE,
+    log_dir: LOG_DIR_TYPE,
+    log_file_formats: LogFileFormatsType,
+    console_level: LOG_CONSOLE_LEVEL_TYPE,
+    console_format: LOG_CONSOLE_FORMAT_TYPE,
+    colorize_console: LOG_CONSOLE_COLORIZE_TYPE,
+    log_date_format: LOG_DATE_FORMAT_TYPE,
     log_email_notifier_enable: bool,
-    log_email_notifier_log_levels: List[str],
-    log_email_notifier_log_format: Union[int, str],
+    log_email_notifier_log_levels: LOG_LEVELS_TYPE,
+    log_email_notifier_log_format: FormatOption,
 ) -> None:
     """
     Sets up the logging configuration.
@@ -63,8 +68,6 @@ def set_logging(
         return
 
     if os.environ.get("RUN_MAIN") == "true":
-        from django_logging.utils.get_config import is_initialization_message_enabled
-
         if is_initialization_message_enabled():
             from logging import getLogger
 
