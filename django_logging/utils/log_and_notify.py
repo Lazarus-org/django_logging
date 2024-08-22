@@ -6,29 +6,30 @@ from django.conf import settings
 
 from django_logging.constants.format_options import FORMAT_OPTIONS
 from django_logging.utils.email_notifier import send_email_async
+from django_logging.utils.get_config import get_conf
 from django_logging.handlers import EmailHandler
 from django_logging.settings.conf import LogConfig
 
 
-def log_and_notify(logger, level: int, message: str, extra: Optional[Dict] = None) -> None:
+def log_and_notify(
+    logger, level: int, message: str, extra: Optional[Dict] = None
+) -> None:
     # Get the caller's frame to capture the correct module, file, and line number
     frame = inspect.currentframe().f_back
+    logging_settings = get_conf()
+    email_notifier_enable = getattr(
+        logging_settings, "log_email_notifier_enable", False
+    )
 
-    if not hasattr(settings, "DJANGO_LOGGING"):
+    if not email_notifier_enable:
         raise ValueError(
-            "Email notifier is disabled. Please add DJANGO_LOGGING to your settings file and set "
-            "the 'ENABLE' option to True in the 'LOG_EMAIL_NOTIFIER' settings to activate email notifications."
-        )
-    email_notifier_conf = settings.DJANGO_LOGGING.get("LOG_EMAIL_NOTIFIER")
-
-    notifier_enable = email_notifier_conf.get("ENABLE", False)
-    if not notifier_enable:
-        raise ValueError(
-            "Email notifier is disabled. Please set the 'ENABLE' option to True in the 'LOG_EMAIL_NOTIFIER' "
-            "settings to activate email notifications."
+            "Email notifier is disabled. Please set the 'ENABLE' option to True in the 'LOG_EMAIL_NOTIFIER'"
+            " in DJANGO_LOGGING in your settings to activate email notifications."
         )
 
-    _format = email_notifier_conf.get("LOG_FORMAT", FORMAT_OPTIONS[1])
+    _format = getattr(
+        logging_settings, "log_email_notifier_log_format", FORMAT_OPTIONS[1]
+    )
 
     try:
         # create a LogRecord
@@ -62,4 +63,10 @@ def log_and_notify(logger, level: int, message: str, extra: Optional[Dict] = Non
     email_body = EmailHandler.render_template(formatted_message, request)
 
     subject = f"New Log Record: {logging.getLevelName(level)}"
-    send_email_async(subject, email_body, [settings.ADMIN_EMAIL])
+    admin_email = getattr(settings, "ADMIN_EMAIL")
+    if not admin_email:
+        raise ValueError(
+            "'ADMIN EMAIL' not provided, please provide 'ADMIN_EMAIL' in your settings"
+        )
+
+    send_email_async(subject, email_body, [admin_email])
