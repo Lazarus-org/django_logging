@@ -24,7 +24,7 @@ class LogFileFormatsType(TypedDict, total=False):
 
 # Type Aliases for other configurations
 LOG_DIR_TYPE = str
-LOG_FILE_LEVELS_TYPE = List[str]
+LOG_LEVELS_TYPE = List[str]
 LOG_DATE_FORMAT_TYPE = str
 AUTO_INITIALIZATION_ENABLE_TYPE = bool
 INITIALIZATION_MESSAGE_ENABLE_TYPE = bool

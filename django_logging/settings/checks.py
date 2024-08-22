@@ -2,18 +2,7 @@ from django.conf import settings
 from django.core.checks import Error, register
 from typing import Dict, Any, List
 
-from django_logging.constants import (
-    DEFAULT_LOG_DIR,
-    DEFAULT_LOG_FILE_LEVELS,
-    DEFAULT_LOG_DATE_FORMAT,
-    DEFAULT_LOG_EMAIL_NOTIFIER,
-    DEFAULT_LOG_CONSOLE_LEVEL,
-    DEFAULT_LOG_CONSOLE_FORMAT,
-    DEFAULT_LOG_CONSOLE_COLORIZE,
-    DEFAULT_LOG_FILE_FORMATS,
-    DEFAULT_AUTO_INITIALIZATION_ENABLE,
-    DEFAULT_INITIALIZATION_MESSAGE_ENABLE,
-)
+from django_logging.constants import DefaultLoggingSettings
 
 from django_logging.validators.config_validators import (
     validate_directory,
@@ -31,26 +20,29 @@ def check_logging_settings(app_configs: Dict[str, Any], **kwargs: Any) -> List[E
     errors: List[Error] = []
 
     log_settings = getattr(settings, "DJANGO_LOGGING", {})
+    defaults = DefaultLoggingSettings()
 
     # Validate LOG_DIR
-    log_dir = log_settings.get("LOG_DIR", DEFAULT_LOG_DIR)
+    log_dir = log_settings.get("LOG_DIR", defaults.log_dir)
     errors.extend(validate_directory(log_dir, "LOG_DIR"))
 
     # Validate LOG_FILE_LEVELS
-    log_file_levels = log_settings.get("LOG_FILE_LEVELS", DEFAULT_LOG_FILE_LEVELS)
+    log_file_levels = log_settings.get("LOG_FILE_LEVELS", defaults.log_levels)
     errors.extend(
-        validate_log_levels(log_file_levels, "LOG_FILE_LEVELS", DEFAULT_LOG_FILE_LEVELS)
+        validate_log_levels(
+            log_file_levels, "LOG_FILE_LEVELS", defaults.log_levels
+        )
     )
 
     # Validate LOG_FILE_FORMATS
-    log_file_formats = log_settings.get("LOG_FILE_FORMATS", DEFAULT_LOG_FILE_FORMATS)
+    log_file_formats = log_settings.get("LOG_FILE_FORMATS", defaults.log_file_formats)
     if isinstance(log_file_formats, dict):
         for level, format_option in log_file_formats.items():
-            if level not in DEFAULT_LOG_FILE_LEVELS:
+            if level not in defaults.log_levels:
                 errors.append(
                     Error(
                         f"Invalid log level '{level}' in LOG_FILE_FORMATS.",
-                        hint=f"Valid log levels are: {DEFAULT_LOG_FILE_LEVELS}.",
+                        hint=f"Valid log levels are: {defaults.log_levels}.",
                         id="django_logging.E019_LOG_FILE_FORMATS",
                     )
                 )
@@ -68,33 +60,35 @@ def check_logging_settings(app_configs: Dict[str, Any], **kwargs: Any) -> List[E
 
     # Validate LOG_CONSOLE_FORMAT
     log_console_format = log_settings.get(
-        "LOG_CONSOLE_FORMAT", DEFAULT_LOG_CONSOLE_FORMAT
+        "LOG_CONSOLE_FORMAT", defaults.log_console_format
     )
     errors.extend(validate_format_option(log_console_format, "LOG_CONSOLE_FORMAT"))
 
     # Validate LOG_CONSOLE_LEVEL
-    log_console_level = log_settings.get("LOG_CONSOLE_LEVEL", DEFAULT_LOG_CONSOLE_LEVEL)
+    log_console_level = log_settings.get(
+        "LOG_CONSOLE_LEVEL", defaults.log_console_level
+    )
     errors.extend(
         validate_log_levels(
-            [log_console_level], "LOG_CONSOLE_LEVEL", DEFAULT_LOG_FILE_LEVELS
+            [log_console_level], "LOG_CONSOLE_LEVEL", defaults.log_levels
         )
     )
 
     # Validate LOG_CONSOLE_COLORIZE
     log_console_colorize = log_settings.get(
-        "LOG_CONSOLE_COLORIZE", DEFAULT_LOG_CONSOLE_COLORIZE
+        "LOG_CONSOLE_COLORIZE", defaults.log_console_colorize
     )
     errors.extend(
         validate_boolean_setting(log_console_colorize, "LOG_CONSOLE_COLORIZE")
     )
 
     # Validate LOG_DATE_FORMAT
-    log_date_format = log_settings.get("LOG_DATE_FORMAT", DEFAULT_LOG_DATE_FORMAT)
+    log_date_format = log_settings.get("LOG_DATE_FORMAT", defaults.log_date_format)
     errors.extend(validate_date_format(log_date_format, "LOG_DATE_FORMAT"))
 
     # Validate AUTO_INITIALIZATION_ENABLE
     auto_initialization_enable = log_settings.get(
-        "AUTO_INITIALIZATION_ENABLE", DEFAULT_AUTO_INITIALIZATION_ENABLE
+        "AUTO_INITIALIZATION_ENABLE", defaults.auto_initialization_enable
     )
     errors.extend(
         validate_boolean_setting(
@@ -104,7 +98,7 @@ def check_logging_settings(app_configs: Dict[str, Any], **kwargs: Any) -> List[E
 
     # Validate INITIALIZATION_MESSAGE_ENABLE
     initialization_message_enable = log_settings.get(
-        "INITIALIZATION_MESSAGE_ENABLE", DEFAULT_INITIALIZATION_MESSAGE_ENABLE
+        "INITIALIZATION_MESSAGE_ENABLE", defaults.initialization_message_enable
     )
     errors.extend(
         validate_boolean_setting(
@@ -114,7 +108,7 @@ def check_logging_settings(app_configs: Dict[str, Any], **kwargs: Any) -> List[E
 
     # Validate LOG_EMAIL_NOTIFIER
     log_email_notifier = log_settings.get(
-        "LOG_EMAIL_NOTIFIER", DEFAULT_LOG_EMAIL_NOTIFIER
+        "LOG_EMAIL_NOTIFIER", defaults.log_email_notifier
     )
     errors.extend(validate_email_notifier(log_email_notifier))
 

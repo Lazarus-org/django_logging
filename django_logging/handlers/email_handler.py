@@ -9,19 +9,9 @@ from django_logging.middleware import RequestLogMiddleware
 
 
 class EmailHandler(logging.Handler):
-    def __init__(self, include_html=True, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        self.include_html = include_html
-
-        try:
-            # Attempt to retrieve the logging settings from the Django settings
-            logging_settings = settings.DJANGO_LOGGING
-
-            self.include_html = use_email_notifier_template()
-
-        except Exception as e:
-            logging.error(f"An unexpected error occurred while initializing EmailHandler: {e}")
+        self.include_html = use_email_notifier_template()
 
     def emit(self, record):
         try:
@@ -40,13 +30,19 @@ class EmailHandler(logging.Handler):
             self.handleError(record)
 
     @staticmethod
-    def render_template(log_entry, request=None, template_path="email_notifier_template.html"):
+    def render_template(
+        log_entry, request=None, template_path="email_notifier_template.html"
+    ):
         django_engine = engines["django"]
         template = django_engine.get_template(template_path)
 
         # Fetch IP address and user agent using middleware methods
-        ip_address = RequestLogMiddleware.get_ip_address(request) if request else "Unknown"
-        user_agent = RequestLogMiddleware.get_user_agent(request) if request else "Unknown"
+        ip_address = (
+            RequestLogMiddleware.get_ip_address(request) if request else "Unknown"
+        )
+        user_agent = (
+            RequestLogMiddleware.get_user_agent(request) if request else "Unknown"
+        )
 
         context = {
             "message": log_entry,

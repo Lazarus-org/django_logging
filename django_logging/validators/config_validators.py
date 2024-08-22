@@ -9,7 +9,7 @@ from django.core.checks import Error
 from django_logging.constants import LOG_FORMAT_SPECIFIERS, FORMAT_OPTIONS
 from django_logging.constants.settings_types import (
     FormatOption,
-    LOG_FILE_LEVELS_TYPE,
+    LOG_LEVELS_TYPE,
     LogEmailNotifierType,
 )
 
@@ -44,9 +44,9 @@ def validate_directory(path: str, config_name: str) -> List[Error]:
 
 
 def validate_log_levels(
-    log_levels: LOG_FILE_LEVELS_TYPE,
+    log_levels: LOG_LEVELS_TYPE,
     config_name: str,
-    valid_levels: LOG_FILE_LEVELS_TYPE,
+    valid_levels: LOG_LEVELS_TYPE,
 ) -> List[Error]:
     errors = []
     if not isinstance(log_levels, list):

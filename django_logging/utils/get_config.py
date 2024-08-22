@@ -2,18 +2,7 @@ import os
 from django.conf import settings
 
 from typing import List
-from django_logging.constants import (
-    DEFAULT_LOG_DIR,
-    DEFAULT_LOG_FILE_LEVELS,
-    DEFAULT_LOG_DATE_FORMAT,
-    DEFAULT_LOG_EMAIL_NOTIFIER,
-    DEFAULT_LOG_CONSOLE_LEVEL,
-    DEFAULT_LOG_CONSOLE_FORMAT,
-    DEFAULT_LOG_CONSOLE_COLORIZE,
-    DEFAULT_LOG_FILE_FORMATS,
-    DEFAULT_INITIALIZATION_MESSAGE_ENABLE,
-    DEFAULT_AUTO_INITIALIZATION_ENABLE,
-)
+from django_logging.constants import DefaultLoggingSettings
 
 
 def get_conf() -> List:
@@ -24,19 +13,20 @@ def get_conf() -> List:
         A tuple containing all necessary configurations for logging.
     """
     log_settings = getattr(settings, "DJANGO_LOGGING", {})
+    defaults = DefaultLoggingSettings()
 
-    log_levels = log_settings.get("LOG_FILE_LEVELS", DEFAULT_LOG_FILE_LEVELS)
-    log_dir = log_settings.get("LOG_DIR", os.path.join(os.getcwd(), DEFAULT_LOG_DIR))
-    log_file_formats = log_settings.get("LOG_FILE_FORMATS", DEFAULT_LOG_FILE_FORMATS)
-    console_level = log_settings.get("LOG_CONSOLE_LEVEL", DEFAULT_LOG_CONSOLE_LEVEL)
-    console_format = log_settings.get("LOG_CONSOLE_FORMAT", DEFAULT_LOG_CONSOLE_FORMAT)
+    log_levels = log_settings.get("LOG_FILE_LEVELS", defaults.log_levels)
+    log_dir = log_settings.get("LOG_DIR", os.path.join(os.getcwd(), defaults.log_dir))
+    log_file_formats = log_settings.get("LOG_FILE_FORMATS", defaults.log_file_formats)
+    console_level = log_settings.get("LOG_CONSOLE_LEVEL", defaults.log_console_level)
+    console_format = log_settings.get("LOG_CONSOLE_FORMAT", defaults.log_console_format)
     colorize_console = log_settings.get(
-        "LOG_CONSOLE_COLORIZE", DEFAULT_LOG_CONSOLE_COLORIZE
+        "LOG_CONSOLE_COLORIZE", defaults.log_console_colorize
     )
-    log_date_format = log_settings.get("LOG_DATE_FORMAT", DEFAULT_LOG_DATE_FORMAT)
+    log_date_format = log_settings.get("LOG_DATE_FORMAT", defaults.log_date_format)
 
     log_email_notifier = log_settings.get(
-        "LOG_EMAIL_NOTIFIER", DEFAULT_LOG_EMAIL_NOTIFIER
+        "LOG_EMAIL_NOTIFIER", defaults.log_email_notifier
     )
     log_email_notifier_enable = log_email_notifier.get("ENABLE")
     log_email_notifier_log_levels = [
@@ -68,10 +58,12 @@ def use_email_notifier_template() -> bool:
         bool: True if the email notifier should use a template, False otherwise.
     """
     log_settings = getattr(settings, "DJANGO_LOGGING", {})
+    defaults = DefaultLoggingSettings()
+
     log_email_notifier = log_settings.get(
-        "LOG_EMAIL_NOTIFIER", DEFAULT_LOG_EMAIL_NOTIFIER
+        "LOG_EMAIL_NOTIFIER", defaults.log_email_notifier
     )
-    return log_email_notifier.get("USE_TEMPLATE", False)
+    return log_email_notifier.get("USE_TEMPLATE", True)
 
 
 def is_auto_initialization_enabled() -> bool:
@@ -83,8 +75,10 @@ def is_auto_initialization_enabled() -> bool:
          Defaults to True if not specified.
     """
     log_settings = getattr(settings, "DJANGO_LOGGING", {})
+    defaults = DefaultLoggingSettings()
+
     return log_settings.get(
-        "AUTO_INITIALIZATION_ENABLE", DEFAULT_AUTO_INITIALIZATION_ENABLE
+        "AUTO_INITIALIZATION_ENABLE", defaults.auto_initialization_enable
     )
 
 
@@ -97,6 +91,8 @@ def is_initialization_message_enabled() -> bool:
          Defaults to True if not specified.
     """
     log_settings = getattr(settings, "DJANGO_LOGGING", {})
+    defaults = DefaultLoggingSettings()
+
     return log_settings.get(
-        "INITIALIZATION_MESSAGE_ENABLE", DEFAULT_INITIALIZATION_MESSAGE_ENABLE
+        "INITIALIZATION_MESSAGE_ENABLE", defaults.initialization_message_enable
     )
