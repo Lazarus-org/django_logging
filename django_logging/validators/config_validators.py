@@ -25,13 +25,17 @@ def validate_directory(path: str, config_name: str) -> List[Error]:
             )
         )
     elif not os.path.exists(path):
-        errors.append(
-            Error(
-                f"The path specified in {config_name} does not exist.",
-                hint=f"Ensure the path set in {config_name} exists.",
-                id=f"django_logging.E002_{config_name}",
+        try:
+            os.mkdir(os.path.join(os.getcwd(), path))
+        except Exception as e:
+            errors.append(
+                Error(
+                    f"The path specified in {config_name} is not a valid path.",
+                    hint=f"Ensure the path set in {config_name} is valid.",
+                    id=f"django_logging.E002_{config_name}",
+                )
             )
-        )
+
     elif not os.path.isdir(path):
         errors.append(
             Error(
