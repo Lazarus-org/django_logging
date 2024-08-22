@@ -26,7 +26,7 @@ def validate_directory(path: str, config_name: str) -> List[Error]:
         )
     elif not os.path.exists(path):
         try:
-            os.mkdir(os.path.join(os.getcwd(), path))
+            os.makedirs(os.path.dirname(path), exist_ok=True)
         except Exception as e:
             errors.append(
                 Error(
