@@ -101,7 +101,7 @@ class Command(BaseCommand):
 
         Raises ImproperlyConfigured if any of the required email settings are missing.
         """
-        errors = check_email_settings()
+        errors = check_email_settings(require_admin_email=False)
         if errors:
             logger.error(errors)
             raise ImproperlyConfigured(errors)
