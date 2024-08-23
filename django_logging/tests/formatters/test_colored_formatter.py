@@ -6,7 +6,14 @@ from django_logging.formatters import ColorizedFormatter
 
 @pytest.fixture
 def log_record():
-    """Fixture to create a dummy log record."""
+    """
+    Fixture to create a dummy log record for testing.
+
+    Returns:
+    -------
+    logging.LogRecord
+        A dummy log record with predefined attributes.
+    """
     return logging.LogRecord(
         name="test",
         level=logging.DEBUG,
@@ -20,13 +27,18 @@ def log_record():
 
 @pytest.fixture
 def formatter():
-    """Fixture to create a ColoredFormatter instance with a specific format."""
+    """
+    Fixture to create a `ColorizedFormatter` instance with a specific format.
+
+    Returns:
+    -------
+    ColorizedFormatter
+        An instance of `ColorizedFormatter` with a predefined format.
+    """
     return ColorizedFormatter(fmt="%(levelname)s: %(message)s")
 
 
-@patch(
-    "django_logging.formatters.colored_formatter.colorize_log_format", autospec=True
-)
+@patch("django_logging.formatters.colored_formatter.colorize_log_format", autospec=True)
 @patch(
     "django_logging.settings.conf.LogConfig.remove_ansi_escape_sequences",
     side_effect=lambda fmt: fmt,
@@ -34,7 +46,27 @@ def formatter():
 def test_format_applies_colorization(
     mock_remove_ansi, mock_colorize, formatter, log_record
 ):
-    """Test that the format method applies colorization."""
+    """
+    Test that the `format` method of `ColorizedFormatter` applies colorization.
+
+    This test verifies that the `format` method calls the `colorize_log_format`
+    function to apply colorization based on the log level.
+
+    Parameters:
+    ----------
+    mock_remove_ansi : MagicMock
+        Mock for `remove_ansi_escape_sequences`.
+    mock_colorize : MagicMock
+        Mock for `colorize_log_format`.
+    formatter : ColorizedFormatter
+        The formatter instance being tested.
+    log_record : logging.LogRecord
+        The dummy log record created by the fixture.
+
+    Asserts:
+    -------
+    - The `colorize_log_format` function is called once with the correct arguments.
+    """
     # Mock the colorize_log_format to return a predictable format
     mock_colorize.return_value = "%(levelname)s: %(message)s"
 
@@ -51,7 +83,25 @@ def test_format_applies_colorization(
     side_effect=lambda fmt: fmt,
 )
 def test_format_resets_to_original_format(mock_remove_ansi, formatter, log_record):
-    """Test that the format method resets the format string after formatting."""
+    """
+    Test that the `format` method resets the format string to its original state after formatting.
+
+    This test ensures that the formatter's internal format string is not permanently modified
+    by the colorization process and is reset to its original value after each log record is formatted.
+
+    Parameters:
+    ----------
+    mock_remove_ansi : MagicMock
+        Mock for `remove_ansi_escape_sequences`.
+    formatter : ColorizedFormatter
+        The formatter instance being tested.
+    log_record : logging.LogRecord
+        The dummy log record created by the fixture.
+
+    Asserts:
+    -------
+    - The formatter's internal format string (`_style._fmt`) matches the original format after formatting.
+    """
     original_format = formatter._style._fmt
     formatter.format(log_record)
     assert (
@@ -64,7 +114,23 @@ def test_format_resets_to_original_format(mock_remove_ansi, formatter, log_recor
     side_effect=lambda fmt: fmt,
 )
 def test_format_returns_formatted_output(formatter, log_record):
-    """Test that the format method returns the correctly formatted output."""
+    """
+    Test that the `format` method returns the correctly formatted log output.
+
+    This test verifies that the formatted output matches the expected structure,
+    including the log level name and the log message.
+
+    Parameters:
+    ----------
+    formatter : ColorizedFormatter
+        The formatter instance being tested.
+    log_record : logging.LogRecord
+        The dummy log record created by the fixture.
+
+    Asserts:
+    -------
+    - The formatted output starts with the expected log level and message.
+    """
     expected_output = f"{logging.getLevelName(log_record.levelno)}: {log_record.msg}"
     formatted_output = formatter.format(log_record)
 

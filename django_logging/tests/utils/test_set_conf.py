@@ -19,6 +19,29 @@ def test_set_config_success(
     mock_LogManager,
     mock_LogConfig,
 ):
+    """
+    Test the successful execution of set_config.
+
+    This test verifies that the set_config function correctly initializes
+    LogConfig and LogManager when auto initialization is enabled. It also
+    checks that the initialization message is logged if RUN_MAIN is set to "true"
+    and initialization messages are enabled.
+
+    Mocks:
+    ------
+    - `django_logging.utils.get_conf.get_config` to return mock configuration values.
+    - `logging.getLogger` to provide a mock logger.
+    - `django_logging.utils.set_conf.LogConfig` to simulate LogConfig instantiation.
+    - `django_logging.utils.set_conf.LogManager` to simulate LogManager instantiation.
+    - `django_logging.utils.set_conf.is_auto_initialization_enabled` to control auto initialization.
+    - `django_logging.utils.set_conf.is_initialization_message_enabled` to check if initialization messages are enabled.
+
+    Asserts:
+    -------
+    - `LogConfig` and `LogManager` are instantiated with the expected arguments.
+    - `create_log_files` and `set_conf` methods of `LogManager` are called once.
+    - If RUN_MAIN is "true" and initialization messages are enabled, an info log is generated.
+    """
     # Mock the configuration
     mock_is_auto_initialization_enabled.return_value = True
     mock_get_conf.return_value = (
@@ -95,6 +118,22 @@ def test_set_config_success(
 def test_set_config_auto_initialization_disabled(
     mock_is_auto_initialization_enabled, mock_LogManager, mock_LogConfig
 ):
+    """
+    Test that LogConfig and LogManager are not instantiated when auto initialization is disabled.
+
+    This test verifies that when auto initialization is disabled, the set_config function
+    does not instantiate `LogConfig` or `LogManager`.
+
+    Mocks:
+    ------
+    - `django_logging.utils.set_conf.is_auto_initialization_enabled` to return False.
+    - `django_logging.utils.set_conf.LogConfig` to simulate LogConfig instantiation.
+    - `django_logging.utils.set_conf.LogManager` to simulate LogManager instantiation.
+
+    Asserts:
+    -------
+    - `LogConfig` and `LogManager` are not instantiated.
+    """
     mock_is_auto_initialization_enabled.return_value = False
 
     # Call the function
@@ -122,6 +161,22 @@ def test_set_config_auto_initialization_disabled(
 def test_set_config_exception_handling(
     mock_is_auto_initialization_enabled, mock_LogManager, mock_LogConfig
 ):
+    """
+    Test that set_config handles exceptions and logs a warning message.
+
+    This test verifies that if an exception occurs during the instantiation of
+    `LogManager`, a warning message is logged indicating a configuration error.
+
+    Mocks:
+    ------
+    - `django_logging.utils.set_conf.is_auto_initialization_enabled` to return True.
+    - `django_logging.utils.set_conf.LogManager` to raise a ValueError.
+    - `logging.warning` to capture the warning message.
+
+    Asserts:
+    -------
+    - A warning message indicating a configuration error is logged.
+    """
     mock_is_auto_initialization_enabled.return_value = True
     mock_LogManager.side_effect = ValueError("Invalid configuration")
 

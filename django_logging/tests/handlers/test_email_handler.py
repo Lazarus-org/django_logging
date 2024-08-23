@@ -9,7 +9,14 @@ from django_logging.handlers.email_handler import EmailHandler
 
 @pytest.fixture
 def log_record():
-    """Fixture to create a dummy log record."""
+    """
+    Fixture to create a dummy log record.
+
+    Returns:
+    -------
+    logging.LogRecord
+        A dummy log record with predefined attributes for testing.
+    """
     return logging.LogRecord(
         name="test",
         level=logging.ERROR,
@@ -23,7 +30,14 @@ def log_record():
 
 @pytest.fixture
 def email_handler():
-    """Fixture to create an EmailHandler instance."""
+    """
+    Fixture to create an EmailHandler instance.
+
+    Returns:
+    -------
+    EmailHandler
+        An instance of the EmailHandler class.
+    """
     return EmailHandler()
 
 
@@ -36,7 +50,30 @@ def email_handler():
 def test_emit_with_html_template(
     mock_use_template, mock_render_template, mock_send_email, email_handler, log_record
 ):
-    """Test the emit method with HTML template."""
+    """
+    Test the emit method when HTML templates are used.
+
+    This test verifies that the EmailHandler's `emit` method correctly renders an HTML
+    template and sends an email when `use_email_notifier_template` is enabled.
+
+    Args:
+    ----
+    mock_use_template : MagicMock
+        Mock for the `use_email_notifier_template` function.
+    mock_render_template : MagicMock
+        Mock for the `render_template` method.
+    mock_send_email : MagicMock
+        Mock for the `send_email_async` function.
+    email_handler : EmailHandler
+        The EmailHandler instance being tested.
+    log_record : logging.LogRecord
+        The log record fixture used for testing.
+
+    Asserts:
+    -------
+    - `render_template` is called once with the correct arguments.
+    - `send_email_async` is called once with the expected email subject, HTML content, and recipients.
+    """
     mock_render_template.return_value = "<html>Formatted Log</html>"
 
     email_handler.emit(log_record)
@@ -53,7 +90,25 @@ def test_emit_with_html_template(
     return_value=False,
 )
 def test_emit_without_html_template(mock_use_template, mock_send_email, log_record):
-    """Test the emit method without HTML template."""
+    """
+    Test the emit method when HTML templates are not used.
+
+    This test checks that the EmailHandler's `emit` method correctly sends a plain text
+    email when `use_email_notifier_template` is disabled.
+
+    Args:
+    ----
+    mock_use_template : MagicMock
+        Mock for the `use_email_notifier_template` function.
+    mock_send_email : MagicMock
+        Mock for the `send_email_async` function.
+    log_record : logging.LogRecord
+        The log record fixture used for testing.
+
+    Asserts:
+    -------
+    - `send_email_async` is called once with the expected email subject, plain text content, and recipients.
+    """
     email_handler = EmailHandler()
     email_handler.emit(log_record)
 
@@ -70,7 +125,27 @@ def test_emit_without_html_template(mock_use_template, mock_send_email, log_reco
 def test_emit_handles_exception(
     mock_send_email, mock_handle_error, email_handler, log_record
 ):
-    """Test that emit handles exceptions properly."""
+    """
+    Test that the emit method handles exceptions during email sending.
+
+    This test ensures that when an exception occurs during the email sending process,
+    the `handleError` method is called to manage the error.
+
+    Args:
+    ----
+    mock_send_email : MagicMock
+        Mock for the `send_email_async` function.
+    mock_handle_error : MagicMock
+        Mock for the `handleError` method.
+    email_handler : EmailHandler
+        The EmailHandler instance being tested.
+    log_record : logging.LogRecord
+        The log record fixture used for testing.
+
+    Asserts:
+    -------
+    - `handleError` is called once with the log record when an exception occurs.
+    """
     email_handler.emit(log_record)
 
     mock_handle_error.assert_called_once_with(log_record)
@@ -86,7 +161,31 @@ def test_emit_handles_exception(
 )
 @patch("django_logging.handlers.email_handler.engines")
 def test_render_template(mock_engines, mock_get_user_agent, mock_get_ip_address):
-    """Test the render_template method."""
+    """
+    Test the render_template method of EmailHandler.
+
+    This test verifies that the `render_template` method correctly renders the HTML
+    template with the provided log message and request details.
+
+    Args:
+    ----
+    mock_engines : MagicMock
+        Mock for the Django template engines.
+    mock_get_user_agent : MagicMock
+        Mock for the `get_user_agent` method of the middleware.
+    mock_get_ip_address : MagicMock
+        Mock for the `get_ip_address` method of the middleware.
+
+    Asserts:
+    -------
+    - The correct template is retrieved and rendered with the expected context data.
+    - The rendered HTML output matches the expected formatted log.
+
+    Returns:
+    -------
+    str
+        The rendered HTML output for the log message.
+    """
     mock_template = MagicMock()
     mock_template.render.return_value = "<html>Formatted Log</html>"
     mock_django_engine = MagicMock()

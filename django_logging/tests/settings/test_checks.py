@@ -8,13 +8,31 @@ from django_logging.settings.checks import check_logging_settings
 
 @pytest.fixture
 def reset_settings():
-    """Fixture to reset Django settings after each test."""
+    """
+    Fixture to reset Django settings after each test.
+
+    This ensures that any modifications to the settings during a test are reverted after the test completes.
+
+    Yields:
+    -------
+    None
+    """
     original_settings = settings.DJANGO_LOGGING
     yield
     settings.DJANGO_LOGGING = original_settings
 
 
 def test_valid_logging_settings(reset_settings):
+    """
+    Test that valid logging settings do not produce any errors.
+
+    This test verifies that when all logging settings are properly configured,
+    the `check_logging_settings` function does not return any errors.
+
+    Asserts:
+    -------
+    - No errors are returned by `check_logging_settings`.
+    """
     settings.DJANGO_LOGGING = {
         "LOG_DIR": "logs",
         "LOG_FILE_LEVELS": ["DEBUG", "INFO", "ERROR"],
@@ -38,6 +56,16 @@ def test_valid_logging_settings(reset_settings):
 
 
 def test_invalid_log_dir(reset_settings):
+    """
+    Test invalid LOG_DIR setting.
+
+    This test checks that when `LOG_DIR` is set to an invalid type (e.g., an integer),
+    the appropriate error is returned.
+
+    Asserts:
+    -------
+    - An error with the ID `django_logging.E001_LOG_DIR` is returned.
+    """
     settings.DJANGO_LOGGING = {
         "LOG_DIR": 1,
     }
@@ -46,6 +74,16 @@ def test_invalid_log_dir(reset_settings):
 
 
 def test_invalid_log_file_levels(reset_settings):
+    """
+    Test invalid LOG_FILE_LEVELS setting.
+
+    This test checks that when `LOG_FILE_LEVELS` contains invalid log levels,
+    the appropriate error is returned.
+
+    Asserts:
+    -------
+    - An error with the ID `django_logging.E007_LOG_FILE_LEVELS` is returned.
+    """
     settings.DJANGO_LOGGING = {
         "LOG_FILE_LEVELS": ["invalid"],
     }
@@ -54,6 +92,17 @@ def test_invalid_log_file_levels(reset_settings):
 
 
 def test_invalid_log_file_formats(reset_settings):
+    """
+    Test invalid LOG_FILE_FORMATS setting.
+
+    This test checks for various invalid configurations in `LOG_FILE_FORMATS`
+    and ensures that the appropriate errors are returned.
+
+    Asserts:
+    -------
+    - Errors with the IDs `django_logging.E011_LOG_FILE_FORMATS['DEBUG']` and `django_logging.E019_LOG_FILE_FORMATS` are returned for invalid formats.
+    - An error with the ID `django_logging.E020_LOG_FILE_FORMATS` is returned for invalid type.
+    """
     settings.DJANGO_LOGGING = {
         "LOG_FILE_FORMATS": {
             "DEBUG": "%(levelname)s: %(invalid)s",
@@ -72,6 +121,16 @@ def test_invalid_log_file_formats(reset_settings):
 
 
 def test_invalid_log_console_format(reset_settings):
+    """
+    Test invalid LOG_CONSOLE_FORMAT setting.
+
+    This test checks that when `LOG_CONSOLE_FORMAT` is set to an invalid value,
+    the appropriate error is returned.
+
+    Asserts:
+    -------
+    - An error with the ID `django_logging.E010_LOG_CONSOLE_FORMAT` is returned.
+    """
     settings.DJANGO_LOGGING = {
         "LOG_CONSOLE_FORMAT": "invalid",
     }
@@ -80,6 +139,16 @@ def test_invalid_log_console_format(reset_settings):
 
 
 def test_invalid_log_console_level(reset_settings):
+    """
+    Test invalid LOG_CONSOLE_LEVEL setting.
+
+    This test checks that when `LOG_CONSOLE_LEVEL` is set to an invalid value,
+    the appropriate error is returned.
+
+    Asserts:
+    -------
+    - An error with the ID `django_logging.E006_LOG_CONSOLE_LEVEL` is returned.
+    """
     settings.DJANGO_LOGGING = {
         "LOG_CONSOLE_LEVEL": 10,
     }
@@ -88,6 +157,16 @@ def test_invalid_log_console_level(reset_settings):
 
 
 def test_invalid_log_console_colorize(reset_settings):
+    """
+    Test invalid LOG_CONSOLE_COLORIZE setting.
+
+    This test checks that when `LOG_CONSOLE_COLORIZE` is set to an invalid value,
+    the appropriate error is returned.
+
+    Asserts:
+    -------
+    - An error with the ID `django_logging.E014_LOG_CONSOLE_COLORIZE` is returned.
+    """
     settings.DJANGO_LOGGING = {
         "LOG_CONSOLE_COLORIZE": "not_a_boolean",
     }
@@ -98,6 +177,16 @@ def test_invalid_log_console_colorize(reset_settings):
 
 
 def test_invalid_log_date_format(reset_settings):
+    """
+    Test invalid LOG_DATE_FORMAT setting.
+
+    This test checks that when `LOG_DATE_FORMAT` is set to an invalid value,
+    the appropriate error is returned.
+
+    Asserts:
+    -------
+    - An error with the ID `django_logging.E016_LOG_DATE_FORMAT` is returned.
+    """
     settings.DJANGO_LOGGING = {
         "LOG_DATE_FORMAT": "%invalid_format",
     }
@@ -106,6 +195,16 @@ def test_invalid_log_date_format(reset_settings):
 
 
 def test_invalid_auto_initialization_enable(reset_settings):
+    """
+    Test invalid AUTO_INITIALIZATION_ENABLE setting.
+
+    This test checks that when `AUTO_INITIALIZATION_ENABLE` is set to an invalid value,
+    the appropriate error is returned.
+
+    Asserts:
+    -------
+    - An error with the ID `django_logging.E014_AUTO_INITIALIZATION_ENABLE` is returned.
+    """
     settings.DJANGO_LOGGING = {
         "AUTO_INITIALIZATION_ENABLE": "not_a_boolean",
     }
@@ -116,6 +215,16 @@ def test_invalid_auto_initialization_enable(reset_settings):
 
 
 def test_invalid_initialization_message_enable(reset_settings):
+    """
+    Test invalid INITIALIZATION_MESSAGE_ENABLE setting.
+
+    This test checks that when `INITIALIZATION_MESSAGE_ENABLE` is set to an invalid value,
+    the appropriate error is returned.
+
+    Asserts:
+    -------
+    - An error with the ID `django_logging.E014_INITIALIZATION_MESSAGE_ENABLE` is returned.
+    """
     settings.DJANGO_LOGGING = {
         "INITIALIZATION_MESSAGE_ENABLE": "not_a_boolean",
     }
@@ -127,6 +236,16 @@ def test_invalid_initialization_message_enable(reset_settings):
 
 
 def test_invalid_log_email_notifier(reset_settings):
+    """
+    Test invalid LOG_EMAIL_NOTIFIER setting.
+
+    This test checks that when `LOG_EMAIL_NOTIFIER['ENABLE']` is set to an invalid value,
+    the appropriate error is returned.
+
+    Asserts:
+    -------
+    - An error with the ID `django_logging.E018_LOG_EMAIL_NOTIFIER['ENABLE']` is returned.
+    """
     settings.DJANGO_LOGGING = {
         "LOG_EMAIL_NOTIFIER": {
             "ENABLE": "not_a_boolean",
@@ -140,12 +259,25 @@ def test_invalid_log_email_notifier(reset_settings):
 
 
 def test_missing_email_settings(reset_settings):
+    """
+    Test missing email settings when LOG_EMAIL_NOTIFIER is enabled.
+
+    This test checks that when `LOG_EMAIL_NOTIFIER['ENABLE']` is set to True,
+    but required email settings are missing, the appropriate error is returned.
+
+    Mocks:
+    ------
+    - Mock the `check_email_settings` function to simulate missing email settings.
+
+    Asserts:
+    -------
+    - An error with the ID `django_logging.E010_EMAIL_SETTINGS` is returned.
+    """
     settings.DJANGO_LOGGING = {
         "LOG_EMAIL_NOTIFIER": {
             "ENABLE": True,
         },
     }
-    # Mocking check_email_settings to return errors
     with patch("django_logging.settings.checks.check_email_settings") as mock_check:
         mock_check.return_value = [
             Error("EMAIL_BACKEND not set.", id="django_logging.E010_EMAIL_SETTINGS")

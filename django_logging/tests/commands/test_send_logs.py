@@ -10,6 +10,9 @@ from django.test import TestCase
 
 
 class SendLogsCommandTests(TestCase):
+    """
+    Test suite for the `send_logs` management command in the django_logging package.
+    """
 
     @patch(
         "django_logging.management.commands.send_logs.Command.validate_email_settings"
@@ -19,25 +22,35 @@ class SendLogsCommandTests(TestCase):
     def test_handle_success(
         self, mock_email_message, mock_make_archive, mock_validate_email_settings
     ):
-        # Setup
+        """
+        Test that the `send_logs` command successfully creates an archive of the logs
+        and sends an email when executed with valid settings.
+
+        Args:
+        ----
+            mock_email_message: Mock for the `EmailMessage` class used to send the email.
+            mock_make_archive: Mock for the `shutil.make_archive` function that creates the log archive.
+            mock_validate_email_settings: Mock for the `validate_email_settings` method in the command.
+
+        Asserts:
+        -------
+            - The `validate_email_settings` method is called exactly once.
+            - The `shutil.make_archive` function is called with the correct arguments.
+            - The `EmailMessage` is instantiated and sent.
+        """
         temp_log_dir = tempfile.mkdtemp()
         temp_file = tempfile.NamedTemporaryFile(delete=False)
         temp_file.close()
         mock_make_archive.return_value = temp_file.name
 
-        # Mock settings
         with self.settings(DJANGO_LOGGING={"LOG_DIR": temp_log_dir}):
-            # Execute command
             call_command("send_logs", "test@example.com")
 
-        # Assert
         mock_validate_email_settings.assert_called_once()
         mock_make_archive.assert_called_once_with(ANY, "zip", temp_log_dir)
         mock_email_message.assert_called_once()
 
-        # Cleanup
         shutil.rmtree(temp_log_dir)
-
         (
             os.remove(temp_file.name + ".zip")
             if os.path.exists(temp_file.name + ".zip")
@@ -51,46 +64,63 @@ class SendLogsCommandTests(TestCase):
     def test_handle_email_send_failure(
         self, mock_email_send, mock_validate_email_settings
     ):
-        # Setup
+        """
+        Test that the `send_logs` command handles email sending failures correctly
+        and logs an appropriate error message.
+
+        Args:
+        ----
+            mock_email_send: Mock for the `EmailMessage.send` method, simulating a failure.
+            mock_validate_email_settings: Mock for the `validate_email_settings` method in the command.
+
+        Asserts:
+        -------
+            - An error message is logged when the email sending fails.
+        """
         temp_log_dir = tempfile.mkdtemp()
         mock_email_send.side_effect = Exception("Email send failed")
 
-        # Mock settings
         with self.settings(DJANGO_LOGGING={"LOG_DIR": temp_log_dir}):
             with self.assertLogs(
                 "django_logging.management.commands.send_logs", level="ERROR"
             ) as cm:
                 call_command("send_logs", "test@example.com")
 
-        # Assert
         self.assertIn(
             "ERROR:django_logging.management.commands.send_logs:Failed to send logs: Email send failed",
             cm.output,
         )
 
-        # Cleanup
         shutil.rmtree(temp_log_dir)
 
     @patch(
         "django_logging.management.commands.send_logs.Command.validate_email_settings"
     )
     def test_handle_missing_log_dir(self, mock_validate_email_settings):
-        # Mock settings with a non-existent log directory
+        """
+        Test that the `send_logs` command logs an error when the specified log directory does not exist
+        and skips the email validation step.
+
+        Args:
+        ----
+            mock_validate_email_settings: Mock for the `validate_email_settings` method in the command.
+
+        Asserts:
+        -------
+            - An error message is logged if the log directory does not exist.
+            - The `validate_email_settings` method is not called.
+        """
         non_existent_dir = "/non/existent/directory"
         with self.settings(DJANGO_LOGGING={"LOG_DIR": non_existent_dir}):
             with self.assertLogs(
                 "django_logging.management.commands.send_logs", level="ERROR"
             ) as cm:
-                # Call the command and check that no exception is raised but logs are captured
                 call_command("send_logs", "test@example.com")
 
-            # Check if the correct error message is logged
-            self.assertIn(
-                f'ERROR:django_logging.management.commands.send_logs:Log directory "{non_existent_dir}" does not exist.',
-                cm.output,
-            )
-
-            # Check that validate_email_settings was not called
+        self.assertIn(
+            f'ERROR:django_logging.management.commands.send_logs:Log directory "{non_existent_dir}" does not exist.',
+            cm.output,
+        )
         mock_validate_email_settings.assert_not_called()
 
     @patch(
@@ -98,6 +128,18 @@ class SendLogsCommandTests(TestCase):
         return_value=None,
     )
     def test_validate_email_settings_success(self, mock_check_email_settings):
+        """
+        Test that the `validate_email_settings` method successfully validates the email settings
+        without raising any exceptions.
+
+        Args:
+        ----
+            mock_check_email_settings: Mock for the `check_email_settings` function, simulating a successful check.
+
+        Asserts:
+        -------
+            - The `check_email_settings` function is called exactly once.
+        """
         call_command("send_logs", "test@example.com")
         mock_check_email_settings.assert_called_once()
 
@@ -106,6 +148,18 @@ class SendLogsCommandTests(TestCase):
         return_value="Missing config",
     )
     def test_validate_email_settings_failure(self, mock_check_email_settings):
+        """
+        Test that the `validate_email_settings` method raises an `ImproperlyConfigured` exception
+        when the email settings are invalid.
+
+        Args:
+        ----
+            mock_check_email_settings: Mock for the `check_email_settings` function, simulating a failure.
+
+        Asserts:
+        -------
+            - An `ImproperlyConfigured` exception is raised when email settings are invalid.
+        """
         with self.assertRaises(ImproperlyConfigured):
             call_command("send_logs", "test@example.com")
 
@@ -114,19 +168,27 @@ class SendLogsCommandTests(TestCase):
     )
     @patch("django_logging.management.commands.send_logs.shutil.make_archive")
     def test_cleanup_on_failure(self, mock_make_archive, mock_validate_email_settings):
-        # Setup
+        """
+        Test that the `send_logs` command cleans up any partially created files when an error occurs
+        during the log archiving process.
+
+        Args:
+        ----
+            mock_make_archive: Mock for the `shutil.make_archive` function, simulating a failure.
+            mock_validate_email_settings: Mock for the `validate_email_settings` method in the command.
+
+        Asserts:
+        -------
+            - The zip file is not left behind if an error occurs during the archiving process.
+        """
         temp_log_dir = tempfile.mkdtemp()
         temp_file = tempfile.NamedTemporaryFile(delete=False)
         temp_file.close()
         mock_make_archive.side_effect = Exception("Archive failed")
 
-        # Mock settings
         with self.settings(DJANGO_LOGGING={"LOG_DIR": temp_log_dir}):
             with self.assertRaises(Exception):
                 call_command("send_logs", "test@example.com")
 
-        # Assert
         self.assertFalse(os.path.exists(temp_file.name + ".zip"))
-
-        # Cleanup
         shutil.rmtree(temp_log_dir)
