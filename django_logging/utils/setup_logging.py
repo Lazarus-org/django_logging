@@ -3,9 +3,9 @@ import os
 from django.core.exceptions import ImproperlyConfigured
 
 from django_logging.constants.settings_types import (
-    LOG_LEVELS_TYPE, LOG_DIR_TYPE, LogFileFormatsType,
-    LOG_CONSOLE_LEVEL_TYPE, LOG_CONSOLE_FORMAT_TYPE,
-    LOG_CONSOLE_COLORIZE_TYPE, LOG_DATE_FORMAT_TYPE, FormatOption,
+    LogLevels, LogDir, LogFileFormatsType,
+    LogLevel, LogDateFormat, FormatOption,
+    NotifierLogLevels
 )
 from django_logging.settings.conf import LogConfig, LogManager
 
@@ -15,15 +15,15 @@ from django_logging.utils.get_config import is_auto_initialization_enabled, is_i
 
 
 def set_logging(
-    log_levels: LOG_LEVELS_TYPE,
-    log_dir: LOG_DIR_TYPE,
+    log_levels: LogLevels,
+    log_dir: LogDir,
     log_file_formats: LogFileFormatsType,
-    console_level: LOG_CONSOLE_LEVEL_TYPE,
-    console_format: LOG_CONSOLE_FORMAT_TYPE,
-    colorize_console: LOG_CONSOLE_COLORIZE_TYPE,
-    log_date_format: LOG_DATE_FORMAT_TYPE,
+    console_level: LogLevel,
+    console_format: FormatOption,
+    colorize_console: bool,
+    log_date_format: LogDateFormat,
     log_email_notifier_enable: bool,
-    log_email_notifier_log_levels: LOG_LEVELS_TYPE,
+    log_email_notifier_log_levels: NotifierLogLevels,
     log_email_notifier_log_format: FormatOption,
 ) -> None:
     """

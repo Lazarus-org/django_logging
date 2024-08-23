@@ -11,9 +11,6 @@ class LogEmailNotifierType(TypedDict, total=False):
     USE_TEMPLATE: bool
 
 
-LogLevel = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
-
-
 class LogFileFormatsType(TypedDict, total=False):
     DEBUG: FormatOption
     INFO: FormatOption
@@ -23,11 +20,8 @@ class LogFileFormatsType(TypedDict, total=False):
 
 
 # Type Aliases for other configurations
-LOG_DIR_TYPE = str
-LOG_LEVELS_TYPE = List[str]
-LOG_DATE_FORMAT_TYPE = str
-AUTO_INITIALIZATION_ENABLE_TYPE = bool
-INITIALIZATION_MESSAGE_ENABLE_TYPE = bool
-LOG_CONSOLE_LEVEL_TYPE = LogLevel
-LOG_CONSOLE_FORMAT_TYPE = FormatOption
-LOG_CONSOLE_COLORIZE_TYPE = bool
+LogLevel = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+LogDir = str
+LogLevels = List[LogLevel]
+NotifierLogLevels = List[Literal["ERROR", "CRITICAL"]]
+LogDateFormat = str

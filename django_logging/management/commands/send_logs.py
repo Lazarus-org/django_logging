@@ -8,6 +8,7 @@ from django.core.mail import EmailMessage
 from django.core.management.base import BaseCommand
 from django.conf import settings
 
+from django_logging.constants.settings_types import LogDir
 from django_logging.validators.email_settings_validator import check_email_settings
 from django_logging.constants import DefaultLoggingSettings
 
@@ -49,7 +50,7 @@ class Command(BaseCommand):
 
         default_settings = DefaultLoggingSettings()
 
-        log_dir = settings.DJANGO_LOGGING.get(
+        log_dir: LogDir = settings.DJANGO_LOGGING.get(
             "LOG_DIR", os.path.join(os.getcwd(), default_settings.log_dir)
         )
 

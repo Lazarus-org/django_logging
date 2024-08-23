@@ -5,14 +5,13 @@ from typing import List, Dict, Optional
 
 from django_logging.constants import FORMAT_OPTIONS, DefaultLoggingSettings
 from django_logging.constants.settings_types import (
-    LOG_LEVELS_TYPE,
-    LOG_DIR_TYPE,
+    LogLevels,
+    LogDir,
     LogFileFormatsType,
-    LOG_CONSOLE_FORMAT_TYPE,
-    LOG_DATE_FORMAT_TYPE,
-    LOG_CONSOLE_COLORIZE_TYPE,
+    LogDateFormat,
     FormatOption,
     LogLevel,
+    NotifierLogLevels
 )
 from django_logging.filters.level_filter import LoggingLevelFilter
 
@@ -28,15 +27,15 @@ class LogConfig:
 
     def __init__(
         self,
-        log_levels: LOG_LEVELS_TYPE,
-        log_dir: LOG_DIR_TYPE,
+        log_levels: LogLevels,
+        log_dir: LogDir,
         log_file_formats: LogFileFormatsType,
-        console_level: LOG_CONSOLE_FORMAT_TYPE,
+        console_level: LogLevel,
         console_format: FormatOption,
-        colorize_console: LOG_CONSOLE_COLORIZE_TYPE,
-        log_date_format: LOG_DATE_FORMAT_TYPE,
+        colorize_console: bool,
+        log_date_format: LogDateFormat,
         log_email_notifier_enable: bool,
-        log_email_notifier_log_levels: LOG_LEVELS_TYPE,
+        log_email_notifier_log_levels: NotifierLogLevels,
         log_email_notifier_log_format: FormatOption,
     ) -> None:
 

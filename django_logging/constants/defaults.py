@@ -3,28 +3,24 @@ from dataclasses import dataclass, field
 
 from django_logging.constants.settings_types import (
     LogFileFormatsType,
-    LOG_DIR_TYPE,
-    LOG_LEVELS_TYPE,
-    LOG_CONSOLE_FORMAT_TYPE,
-    LOG_CONSOLE_LEVEL_TYPE,
-    LOG_CONSOLE_COLORIZE_TYPE,
-    LOG_DATE_FORMAT_TYPE,
-    INITIALIZATION_MESSAGE_ENABLE_TYPE,
+    LogDir,
+    LogLevel,
+    LogLevels,
+    FormatOption,
+    LogDateFormat,
     LogEmailNotifierType,
 )
 
 
 @dataclass(frozen=True)
 class DefaultLoggingSettings:
-    log_dir: LOG_DIR_TYPE = field(
-        default_factory=lambda: os.path.join(os.getcwd(), "logs")
-    )
-    log_levels: LOG_LEVELS_TYPE = field(
+    log_dir: LogDir = field(default_factory=lambda: os.path.join(os.getcwd(), "logs"))
+    log_levels: LogLevels = field(
         default_factory=lambda: ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
     )
-    log_date_format: LOG_DATE_FORMAT_TYPE = "%Y-%m-%d %H:%M:%S"
-    auto_initialization_enable: INITIALIZATION_MESSAGE_ENABLE_TYPE = True
-    initialization_message_enable: INITIALIZATION_MESSAGE_ENABLE_TYPE = True
+    log_date_format: LogDateFormat = "%Y-%m-%d %H:%M:%S"
+    auto_initialization_enable: bool = True
+    initialization_message_enable: bool = True
     log_file_formats: LogFileFormatsType = field(
         default_factory=lambda: {
             "DEBUG": 1,
@@ -34,9 +30,9 @@ class DefaultLoggingSettings:
             "CRITICAL": 1,
         }
     )
-    log_console_level: LOG_CONSOLE_LEVEL_TYPE = "DEBUG"
-    log_console_format: LOG_CONSOLE_FORMAT_TYPE = 1
-    log_console_colorize: LOG_CONSOLE_COLORIZE_TYPE = True
+    log_console_level: LogLevel = "DEBUG"
+    log_console_format: FormatOption = 1
+    log_console_colorize: bool = True
     log_email_notifier: LogEmailNotifierType = field(
         default_factory=lambda: {
             "ENABLE": False,
