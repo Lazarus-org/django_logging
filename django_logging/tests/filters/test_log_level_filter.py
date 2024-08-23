@@ -4,7 +4,7 @@ from django_logging.filters import LoggingLevelFilter
 
 
 @pytest.fixture
-def log_record():
+def log_record() -> logging.LogRecord:
     """
     Fixture to create a dummy log record for testing.
 
@@ -23,7 +23,7 @@ def log_record():
     )
 
 
-def test_logging_level_filter_initialization():
+def test_logging_level_filter_initialization() -> None:
     """
     Test that the `LoggingLevelFilter` initializes with the correct logging level.
 
@@ -38,7 +38,9 @@ def test_logging_level_filter_initialization():
     )
 
 
-def test_logging_level_filter_passes_matching_level(log_record):
+def test_logging_level_filter_passes_matching_level(
+    log_record: logging.LogRecord,
+) -> None:
     """
     Test that the `LoggingLevelFilter` passes log records with the matching logging level.
 
@@ -58,7 +60,9 @@ def test_logging_level_filter_passes_matching_level(log_record):
     )
 
 
-def test_logging_level_filter_blocks_non_matching_level(log_record):
+def test_logging_level_filter_blocks_non_matching_level(
+    log_record: logging.LogRecord,
+) -> None:
     """
     Test that the `LoggingLevelFilter` blocks log records with a non-matching logging level.
 

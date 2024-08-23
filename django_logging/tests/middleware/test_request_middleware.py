@@ -10,7 +10,7 @@ from django_logging.middleware import RequestLogMiddleware
 
 
 @pytest.fixture
-def request_factory():
+def request_factory() -> RequestFactory:
     """
     Fixture to create a RequestFactory instance for generating request objects.
 
@@ -23,7 +23,7 @@ def request_factory():
 
 
 @pytest.fixture
-def get_response():
+def get_response() -> callable:
     """
     Fixture to create a mock get_response function.
 
@@ -33,14 +33,14 @@ def get_response():
         A function that returns an HttpResponse with a dummy response.
     """
 
-    def _get_response(request):
+    def _get_response(request) -> HttpResponse:
         return HttpResponse("Test Response")
 
     return _get_response
 
 
 @pytest.fixture
-def middleware(get_response):
+def middleware(get_response: callable) -> RequestLogMiddleware:
     """
     Fixture to create an instance of RequestLogMiddleware.
 
@@ -57,7 +57,11 @@ def middleware(get_response):
     return RequestLogMiddleware(get_response)
 
 
-def test_authenticated_user_logging(middleware, request_factory, caplog):
+def test_authenticated_user_logging(
+    middleware: RequestLogMiddleware,
+    request_factory: RequestFactory,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
     """
     Test logging of requests for authenticated users.
 
@@ -99,7 +103,11 @@ def test_authenticated_user_logging(middleware, request_factory, caplog):
     assert request.browser_type
 
 
-def test_anonymous_user_logging(middleware, request_factory, caplog):
+def test_anonymous_user_logging(
+    middleware: RequestLogMiddleware,
+    request_factory: RequestFactory,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
     """
     Test logging of requests for anonymous users.
 
@@ -130,7 +138,9 @@ def test_anonymous_user_logging(middleware, request_factory, caplog):
     assert "Anonymous" in caplog.text
 
 
-def test_ip_address_extraction(middleware, request_factory):
+def test_ip_address_extraction(
+    middleware: RequestLogMiddleware, request_factory: RequestFactory
+) -> None:
     """
     Test extraction of the client's IP address from the request.
 
@@ -155,7 +165,9 @@ def test_ip_address_extraction(middleware, request_factory):
     assert request.ip_address == "192.168.1.1"
 
 
-def test_user_agent_extraction(middleware, request_factory):
+def test_user_agent_extraction(
+    middleware: RequestLogMiddleware, request_factory: RequestFactory
+) -> None:
     """
     Test extraction of the client's user agent from the request.
 

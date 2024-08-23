@@ -1,12 +1,12 @@
 import logging
 import pytest
 import threading
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 from django_logging.utils.log_email_notifier.notifier import send_email_async
 
 
 @pytest.fixture
-def mock_smtp():
+def mock_smtp() -> MagicMock:
     """
     Fixture to mock the SMTP object used for sending emails.
 
@@ -23,7 +23,7 @@ def mock_smtp():
 
 
 @pytest.fixture
-def mock_settings():
+def mock_settings() -> MagicMock:
     """
     Fixture to mock the Django settings used for email configuration.
 
@@ -35,7 +35,9 @@ def mock_settings():
     unittest.mock.MagicMock
         A mock object representing the Django settings with predefined email configurations.
     """
-    with patch("django_logging.utils.log_email_notifier.notifier.settings") as mock_settings:
+    with patch(
+        "django_logging.utils.log_email_notifier.notifier.settings"
+    ) as mock_settings:
         mock_settings.DEFAULT_FROM_EMAIL = "from@example.com"
         mock_settings.EMAIL_HOST = "smtp.example.com"
         mock_settings.EMAIL_PORT = 587
@@ -45,7 +47,7 @@ def mock_settings():
 
 
 @pytest.fixture
-def mock_logger():
+def mock_logger() -> tuple[MagicMock, MagicMock]:
     """
     Fixture to mock the logger used for logging messages.
 
@@ -57,13 +59,19 @@ def mock_logger():
     tuple
         A tuple containing mock objects for `logger.info` and `logger.warning`.
     """
-    with patch("django_logging.utils.log_email_notifier.notifier.logger.info") as mock_info, patch(
+    with patch(
+        "django_logging.utils.log_email_notifier.notifier.logger.info"
+    ) as mock_info, patch(
         "django_logging.utils.log_email_notifier.notifier.logger.warning"
     ) as mock_warning:
         yield mock_info, mock_warning
 
 
-def test_send_email_async_success(mock_smtp, mock_settings, mock_logger):
+def test_send_email_async_success(
+    mock_smtp: MagicMock,
+    mock_settings: MagicMock,
+    mock_logger: tuple[MagicMock, MagicMock],
+) -> None:
     """
     Test that the send_email_async function successfully sends an email.
 
@@ -129,7 +137,11 @@ def test_send_email_async_success(mock_smtp, mock_settings, mock_logger):
     mock_warning.assert_not_called()
 
 
-def test_send_email_async_failure(mock_smtp, mock_settings, mock_logger):
+def test_send_email_async_failure(
+    mock_smtp: MagicMock,
+    mock_settings: MagicMock,
+    mock_logger: tuple[MagicMock, MagicMock],
+) -> None:
     """
     Test that the send_email_async function handles SMTP failures.
 

@@ -12,13 +12,13 @@ from django_logging.utils.set_conf import set_config
 @patch("logging.getLogger")
 @patch("django_logging.utils.get_conf.get_config")
 def test_set_config_success(
-    mock_get_conf,
-    mock_get_logger,
-    mock_is_initialization_message_enabled,
-    mock_is_auto_initialization_enabled,
-    mock_LogManager,
-    mock_LogConfig,
-):
+    mock_get_conf: MagicMock,
+    mock_get_logger: MagicMock,
+    mock_is_initialization_message_enabled: MagicMock,
+    mock_is_auto_initialization_enabled: MagicMock,
+    mock_LogManager: MagicMock,
+    mock_LogConfig: MagicMock,
+) -> None:
     """
     Test the successful execution of set_config.
 
@@ -116,8 +116,10 @@ def test_set_config_success(
 @patch("django_logging.utils.set_conf.LogManager")
 @patch("django_logging.utils.set_conf.is_auto_initialization_enabled")
 def test_set_config_auto_initialization_disabled(
-    mock_is_auto_initialization_enabled, mock_LogManager, mock_LogConfig
-):
+    mock_is_auto_initialization_enabled: MagicMock,
+    mock_LogManager: MagicMock,
+    mock_LogConfig: MagicMock,
+) -> None:
     """
     Test that LogConfig and LogManager are not instantiated when auto initialization is disabled.
 
@@ -159,8 +161,10 @@ def test_set_config_auto_initialization_disabled(
 @patch("django_logging.utils.set_conf.LogManager")
 @patch("django_logging.utils.set_conf.is_auto_initialization_enabled")
 def test_set_config_exception_handling(
-    mock_is_auto_initialization_enabled, mock_LogManager, mock_LogConfig
-):
+    mock_is_auto_initialization_enabled: MagicMock,
+    mock_LogManager: MagicMock,
+    mock_LogConfig: MagicMock,
+) -> None:
     """
     Test that set_config handles exceptions and logs a warning message.
 

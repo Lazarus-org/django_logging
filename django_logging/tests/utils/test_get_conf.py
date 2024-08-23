@@ -1,3 +1,5 @@
+from typing import Dict
+
 import pytest
 from unittest.mock import patch
 from django.conf import settings
@@ -10,7 +12,7 @@ from django_logging.utils.get_conf import (
 
 
 @pytest.fixture
-def mock_settings():
+def mock_settings() -> Dict:
     """
     Fixture to mock Django settings.
 
@@ -46,7 +48,7 @@ def mock_settings():
         yield mock_settings
 
 
-def test_get_conf(mock_settings):
+def test_get_conf(mock_settings: Dict) -> None:
     """
     Test that the `get_config` function returns the correct configuration values.
 
@@ -80,7 +82,7 @@ def test_get_conf(mock_settings):
     assert result == expected
 
 
-def test_use_email_notifier_template(mock_settings):
+def test_use_email_notifier_template(mock_settings: Dict) -> None:
     """
     Test that the `use_email_notifier_template` function correctly reads the `USE_TEMPLATE` setting.
 
@@ -105,7 +107,7 @@ def test_use_email_notifier_template(mock_settings):
         assert use_email_notifier_template() is False
 
 
-def test_is_auto_initialization_enabled(mock_settings):
+def test_is_auto_initialization_enabled(mock_settings: Dict) -> None:
     """
     Test that the `is_auto_initialization_enabled` function correctly reads the `AUTO_INITIALIZATION_ENABLE` setting.
 
@@ -130,7 +132,7 @@ def test_is_auto_initialization_enabled(mock_settings):
         assert is_auto_initialization_enabled() is False
 
 
-def test_is_initialization_message_enabled(mock_settings):
+def test_is_initialization_message_enabled(mock_settings: Dict) -> None:
     """
     Test that the `is_initialization_message_enabled` function correctly reads the `INITIALIZATION_MESSAGE_ENABLE` setting.
 

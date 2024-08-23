@@ -8,7 +8,7 @@ from django_logging.handlers.email_handler import EmailHandler
 
 
 @pytest.fixture
-def log_record():
+def log_record() -> logging.LogRecord:
     """
     Fixture to create a dummy log record.
 
@@ -29,7 +29,7 @@ def log_record():
 
 
 @pytest.fixture
-def email_handler():
+def email_handler() -> EmailHandler:
     """
     Fixture to create an EmailHandler instance.
 
@@ -48,8 +48,8 @@ def email_handler():
     return_value=True,
 )
 def test_emit_with_html_template(
-    mock_use_template, mock_render_template, mock_send_email, email_handler, log_record
-):
+    mock_use_template: MagicMock, mock_render_template: MagicMock, mock_send_email: MagicMock, email_handler: EmailHandler, log_record: logging.LogRecord
+) -> None:
     """
     Test the emit method when HTML templates are used.
 
@@ -89,7 +89,7 @@ def test_emit_with_html_template(
     "django_logging.handlers.email_handler.use_email_notifier_template",
     return_value=False,
 )
-def test_emit_without_html_template(mock_use_template, mock_send_email, log_record):
+def test_emit_without_html_template(mock_use_template: MagicMock, mock_send_email: MagicMock, log_record: logging.LogRecord) -> None:
     """
     Test the emit method when HTML templates are not used.
 
@@ -123,8 +123,8 @@ def test_emit_without_html_template(mock_use_template, mock_send_email, log_reco
     side_effect=Exception("Email send failed"),
 )
 def test_emit_handles_exception(
-    mock_send_email, mock_handle_error, email_handler, log_record
-):
+    mock_send_email: MagicMock, mock_handle_error: MagicMock, email_handler: EmailHandler, log_record: logging.LogRecord
+) -> None:
     """
     Test that the emit method handles exceptions during email sending.
 
@@ -160,7 +160,7 @@ def test_emit_handles_exception(
     return_value="Mozilla/5.0",
 )
 @patch("django_logging.handlers.email_handler.engines")
-def test_render_template(mock_engines, mock_get_user_agent, mock_get_ip_address):
+def test_render_template(mock_engines: MagicMock, mock_get_user_agent: MagicMock, mock_get_ip_address: MagicMock):
     """
     Test the render_template method of EmailHandler.
 

@@ -2,7 +2,7 @@ import os
 import tempfile
 import shutil
 
-from unittest.mock import patch, ANY
+from unittest.mock import patch, ANY, Mock
 
 from django.core.exceptions import ImproperlyConfigured
 from django.core.management import call_command
@@ -20,8 +20,11 @@ class SendLogsCommandTests(TestCase):
     @patch("django_logging.management.commands.send_logs.shutil.make_archive")
     @patch("django_logging.management.commands.send_logs.EmailMessage")
     def test_handle_success(
-        self, mock_email_message, mock_make_archive, mock_validate_email_settings
-    ):
+        self,
+        mock_email_message: Mock,
+        mock_make_archive: Mock,
+        mock_validate_email_settings: Mock,
+    ) -> None:
         """
         Test that the `send_logs` command successfully creates an archive of the logs
         and sends an email when executed with valid settings.
@@ -62,8 +65,8 @@ class SendLogsCommandTests(TestCase):
     )
     @patch("django_logging.management.commands.send_logs.EmailMessage.send")
     def test_handle_email_send_failure(
-        self, mock_email_send, mock_validate_email_settings
-    ):
+        self, mock_email_send: Mock, mock_validate_email_settings: Mock
+    ) -> None:
         """
         Test that the `send_logs` command handles email sending failures correctly
         and logs an appropriate error message.
@@ -96,7 +99,7 @@ class SendLogsCommandTests(TestCase):
     @patch(
         "django_logging.management.commands.send_logs.Command.validate_email_settings"
     )
-    def test_handle_missing_log_dir(self, mock_validate_email_settings):
+    def test_handle_missing_log_dir(self, mock_validate_email_settings: Mock) -> None:
         """
         Test that the `send_logs` command logs an error when the specified log directory does not exist
         and skips the email validation step.
@@ -127,7 +130,9 @@ class SendLogsCommandTests(TestCase):
         "django_logging.management.commands.send_logs.check_email_settings",
         return_value=None,
     )
-    def test_validate_email_settings_success(self, mock_check_email_settings):
+    def test_validate_email_settings_success(
+        self, mock_check_email_settings: Mock
+    ) -> None:
         """
         Test that the `validate_email_settings` method successfully validates the email settings
         without raising any exceptions.
@@ -147,7 +152,9 @@ class SendLogsCommandTests(TestCase):
         "django_logging.management.commands.send_logs.check_email_settings",
         return_value="Missing config",
     )
-    def test_validate_email_settings_failure(self, mock_check_email_settings):
+    def test_validate_email_settings_failure(
+        self, mock_check_email_settings: Mock
+    ) -> None:
         """
         Test that the `validate_email_settings` method raises an `ImproperlyConfigured` exception
         when the email settings are invalid.
@@ -167,7 +174,9 @@ class SendLogsCommandTests(TestCase):
         "django_logging.management.commands.send_logs.Command.validate_email_settings"
     )
     @patch("django_logging.management.commands.send_logs.shutil.make_archive")
-    def test_cleanup_on_failure(self, mock_make_archive, mock_validate_email_settings):
+    def test_cleanup_on_failure(
+        self, mock_make_archive, mock_validate_email_settings: Mock
+    ) -> None:
         """
         Test that the `send_logs` command cleans up any partially created files when an error occurs
         during the log archiving process.

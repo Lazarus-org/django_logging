@@ -7,7 +7,7 @@ from django_logging.constants import FORMAT_OPTIONS
 
 
 @pytest.fixture
-def log_config():
+def log_config() -> LogConfig:
     """
     Fixture to provide a default LogConfig instance.
 
@@ -34,7 +34,7 @@ def log_config():
 
 
 @pytest.fixture
-def log_manager(log_config):
+def log_manager(log_config) -> LogManager:
     """
     Fixture to provide a LogManager instance initialized with a LogConfig.
 
@@ -49,7 +49,7 @@ def log_manager(log_config):
     return LogManager(log_config)
 
 
-def test_resolve_format():
+def test_resolve_format() -> None:
     """
     Test resolution of format options in LogConfig.
 
@@ -77,7 +77,7 @@ def test_resolve_format():
     assert resolved_format == "%(message)s"
 
 
-def test_remove_ansi_escape_sequences():
+def test_remove_ansi_escape_sequences() -> None:
     """
     Test removal of ANSI escape sequences.
 
@@ -93,7 +93,7 @@ def test_remove_ansi_escape_sequences():
     assert clean_string == "ERROR"
 
 
-def test_create_log_files(log_manager):
+def test_create_log_files(log_manager: LogManager) -> None:
     """
     Test creation of log files.
 
@@ -133,7 +133,7 @@ def test_create_log_files(log_manager):
             log_manager.log_files[log_level] = expected_file_path
 
 
-def test_set_conf(log_manager):
+def test_set_conf(log_manager: LogManager) -> None:
     """
     Test setting up logging configuration.
 
@@ -181,7 +181,7 @@ def test_set_conf(log_manager):
         assert "disable_existing_loggers" in config
 
 
-def test_log_manager_get_log_file(log_manager):
+def test_log_manager_get_log_file(log_manager: LogManager) -> None:
     """
     Test retrieval of log file paths.
 

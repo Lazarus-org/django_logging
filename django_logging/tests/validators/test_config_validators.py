@@ -10,7 +10,7 @@ from django_logging.validators.config_validators import (
 )
 
 
-def test_validate_directory_success():
+def test_validate_directory_success() -> None:
     """
     Test the successful validation of a directory path.
 
@@ -35,7 +35,7 @@ def test_validate_directory_success():
         mock_mkdir.assert_called_once()
 
 
-def test_validate_directory_invalid_path():
+def test_validate_directory_invalid_path() -> None:
     """
     Test validation of invalid directory paths.
 
@@ -61,7 +61,7 @@ def test_validate_directory_invalid_path():
         assert errors[0].id == "django_logging.E002_test_directory"
 
 
-def test_validate_directory_is_file():
+def test_validate_directory_is_file() -> None:
     """
     Test validation when the path is a file, not a directory.
 
@@ -98,7 +98,7 @@ def test_validate_directory_is_file():
         assert "Ensure test_directory points to a valid directory." in errors[0].hint
 
 
-def test_validate_log_levels_success():
+def test_validate_log_levels_success() -> None:
     """
     Test successful validation of log levels.
 
@@ -118,7 +118,7 @@ def test_validate_log_levels_success():
     assert not errors
 
 
-def test_validate_log_levels_invalid_type():
+def test_validate_log_levels_invalid_type() -> None:
     """
     Test validation of log levels with invalid types.
 
@@ -143,7 +143,7 @@ def test_validate_log_levels_invalid_type():
     assert errors[0].id == "django_logging.E005_log_levels"
 
 
-def test_validate_format_string_success():
+def test_validate_format_string_success() -> None:
     """
     Test successful validation of a log format string.
 
@@ -163,7 +163,7 @@ def test_validate_format_string_success():
     assert not errors
 
 
-def test_validate_format_string_invalid():
+def test_validate_format_string_invalid() -> None:
     """
     Test validation of an invalid log format string.
 
@@ -195,7 +195,7 @@ def test_validate_format_string_invalid():
     assert errors[0].id == "django_logging.E009_log_format"
 
 
-def test_validate_format_option_integer_success():
+def test_validate_format_option_integer_success() -> None:
     """
     Test successful validation of an integer format option.
 
@@ -215,7 +215,7 @@ def test_validate_format_option_integer_success():
     assert not errors
 
 
-def test_validate_format_option_failure():
+def test_validate_format_option_failure() -> None:
     """
     Test validation of invalid format options.
 
@@ -242,7 +242,7 @@ def test_validate_format_option_failure():
     assert errors[0].id == "django_logging.E013_log_format_option"
 
 
-def test_validate_format_option_string_success():
+def test_validate_format_option_string_success() -> None:
     """
     Test successful validation of a string format option.
 
@@ -262,7 +262,7 @@ def test_validate_format_option_string_success():
     assert not errors
 
 
-def test_validate_boolean_setting_success():
+def test_validate_boolean_setting_success() -> None:
     """
     Test successful validation of a boolean setting.
 
@@ -281,7 +281,7 @@ def test_validate_boolean_setting_success():
     assert not errors
 
 
-def test_validate_date_format_success():
+def test_validate_date_format_success() -> None:
     """
     Test successful validation of a date format string.
 
@@ -301,7 +301,7 @@ def test_validate_date_format_success():
     assert not errors
 
 
-def test_validate_date_format_invalid_format():
+def test_validate_date_format_invalid_format() -> None:
     """
     Test validation of invalid date format strings.
 
@@ -328,7 +328,7 @@ def test_validate_date_format_invalid_format():
     assert errors[0].id == "django_logging.E016_date_format"
 
 
-def test_validate_email_notifier_success():
+def test_validate_email_notifier_success() -> None:
     """
     Test successful validation of email notifier configuration.
 
@@ -352,7 +352,7 @@ def test_validate_email_notifier_success():
     assert not errors
 
 
-def test_validate_email_notifier_invalid_type():
+def test_validate_email_notifier_invalid_type() -> None:
     """
     Test validation of invalid email notifier configuration types.
 

@@ -1,3 +1,5 @@
+from typing import Dict
+
 import pytest
 from unittest.mock import patch
 from django.conf import settings
@@ -7,7 +9,7 @@ from django_logging.validators.email_settings_validator import check_email_setti
 
 # Mock required email settings for testing
 @pytest.fixture
-def mock_email_settings():
+def mock_email_settings() -> Dict:
     """
     Fixture to mock Django email settings.
 
@@ -31,7 +33,7 @@ def mock_email_settings():
     }
 
 
-def test_check_email_settings_all_present(mock_email_settings):
+def test_check_email_settings_all_present(mock_email_settings: Dict) -> None:
     """
     Test validation when all required email settings are present.
 
@@ -75,7 +77,7 @@ def test_check_email_settings_all_present(mock_email_settings):
                             assert not errors  # No errors should be present
 
 
-def test_check_email_settings_missing_some(mock_email_settings):
+def test_check_email_settings_missing_some(mock_email_settings: Dict) -> None:
     """
     Test validation when some required email settings are missing.
 
@@ -124,7 +126,7 @@ def test_check_email_settings_missing_some(mock_email_settings):
                             assert errors[0].id == "django_logging.E021"
 
 
-def test_check_email_settings_all_missing():
+def test_check_email_settings_all_missing() -> None:
     """
     Test validation when all required email settings are missing.
 

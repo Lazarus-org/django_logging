@@ -9,7 +9,7 @@ from django_logging.utils.context_manager import (
 
 
 @pytest.fixture
-def mock_logger():
+def mock_logger() -> logging.Logger:
     """
     Fixture to create a mock logger for testing.
 
@@ -26,7 +26,7 @@ def mock_logger():
         yield logger
 
 
-def test_config_setup_auto_initialization_enabled():
+def test_config_setup_auto_initialization_enabled() -> None:
     """
     Test that ValueError is raised when auto-initialization is enabled.
 
@@ -52,7 +52,7 @@ def test_config_setup_auto_initialization_enabled():
         )
 
 
-def test_config_setup_applies_custom_config(mock_logger):
+def test_config_setup_applies_custom_config(mock_logger: logging.Logger) -> None:
     """
     Test that the custom logging configuration is applied.
 
@@ -102,7 +102,7 @@ def test_config_setup_applies_custom_config(mock_logger):
                     mock_log_manager.set_conf.assert_called_once()
 
 
-def test_config_context_restores_original_config(mock_logger):
+def test_config_context_restores_original_config(mock_logger: logging.Logger) -> None:
     """
     Test that the original logging configuration is restored after context exit.
 
@@ -153,7 +153,7 @@ def test_config_context_restores_original_config(mock_logger):
                 assert mock_logger.handlers == original_handlers
 
 
-def test_restore_logging_config(mock_logger):
+def test_restore_logging_config(mock_logger: logging.Logger) -> None:
     """
     Test the _restore_logging_config helper function.
 

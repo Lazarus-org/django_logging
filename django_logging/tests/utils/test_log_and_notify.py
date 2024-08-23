@@ -6,7 +6,7 @@ from django_logging.utils.log_email_notifier.log_and_notify import log_and_notif
 
 
 # Helper function to mock LogConfig
-def mock_log_config(email_notifier_enable=True):
+def mock_log_config(email_notifier_enable: bool = True) -> MagicMock:
     """
     Helper function to create a mock LogConfig object.
 
@@ -27,7 +27,7 @@ def mock_log_config(email_notifier_enable=True):
 
 
 @pytest.fixture
-def mock_logger():
+def mock_logger() -> MagicMock:
     """
     Fixture to create a mock logger object for testing.
 
@@ -40,7 +40,7 @@ def mock_logger():
 
 
 @pytest.fixture
-def mock_settings():
+def mock_settings() -> None:
     """
     Fixture to mock Django settings related to email notifications.
 
@@ -56,7 +56,7 @@ def mock_settings():
     del settings.ADMIN_EMAIL
 
 
-def test_log_and_notify_email_notifier_disabled(mock_logger):
+def test_log_and_notify_email_notifier_disabled(mock_logger: MagicMock) -> None:
     """
     Test that a ValueError is raised when email notifier is disabled.
 
@@ -80,7 +80,9 @@ def test_log_and_notify_email_notifier_disabled(mock_logger):
             log_and_notify_admin(mock_logger, logging.ERROR, "Test message")
 
 
-def test_log_and_notify_admin_success(mock_logger, mock_settings):
+def test_log_and_notify_admin_success(
+    mock_logger: MagicMock, mock_settings: None
+) -> None:
     """
     Test successful logging and email notification to admin.
 
@@ -145,7 +147,9 @@ def test_log_and_notify_admin_success(mock_logger, mock_settings):
                         )
 
 
-def test_log_and_notify_admin_logging_failure(mock_logger, mock_settings):
+def test_log_and_notify_admin_logging_failure(
+    mock_logger: MagicMock, mock_settings: None
+) -> None:
     """
     Test logging failure due to invalid parameters.
 
@@ -185,7 +189,7 @@ def test_log_and_notify_admin_logging_failure(mock_logger, mock_settings):
                 log_and_notify_admin(mock_logger, logging.ERROR, "Test message")
 
 
-def test_log_and_notify_admin_missing_admin_email(mock_logger):
+def test_log_and_notify_admin_missing_admin_email(mock_logger: MagicMock) -> None:
     """
     Test logging and email notification when ADMIN_EMAIL is missing.
 

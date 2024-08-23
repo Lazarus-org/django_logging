@@ -1,3 +1,4 @@
+from typing import Generator, List
 from unittest.mock import patch
 
 import pytest
@@ -7,7 +8,7 @@ from django_logging.settings.checks import check_logging_settings
 
 
 @pytest.fixture
-def reset_settings():
+def reset_settings() -> Generator[None, None, None]:
     """
     Fixture to reset Django settings after each test.
 
@@ -22,7 +23,7 @@ def reset_settings():
     settings.DJANGO_LOGGING = original_settings
 
 
-def test_valid_logging_settings(reset_settings):
+def test_valid_logging_settings(reset_settings: None) -> None:
     """
     Test that valid logging settings do not produce any errors.
 
@@ -51,11 +52,11 @@ def test_valid_logging_settings(reset_settings):
             "LOG_FORMAT": 1,
         },
     }
-    errors = check_logging_settings(None)
+    errors: List[Error] = check_logging_settings(None)
     assert not errors
 
 
-def test_invalid_log_dir(reset_settings):
+def test_invalid_log_dir(reset_settings: None) -> None:
     """
     Test invalid LOG_DIR setting.
 
@@ -69,11 +70,11 @@ def test_invalid_log_dir(reset_settings):
     settings.DJANGO_LOGGING = {
         "LOG_DIR": 1,
     }
-    errors = check_logging_settings(None)
+    errors: List[Error] = check_logging_settings(None)
     assert any(error.id == "django_logging.E001_LOG_DIR" for error in errors)
 
 
-def test_invalid_log_file_levels(reset_settings):
+def test_invalid_log_file_levels(reset_settings: None) -> None:
     """
     Test invalid LOG_FILE_LEVELS setting.
 
@@ -91,7 +92,7 @@ def test_invalid_log_file_levels(reset_settings):
     assert any(error.id == "django_logging.E007_LOG_FILE_LEVELS" for error in errors)
 
 
-def test_invalid_log_file_formats(reset_settings):
+def test_invalid_log_file_formats(reset_settings: None) -> None:
     """
     Test invalid LOG_FILE_FORMATS setting.
 
@@ -109,7 +110,7 @@ def test_invalid_log_file_formats(reset_settings):
             "invalid": "%(message)s",
         },
     }
-    errors = check_logging_settings(None)
+    errors: List[Error] = check_logging_settings(None)
     assert any(
         error.id == "django_logging.E011_LOG_FILE_FORMATS['DEBUG']" for error in errors
     )
@@ -120,7 +121,7 @@ def test_invalid_log_file_formats(reset_settings):
     assert any(error.id == "django_logging.E020_LOG_FILE_FORMATS" for error in errors)
 
 
-def test_invalid_log_console_format(reset_settings):
+def test_invalid_log_console_format(reset_settings: None) -> None:
     """
     Test invalid LOG_CONSOLE_FORMAT setting.
 
@@ -138,7 +139,7 @@ def test_invalid_log_console_format(reset_settings):
     assert any(error.id == "django_logging.E010_LOG_CONSOLE_FORMAT" for error in errors)
 
 
-def test_invalid_log_console_level(reset_settings):
+def test_invalid_log_console_level(reset_settings: None) -> None:
     """
     Test invalid LOG_CONSOLE_LEVEL setting.
 
@@ -152,11 +153,11 @@ def test_invalid_log_console_level(reset_settings):
     settings.DJANGO_LOGGING = {
         "LOG_CONSOLE_LEVEL": 10,
     }
-    errors = check_logging_settings(None)
+    errors: List[Error] = check_logging_settings(None)
     assert any(error.id == "django_logging.E006_LOG_CONSOLE_LEVEL" for error in errors)
 
 
-def test_invalid_log_console_colorize(reset_settings):
+def test_invalid_log_console_colorize(reset_settings: None) -> None:
     """
     Test invalid LOG_CONSOLE_COLORIZE setting.
 
@@ -170,13 +171,13 @@ def test_invalid_log_console_colorize(reset_settings):
     settings.DJANGO_LOGGING = {
         "LOG_CONSOLE_COLORIZE": "not_a_boolean",
     }
-    errors = check_logging_settings(None)
+    errors: List[Error] = check_logging_settings(None)
     assert any(
         error.id == "django_logging.E014_LOG_CONSOLE_COLORIZE" for error in errors
     )
 
 
-def test_invalid_log_date_format(reset_settings):
+def test_invalid_log_date_format(reset_settings: None) -> None:
     """
     Test invalid LOG_DATE_FORMAT setting.
 
@@ -190,11 +191,11 @@ def test_invalid_log_date_format(reset_settings):
     settings.DJANGO_LOGGING = {
         "LOG_DATE_FORMAT": "%invalid_format",
     }
-    errors = check_logging_settings(None)
+    errors: List[Error] = check_logging_settings(None)
     assert any(error.id == "django_logging.E016_LOG_DATE_FORMAT" for error in errors)
 
 
-def test_invalid_auto_initialization_enable(reset_settings):
+def test_invalid_auto_initialization_enable(reset_settings: None) -> None:
     """
     Test invalid AUTO_INITIALIZATION_ENABLE setting.
 
@@ -208,13 +209,13 @@ def test_invalid_auto_initialization_enable(reset_settings):
     settings.DJANGO_LOGGING = {
         "AUTO_INITIALIZATION_ENABLE": "not_a_boolean",
     }
-    errors = check_logging_settings(None)
+    errors: List[Error] = check_logging_settings(None)
     assert any(
         error.id == "django_logging.E014_AUTO_INITIALIZATION_ENABLE" for error in errors
     )
 
 
-def test_invalid_initialization_message_enable(reset_settings):
+def test_invalid_initialization_message_enable(reset_settings: None) -> None:
     """
     Test invalid INITIALIZATION_MESSAGE_ENABLE setting.
 
@@ -228,14 +229,14 @@ def test_invalid_initialization_message_enable(reset_settings):
     settings.DJANGO_LOGGING = {
         "INITIALIZATION_MESSAGE_ENABLE": "not_a_boolean",
     }
-    errors = check_logging_settings(None)
+    errors: List[Error] = check_logging_settings(None)
     assert any(
         error.id == "django_logging.E014_INITIALIZATION_MESSAGE_ENABLE"
         for error in errors
     )
 
 
-def test_invalid_log_email_notifier(reset_settings):
+def test_invalid_log_email_notifier(reset_settings: None) -> None:
     """
     Test invalid LOG_EMAIL_NOTIFIER setting.
 
@@ -251,14 +252,14 @@ def test_invalid_log_email_notifier(reset_settings):
             "ENABLE": "not_a_boolean",
         },
     }
-    errors = check_logging_settings(None)
+    errors: List[Error] = check_logging_settings(None)
     assert any(
         error.id == "django_logging.E018_LOG_EMAIL_NOTIFIER['ENABLE']"
         for error in errors
     )
 
 
-def test_missing_email_settings(reset_settings):
+def test_missing_email_settings(reset_settings: None) -> None:
     """
     Test missing email settings when LOG_EMAIL_NOTIFIER is enabled.
 
@@ -282,5 +283,5 @@ def test_missing_email_settings(reset_settings):
         mock_check.return_value = [
             Error("EMAIL_BACKEND not set.", id="django_logging.E010_EMAIL_SETTINGS")
         ]
-        errors = check_logging_settings(None)
+        errors: List[Error] = check_logging_settings(None)
         assert any(error.id == "django_logging.E010_EMAIL_SETTINGS" for error in errors)
