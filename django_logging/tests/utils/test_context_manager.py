@@ -43,8 +43,7 @@ def test_config_setup_auto_initialization_enabled() -> None:
         return_value=True,
     ):
         with pytest.raises(ValueError) as excinfo:
-            with config_setup():
-                """"""
+            with config_setup(): ""
 
         assert (
             str(excinfo.value)
