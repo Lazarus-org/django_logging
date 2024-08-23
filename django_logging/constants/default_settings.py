@@ -1,7 +1,7 @@
 import os
 from dataclasses import dataclass, field
 
-from django_logging.constants.settings_types import (
+from django_logging.constants.config_types import (
     LogFileFormatsType,
     LogDir,
     LogLevel,

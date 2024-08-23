@@ -7,7 +7,7 @@ from typing import List
 from django.core.checks import Error
 
 from django_logging.constants import LOG_FORMAT_SPECIFIERS, FORMAT_OPTIONS
-from django_logging.constants.settings_types import (
+from django_logging.constants.config_types import (
     FormatOption,
     LogLevels,
     LogEmailNotifierType,

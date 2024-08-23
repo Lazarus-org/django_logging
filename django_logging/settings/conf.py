@@ -4,7 +4,7 @@ import os
 from typing import List, Dict, Optional
 
 from django_logging.constants import FORMAT_OPTIONS, DefaultLoggingSettings
-from django_logging.constants.settings_types import (
+from django_logging.constants.config_types import (
     LogLevels,
     LogDir,
     LogFileFormatsType,
@@ -13,7 +13,7 @@ from django_logging.constants.settings_types import (
     LogLevel,
     NotifierLogLevels
 )
-from django_logging.filters.level_filter import LoggingLevelFilter
+from django_logging.filters.log_level_filter import LoggingLevelFilter
 
 
 class LogConfig:

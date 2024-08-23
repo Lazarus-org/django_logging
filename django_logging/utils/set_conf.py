@@ -2,7 +2,7 @@ import os
 
 from django.core.exceptions import ImproperlyConfigured
 
-from django_logging.constants.settings_types import (
+from django_logging.constants.config_types import (
     LogLevels, LogDir, LogFileFormatsType,
     LogLevel, LogDateFormat, FormatOption,
     NotifierLogLevels
@@ -11,10 +11,10 @@ from django_logging.settings.conf import LogConfig, LogManager
 
 from typing import List
 from django_logging.constants.ansi_colors import AnsiColors
-from django_logging.utils.get_config import is_auto_initialization_enabled, is_initialization_message_enabled
+from django_logging.utils.get_conf import is_auto_initialization_enabled, is_initialization_message_enabled
 
 
-def set_logging(
+def set_config(
     log_levels: LogLevels,
     log_dir: LogDir,
     log_file_formats: LogFileFormatsType,

@@ -4,19 +4,19 @@ from typing import Optional, Dict
 
 from django.conf import settings
 
-from django_logging.constants.format_options import FORMAT_OPTIONS
-from django_logging.utils.email_notifier import send_email_async
-from django_logging.utils.get_config import get_conf
+from django_logging.constants.log_format_options import FORMAT_OPTIONS
+from django_logging.utils.log_email_notifier import send_email_async
+from django_logging.utils.get_conf import get_config
 from django_logging.handlers import EmailHandler
 from django_logging.settings.conf import LogConfig
 
 
-def log_and_notify(
+def log_and_notify_admin(
     logger, level: int, message: str, extra: Optional[Dict] = None
 ) -> None:
     # Get the caller's frame to capture the correct module, file, and line number
     frame = inspect.currentframe().f_back
-    logging_settings = get_conf()
+    logging_settings = get_config()
     email_notifier_enable = getattr(
         logging_settings, "log_email_notifier_enable", False
     )

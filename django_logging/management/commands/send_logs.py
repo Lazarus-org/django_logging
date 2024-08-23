@@ -8,7 +8,7 @@ from django.core.mail import EmailMessage
 from django.core.management.base import BaseCommand
 from django.conf import settings
 
-from django_logging.constants.settings_types import LogDir
+from django_logging.constants.config_types import LogDir
 from django_logging.validators.email_settings_validator import check_email_settings
 from django_logging.constants import DefaultLoggingSettings
 

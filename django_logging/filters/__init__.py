@@ -1,1 +1,1 @@
-from .level_filter import LoggingLevelFilter
+from .log_level_filter import LoggingLevelFilter

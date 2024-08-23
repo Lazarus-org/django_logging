@@ -1,7 +1,7 @@
 from typing import List
 from django.conf import settings
 from django.core.checks import Error
-from django_logging.constants.email_settings import EMAIL_REQUIRED_SETTINGS
+from django_logging.constants.required_email_settings import EMAIL_REQUIRED_SETTINGS
 
 
 def check_email_settings() -> List[Error]:
