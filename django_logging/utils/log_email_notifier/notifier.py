@@ -9,7 +9,7 @@ from django.conf import settings
 logger = logging.getLogger(__name__)
 
 
-def send_email_async(subject, body, recipient_list):
+def send_email_async(subject, body, recipient_list, event=None):
     def send_email():
         msg = MIMEMultipart()
         msg["From"] = settings.DEFAULT_FROM_EMAIL
@@ -30,6 +30,10 @@ def send_email_async(subject, body, recipient_list):
 
         except Exception as e:
             logger.warning(f"Email Notifier failed to send Log Record: {e}")
+
+        finally:
+            if event:
+                event.set()  # set event that waits until email send. (used for Tests)
 
     # Start a new thread to send the email asynchronously
     email_thread = threading.Thread(target=send_email)
