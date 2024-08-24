@@ -1,6 +1,6 @@
 import logging
 import threading
-import smtplib
+from smtplib import SMTP
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
@@ -19,7 +19,7 @@ def send_email_async(subject, body, recipient_list):
         msg.attach(MIMEText(body, "html"))
 
         try:
-            server = smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT)
+            server = SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT)
             server.starttls()
             server.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
             server.sendmail(

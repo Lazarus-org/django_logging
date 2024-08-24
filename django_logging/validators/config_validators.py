@@ -7,9 +7,9 @@ from typing import List
 from django.core.checks import Error
 
 from django_logging.constants import LOG_FORMAT_SPECIFIERS, FORMAT_OPTIONS
-from django_logging.constants.settings_types import (
+from django_logging.constants.config_types import (
     FormatOption,
-    LOG_LEVELS_TYPE,
+    LogLevels,
     LogEmailNotifierType,
 )
 
@@ -25,13 +25,17 @@ def validate_directory(path: str, config_name: str) -> List[Error]:
             )
         )
     elif not os.path.exists(path):
-        errors.append(
-            Error(
-                f"The path specified in {config_name} does not exist.",
-                hint=f"Ensure the path set in {config_name} exists.",
-                id=f"django_logging.E002_{config_name}",
+        try:
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+        except Exception as e:
+            errors.append(
+                Error(
+                    f"The path specified in {config_name} is not a valid path.",
+                    hint=f"Ensure the path set in {config_name} is valid.",
+                    id=f"django_logging.E002_{config_name}",
+                )
             )
-        )
+
     elif not os.path.isdir(path):
         errors.append(
             Error(
@@ -44,9 +48,9 @@ def validate_directory(path: str, config_name: str) -> List[Error]:
 
 
 def validate_log_levels(
-    log_levels: LOG_LEVELS_TYPE,
+    log_levels: LogLevels,
     config_name: str,
-    valid_levels: LOG_LEVELS_TYPE,
+    valid_levels: LogLevels,
 ) -> List[Error]:
     errors = []
     if not isinstance(log_levels, list):

@@ -5,7 +5,7 @@ from typing import List
 from django_logging.constants import DefaultLoggingSettings
 
 
-def get_conf() -> List:
+def get_config() -> List:
     """
     Retrieve logging configuration from Django settings.
 

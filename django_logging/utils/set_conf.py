@@ -2,24 +2,29 @@ import os
 
 from django.core.exceptions import ImproperlyConfigured
 
+from django_logging.constants.config_types import (
+    LogLevels, LogDir, LogFileFormatsType,
+    LogLevel, LogDateFormat, FormatOption,
+    NotifierLogLevels
+)
 from django_logging.settings.conf import LogConfig, LogManager
 
-from typing import List, Optional, Union, Dict
+from typing import List
 from django_logging.constants.ansi_colors import AnsiColors
-from django_logging.utils.get_config import is_auto_initialization_enabled
+from django_logging.utils.get_conf import is_auto_initialization_enabled, is_initialization_message_enabled
 
 
-def set_logging(
-    log_levels: List[str],
-    log_dir: str,
-    log_file_formats: Dict[str, Union[int, str]],
-    console_level: str,
-    console_format: Optional[Union[int, str]],
+def set_config(
+    log_levels: LogLevels,
+    log_dir: LogDir,
+    log_file_formats: LogFileFormatsType,
+    console_level: LogLevel,
+    console_format: FormatOption,
     colorize_console: bool,
-    log_date_format: str,
+    log_date_format: LogDateFormat,
     log_email_notifier_enable: bool,
-    log_email_notifier_log_levels: List[str],
-    log_email_notifier_log_format: Union[int, str],
+    log_email_notifier_log_levels: NotifierLogLevels,
+    log_email_notifier_log_format: FormatOption,
 ) -> None:
     """
     Sets up the logging configuration.
@@ -63,8 +68,6 @@ def set_logging(
         return
 
     if os.environ.get("RUN_MAIN") == "true":
-        from django_logging.utils.get_config import is_initialization_message_enabled
-
         if is_initialization_message_enabled():
             from logging import getLogger
 

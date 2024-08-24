@@ -4,16 +4,16 @@ from typing import Dict
 from django.conf import settings
 
 from django_logging.settings.conf import LogConfig, LogManager
-from django_logging.utils.get_config import get_conf, is_auto_initialization_enabled
+from django_logging.utils.get_conf import get_config, is_auto_initialization_enabled
 
 
 @contextmanager
-def config_context() -> LogManager:
+def config_setup() -> LogManager:
     """
     Context manager to temporarily apply a custom logging configuration.
 
     Raises:
-        ValueError: If 'django_logging' is in INSTALLED_APPS.
+        ValueError: If 'AUTO_INITIALIZATION_ENABLE' in DJNAGO_LOGGING is set to True.
 
     Yields:
         LogManager: The log manager instance with the custom configuration.
@@ -29,7 +29,7 @@ def config_context() -> LogManager:
     original_handlers = logger.handlers.copy()
 
     try:
-        conf = get_conf()
+        conf = get_config()
         log_config = LogConfig(*conf)
         log_manager = LogManager(log_config)
         log_manager.create_log_files()
