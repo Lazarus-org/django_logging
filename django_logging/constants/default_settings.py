@@ -1,4 +1,5 @@
 import os
+from typing import cast
 from dataclasses import dataclass, field
 
 from django_logging.constants.config_types import (
@@ -22,23 +23,29 @@ class DefaultLoggingSettings:
     auto_initialization_enable: bool = True
     initialization_message_enable: bool = True
     log_file_formats: LogFileFormatsType = field(
-        default_factory=lambda: {
-            "DEBUG": 1,
-            "INFO": 1,
-            "WARNING": 1,
-            "ERROR": 1,
-            "CRITICAL": 1,
-        }
+        default_factory=lambda: cast(
+            LogFileFormatsType,
+            {
+                "DEBUG": 1,
+                "INFO": 1,
+                "WARNING": 1,
+                "ERROR": 1,
+                "CRITICAL": 1,
+            },
+        )
     )
     log_console_level: LogLevel = "DEBUG"
     log_console_format: FormatOption = 1
     log_console_colorize: bool = True
     log_email_notifier: LogEmailNotifierType = field(
-        default_factory=lambda: {
-            "ENABLE": False,
-            "NOTIFY_ERROR": False,
-            "NOTIFY_CRITICAL": False,
-            "LOG_FORMAT": 1,
-            "USE_TEMPLATE": True,
-        }
+        default_factory=lambda: cast(
+            LogEmailNotifierType,
+            {
+                "ENABLE": False,
+                "NOTIFY_ERROR": False,
+                "NOTIFY_CRITICAL": False,
+                "LOG_FORMAT": 1,
+                "USE_TEMPLATE": True,
+            },
+        )
     )
