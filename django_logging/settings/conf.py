@@ -189,7 +189,7 @@ class LogManager:
         }
         if self.log_config.colorize_console:
             formatters["console"].update(
-                {"()": "django_logging.formatters.ColorizedFormatter"}
+                {"()": "django_logging.formatters.ColoredFormatter"}
             )
 
         formatters["email"] = {

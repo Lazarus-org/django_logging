@@ -1,6 +1,8 @@
-import logging
+from logging import Handler, LogRecord
+from typing import Optional
 
 from django.conf import settings
+from django.http import HttpRequest
 from django.template import engines
 from django.utils.timezone import now
 from django_logging.utils.log_email_notifier.notifier import send_email_async
@@ -8,17 +10,13 @@ from django_logging.utils.get_conf import use_email_notifier_template
 from django_logging.middleware import RequestLogMiddleware
 
 
-class EmailHandler(logging.Handler):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.include_html = use_email_notifier_template()
-
-    def emit(self, record):
+class EmailHandler(Handler):
+    def emit(self, record: LogRecord) -> None:
         try:
             request = getattr(record, "request", None)
             log_entry = self.format(record)
 
-            if self.include_html:
+            if use_email_notifier_template():
                 email_body = self.render_template(log_entry, request)
             else:
                 email_body = log_entry
@@ -31,8 +29,8 @@ class EmailHandler(logging.Handler):
 
     @staticmethod
     def render_template(
-        log_entry, request=None, template_path="email_notifier_template.html"
-    ):
+        log_entry: str, request: Optional[HttpRequest] = None, template_path: str = "email_notifier_template.html"
+    ) -> str:
         django_engine = engines["django"]
         template = django_engine.get_template(template_path)
 

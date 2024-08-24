@@ -2,6 +2,8 @@ import os
 import shutil
 import tempfile
 import logging
+from argparse import ArgumentParser
+from typing import Dict, Tuple
 
 from django.core.exceptions import ImproperlyConfigured
 from django.core.mail import EmailMessage
@@ -27,7 +29,7 @@ class Command(BaseCommand):
 
     help = "Send log folder to the specified email address"
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: ArgumentParser) -> None:
         """
         Add custom command arguments.
 
@@ -38,7 +40,7 @@ class Command(BaseCommand):
             "email", type=str, help="The email address to send the logs to"
         )
 
-    def handle(self, *args, **kwargs):
+    def handle(self, *args: Tuple, **kwargs: Dict) -> None:
         """
         The main entry point for the command.
 
@@ -95,7 +97,7 @@ class Command(BaseCommand):
                 os.remove(zip_path)
                 logger.info("Temporary zip file cleaned up successfully.")
 
-    def validate_email_settings(self):
+    def validate_email_settings(self) -> None:
         """
         Check if all required email settings are present in the settings file.
 

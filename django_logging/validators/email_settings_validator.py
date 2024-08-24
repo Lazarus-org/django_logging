@@ -7,7 +7,7 @@ from django_logging.constants.required_email_settings import (
 )
 
 
-def check_email_settings(require_admin_email=True) -> List[Error]:
+def check_email_settings(require_admin_email: bool = True) -> List[Error]:
     """
     Check if all required email settings are present in the settings file.
 

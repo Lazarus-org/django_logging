@@ -1,1 +1,1 @@
-from .colored_formatter import ColorizedFormatter
+from .colored_formatter import ColoredFormatter

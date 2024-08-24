@@ -1,5 +1,6 @@
 import logging
 import threading
+from typing import List, Optional
 from smtplib import SMTP
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -9,8 +10,13 @@ from django.conf import settings
 logger = logging.getLogger(__name__)
 
 
-def send_email_async(subject, body, recipient_list):
-    def send_email():
+def send_email_async(
+    subject: str,
+    body: str,
+    recipient_list: List[str],
+    event: Optional[threading.Event] = None,
+) -> None:
+    def send_email() -> None:
         msg = MIMEMultipart()
         msg["From"] = settings.DEFAULT_FROM_EMAIL
         msg["To"] = ", ".join(recipient_list)
@@ -30,6 +36,10 @@ def send_email_async(subject, body, recipient_list):
 
         except Exception as e:
             logger.warning(f"Email Notifier failed to send Log Record: {e}")
+
+        finally:
+            if event:
+                event.set()  # set event that waits until email send. (used for Tests)
 
     # Start a new thread to send the email asynchronously
     email_thread = threading.Thread(target=send_email)
