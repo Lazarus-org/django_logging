@@ -175,7 +175,7 @@ class SendLogsCommandTests(TestCase):
     )
     @patch("django_logging.management.commands.send_logs.shutil.make_archive")
     def test_cleanup_on_failure(
-        self, mock_make_archive, mock_validate_email_settings: Mock
+        self, mock_make_archive: Mock, mock_validate_email_settings: Mock
     ) -> None:
         """
         Test that the `send_logs` command cleans up any partially created files when an error occurs

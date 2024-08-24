@@ -1,4 +1,5 @@
 import logging
+from typing import Callable
 from unittest.mock import Mock
 
 import pytest
@@ -23,7 +24,7 @@ def request_factory() -> RequestFactory:
 
 
 @pytest.fixture
-def get_response() -> callable:
+def get_response() -> Callable:
     """
     Fixture to create a mock get_response function.
 
@@ -33,14 +34,14 @@ def get_response() -> callable:
         A function that returns an HttpResponse with a dummy response.
     """
 
-    def _get_response(request) -> HttpResponse:
+    def _get_response(request: RequestFactory) -> HttpResponse:
         return HttpResponse("Test Response")
 
     return _get_response
 
 
 @pytest.fixture
-def middleware(get_response: callable) -> RequestLogMiddleware:
+def middleware(get_response: Callable) -> RequestLogMiddleware:
     """
     Fixture to create an instance of RequestLogMiddleware.
 

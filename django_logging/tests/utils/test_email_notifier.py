@@ -1,4 +1,6 @@
 import logging
+from typing import Generator
+
 import pytest
 import threading
 from unittest.mock import patch, MagicMock
@@ -6,7 +8,7 @@ from django_logging.utils.log_email_notifier.notifier import send_email_async
 
 
 @pytest.fixture
-def mock_smtp() -> MagicMock:
+def mock_smtp() -> Generator[MagicMock, None, None]:
     """
     Fixture to mock the SMTP object used for sending emails.
 
@@ -23,7 +25,7 @@ def mock_smtp() -> MagicMock:
 
 
 @pytest.fixture
-def mock_settings() -> MagicMock:
+def mock_settings() -> Generator[MagicMock, None, None]:
     """
     Fixture to mock the Django settings used for email configuration.
 
@@ -47,7 +49,7 @@ def mock_settings() -> MagicMock:
 
 
 @pytest.fixture
-def mock_logger() -> tuple[MagicMock, MagicMock]:
+def mock_logger() -> Generator[tuple[MagicMock, MagicMock], None, None]:
     """
     Fixture to mock the logger used for logging messages.
 

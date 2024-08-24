@@ -22,7 +22,7 @@ def log_config() -> LogConfig:
     return LogConfig(
         log_levels=["INFO", "WARNING", "ERROR"],
         log_dir="/tmp/logs",
-        log_file_formats={"INFO": 1, "WARNING": None, "ERROR": "%(message)s"},
+        log_file_formats={"INFO": 1, "WARNING": None, "ERROR": "%(message)s"},  # type: ignore
         console_level="INFO",
         console_format=1,
         colorize_console=False,
@@ -34,7 +34,7 @@ def log_config() -> LogConfig:
 
 
 @pytest.fixture
-def log_manager(log_config) -> LogManager:
+def log_manager(log_config: LogConfig) -> LogManager:
     """
     Fixture to provide a LogManager instance initialized with a LogConfig.
 
@@ -65,7 +65,7 @@ def test_resolve_format() -> None:
     - String formats resolve to themselves.
     """
     resolved_format_option = LogConfig.resolve_format(1, use_colors=False)
-    resolved_none_format = LogConfig.resolve_format(None, use_colors=False)
+    resolved_none_format = LogConfig.resolve_format(None, use_colors=False)  # type: ignore
 
     assert resolved_format_option == FORMAT_OPTIONS[1]
     assert resolved_none_format

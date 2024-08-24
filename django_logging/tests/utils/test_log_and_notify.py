@@ -1,4 +1,6 @@
 import logging
+from typing import Generator
+
 import pytest
 from unittest.mock import patch, MagicMock
 from django.conf import settings
@@ -40,7 +42,7 @@ def mock_logger() -> MagicMock:
 
 
 @pytest.fixture
-def mock_settings() -> None:
+def mock_settings() -> Generator[None, None, None]:
     """
     Fixture to mock Django settings related to email notifications.
 

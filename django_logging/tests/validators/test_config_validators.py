@@ -1,4 +1,6 @@
 from unittest.mock import patch
+
+from django_logging.constants.config_types import LogLevels
 from django_logging.validators.config_validators import (
     validate_directory,
     validate_log_levels,
@@ -52,7 +54,7 @@ def test_validate_directory_invalid_path() -> None:
     """
     with patch("os.path.exists") as mock_exists:
         mock_exists.return_value = False
-        errors = validate_directory(None, "test_directory")
+        errors = validate_directory(None, "test_directory")  # type: ignore
         assert len(errors) == 1
         assert errors[0].id == "django_logging.E001_test_directory"
 
@@ -113,7 +115,7 @@ def test_validate_log_levels_success() -> None:
     -------
     - No errors are returned for valid log levels.
     """
-    valid_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+    valid_levels: LogLevels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
     errors = validate_log_levels(["DEBUG", "INFO"], "log_levels", valid_levels)
     assert not errors
 
@@ -133,8 +135,8 @@ def test_validate_log_levels_invalid_type() -> None:
     -------
     - Appropriate errors are returned for invalid log level types.
     """
-    valid_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
-    errors = validate_log_levels("DEBUG, INFO", "log_levels", valid_levels)
+    valid_levels: LogLevels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+    errors = validate_log_levels("DEBUG, INFO", "log_levels", valid_levels)  # type: ignore
     assert len(errors) == 1
     assert errors[0].id == "django_logging.E004_log_levels"
 
@@ -185,7 +187,7 @@ def test_validate_format_string_invalid() -> None:
     assert errors[0].id == "django_logging.E011_log_format"
 
     format_str = tuple()  # invalid type
-    errors = validate_format_string(format_str, "log_format")
+    errors = validate_format_string(format_str, "log_format")  # type: ignore
     assert len(errors) == 1
     assert errors[0].id == "django_logging.E008_log_format"
 
@@ -220,7 +222,7 @@ def test_validate_format_option_failure() -> None:
     Test validation of invalid format options.
 
     This test verifies that `validate_format_option` returns appropriate errors
-    when provided with invalid format options, such as integers outside of a valid
+    when provided with invalid format options, such as integers that not in a valid
     range or non-integer values.
 
     Mocks:
@@ -237,7 +239,7 @@ def test_validate_format_option_failure() -> None:
     assert errors[0].id == "django_logging.E012_log_format_option"
 
     format_option = 1.5
-    errors = validate_format_option(format_option, "log_format_option")
+    errors = validate_format_option(format_option, "log_format_option")  # type: ignore
     assert len(errors) == 1
     assert errors[0].id == "django_logging.E013_log_format_option"
 
@@ -318,7 +320,7 @@ def test_validate_date_format_invalid_format() -> None:
     - Appropriate errors are returned for invalid date format strings.
     """
     date_format = 1  # invalid type
-    errors = validate_date_format(date_format, "date_format")
+    errors = validate_date_format(date_format, "date_format")  # type: ignore
     assert len(errors) == 1
     assert errors[0].id == "django_logging.E015_date_format"
 
@@ -368,11 +370,11 @@ def test_validate_email_notifier_invalid_type() -> None:
     - Appropriate errors are returned for invalid configuration types.
     """
     notifier_config = ["ENABLE", "LOG_FORMAT"]
-    errors = validate_email_notifier(notifier_config)
+    errors = validate_email_notifier(notifier_config)  # type: ignore
     assert len(errors) == 1
     assert errors[0].id == "django_logging.E017_LOG_EMAIL_NOTIFIER"
 
     notifier_config = {"ENABLE": "true", "LOG_FORMAT": "%(asctime)s - %(message)s"}
-    errors = validate_email_notifier(notifier_config)
+    errors = validate_email_notifier(notifier_config)  # type: ignore
     assert len(errors) == 1
     assert errors[0].id == "django_logging.E018_LOG_EMAIL_NOTIFIER['ENABLE']"

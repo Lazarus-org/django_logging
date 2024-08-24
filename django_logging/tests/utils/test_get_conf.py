@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Generator
 
 import pytest
 from unittest.mock import patch
@@ -12,7 +12,7 @@ from django_logging.utils.get_conf import (
 
 
 @pytest.fixture
-def mock_settings() -> Dict:
+def mock_settings() -> Generator[Dict, None, None]:
     """
     Fixture to mock Django settings.
 

@@ -1,4 +1,5 @@
 import logging
+from typing import Generator
 from unittest import mock
 import pytest
 
@@ -9,7 +10,7 @@ from django_logging.utils.context_manager import (
 
 
 @pytest.fixture
-def mock_logger() -> logging.Logger:
+def mock_logger() -> Generator[logging.Logger, None, None]:
     """
     Fixture to create a mock logger for testing.
 
