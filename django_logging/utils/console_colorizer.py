@@ -1,7 +1,8 @@
 from django_logging.constants.ansi_colors import LOG_LEVEL_COLORS, AnsiColors
+from django_logging.constants.config_types import LogLevel
 
 
-def colorize_log_format(log_format, levelname):
+def colorize_log_format(log_format: str, levelname: str) -> str:
     color_mapping = {
         "%(asctime)s": f"{AnsiColors.CYAN}%(asctime)s{AnsiColors.RESET}",
         "%(created)f": f"{AnsiColors.BRIGHT_BLUE}%(created)f{AnsiColors.RESET}",

@@ -1,6 +1,6 @@
 import logging
 import inspect
-from typing import Optional, Dict
+from typing import Optional, Dict, Any
 
 from django.conf import settings
 
@@ -12,7 +12,7 @@ from django_logging.settings.conf import LogConfig
 
 
 def log_and_notify_admin(
-    logger, level: int, message: str, extra: Optional[Dict] = None
+    logger: logging.Logger, level: int, message: str, extra: Optional[Dict[str, Any]] = None
 ) -> None:
     # Get the caller's frame to capture the correct module, file, and line number
     frame = inspect.currentframe().f_back
@@ -39,7 +39,7 @@ def log_and_notify_admin(
             fn=frame.f_code.co_filename,
             lno=frame.f_lineno,
             msg=message,
-            args=None,
+            args=(),
             exc_info=None,
             func=frame.f_code.co_name,
             extra=extra,

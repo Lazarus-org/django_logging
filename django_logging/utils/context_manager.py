@@ -1,6 +1,6 @@
 from contextlib import contextmanager
-from logging import getLogger, Logger
-from typing import Dict
+from logging import getLogger, Logger, PlaceHolder
+from typing import Dict, Iterator, Union
 from django.conf import settings
 
 from django_logging.settings.conf import LogConfig, LogManager
@@ -8,7 +8,7 @@ from django_logging.utils.get_conf import get_config, is_auto_initialization_ena
 
 
 @contextmanager
-def config_setup() -> LogManager:
+def config_setup() -> Iterator[LogManager]:
     """
     Context manager to temporarily apply a custom logging configuration.
 
@@ -44,7 +44,7 @@ def config_setup() -> LogManager:
 
 def _restore_logging_config(
     logger: Logger,
-    original_config: Dict[str, Logger],
+    original_config: Dict[str, Union[Logger, PlaceHolder]],
     original_level: int,
     original_handlers: list,
 ) -> None:
@@ -53,7 +53,7 @@ def _restore_logging_config(
 
     Args:
         logger (Logger): The root logger instance.
-        original_config (Dict[str, Logger]): The original logger dictionary.
+        original_config (Dict[str, Logger | PlaceHolder]): The original logger dictionary.
         original_level (int): The original root logger level.
         original_handlers (list): The original root logger handlers.
     """
