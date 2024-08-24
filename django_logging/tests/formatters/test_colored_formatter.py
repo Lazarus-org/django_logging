@@ -1,7 +1,7 @@
 import logging
 import pytest
 from unittest.mock import patch, MagicMock
-from django_logging.formatters import ColorizedFormatter
+from django_logging.formatters import ColoredFormatter
 
 
 @pytest.fixture
@@ -26,16 +26,16 @@ def log_record() -> logging.LogRecord:
 
 
 @pytest.fixture
-def formatter() -> ColorizedFormatter:
+def formatter() -> ColoredFormatter:
     """
-    Fixture to create a `ColorizedFormatter` instance with a specific format.
+    Fixture to create a `ColoredFormatter` instance with a specific format.
 
     Returns:
     -------
-    ColorizedFormatter
-        An instance of `ColorizedFormatter` with a predefined format.
+    ColoredFormatter
+        An instance of `ColoredFormatter` with a predefined format.
     """
-    return ColorizedFormatter(fmt="%(levelname)s: %(message)s")
+    return ColoredFormatter(fmt="%(levelname)s: %(message)s")
 
 
 @patch("django_logging.formatters.colored_formatter.colorize_log_format", autospec=True)
@@ -44,10 +44,10 @@ def formatter() -> ColorizedFormatter:
     side_effect=lambda fmt: fmt,
 )
 def test_format_applies_colorization(
-    mock_remove_ansi: MagicMock, mock_colorize: MagicMock, formatter: ColorizedFormatter, log_record: logging.LogRecord
+    mock_remove_ansi: MagicMock, mock_colorize: MagicMock, formatter: ColoredFormatter, log_record: logging.LogRecord
 ) -> None:
     """
-    Test that the `format` method of `ColorizedFormatter` applies colorization.
+    Test that the `format` method of `ColoredFormatter` applies colorization.
 
     This test verifies that the `format` method calls the `colorize_log_format`
     function to apply colorization based on the log level.
@@ -58,7 +58,7 @@ def test_format_applies_colorization(
         Mock for `remove_ansi_escape_sequences`.
     mock_colorize : MagicMock
         Mock for `colorize_log_format`.
-    formatter : ColorizedFormatter
+    formatter : ColoredFormatter
         The formatter instance being tested.
     log_record : logging.LogRecord
         The dummy log record created by the fixture.
@@ -83,7 +83,7 @@ def test_format_applies_colorization(
     side_effect=lambda fmt: fmt,
 )
 def test_format_resets_to_original_format(
-        mock_remove_ansi: MagicMock, formatter: ColorizedFormatter, log_record: logging.LogRecord) -> None:
+        mock_remove_ansi: MagicMock, formatter: ColoredFormatter, log_record: logging.LogRecord) -> None:
     """
     Test that the `format` method resets the format string to its original state after formatting.
 
@@ -94,7 +94,7 @@ def test_format_resets_to_original_format(
     ----------
     mock_remove_ansi : MagicMock
         Mock for `remove_ansi_escape_sequences`.
-    formatter : ColorizedFormatter
+    formatter : ColoredFormatter
         The formatter instance being tested.
     log_record : logging.LogRecord
         The dummy log record created by the fixture.
@@ -114,7 +114,7 @@ def test_format_resets_to_original_format(
     "django_logging.settings.conf.LogConfig.remove_ansi_escape_sequences",
     side_effect=lambda fmt: fmt,
 )
-def test_format_returns_formatted_output(formatter: ColorizedFormatter, log_record: logging.LogRecord) -> None:
+def test_format_returns_formatted_output(formatter: ColoredFormatter, log_record: logging.LogRecord) -> None:
     """
     Test that the `format` method returns the correctly formatted log output.
 
@@ -123,7 +123,7 @@ def test_format_returns_formatted_output(formatter: ColorizedFormatter, log_reco
 
     Parameters:
     ----------
-    formatter : ColorizedFormatter
+    formatter : ColoredFormatter
         The formatter instance being tested.
     log_record : logging.LogRecord
         The dummy log record created by the fixture.

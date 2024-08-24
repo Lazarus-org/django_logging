@@ -3,7 +3,7 @@ from django_logging.settings.conf import LogConfig
 from django_logging.utils.console_colorizer import colorize_log_format
 
 
-class ColorizedFormatter(logging.Formatter):
+class ColoredFormatter(logging.Formatter):
     def format(self, record):
         original_format = self._style._fmt
 
