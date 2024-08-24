@@ -160,7 +160,7 @@ def validate_format_option(
 
 
 def validate_boolean_setting(value: bool, config_name: str) -> List[Error]:
-    errors = []
+    errors: List[Error] = []
     if not isinstance(value, bool):
         errors.append(
             Error(
@@ -214,7 +214,7 @@ def validate_email_notifier(notifier_config: LogEmailNotifierType) -> List[Error
         bool_attrs = ["ENABLE", "NOTIFY_ERROR", "NOTIFY_CRITICAL", "USE_TEMPLATE"]
 
         if expected_type is bool and key in bool_attrs:
-            errors.extend(validate_boolean_setting(value, config_name))
+            errors.extend(validate_boolean_setting(bool(value), config_name))
         elif isinstance(value, (int, str)) and key == "LOG_FORMAT":
             errors.extend(validate_format_option(value, config_name))
 
