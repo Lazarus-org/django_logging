@@ -2,13 +2,17 @@ import os
 import shutil
 import tempfile
 import logging
+from argparse import ArgumentParser
+from typing import Dict, Tuple
 
 from django.core.exceptions import ImproperlyConfigured
 from django.core.mail import EmailMessage
 from django.core.management.base import BaseCommand
 from django.conf import settings
 
+from django_logging.constants.config_types import LogDir
 from django_logging.validators.email_settings_validator import check_email_settings
+from django_logging.constants import DefaultLoggingSettings
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +29,7 @@ class Command(BaseCommand):
 
     help = "Send log folder to the specified email address"
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: ArgumentParser) -> None:
         """
         Add custom command arguments.
 
@@ -36,7 +40,7 @@ class Command(BaseCommand):
             "email", type=str, help="The email address to send the logs to"
         )
 
-    def handle(self, *args, **kwargs):
+    def handle(self, *args: Tuple, **kwargs: Dict) -> None:
         """
         The main entry point for the command.
 
@@ -46,8 +50,10 @@ class Command(BaseCommand):
         """
         email = kwargs["email"]
 
-        log_dir = settings.DJANGO_LOGGING.get(
-            "LOG_DIR", os.path.join(os.getcwd(), "logs")
+        default_settings = DefaultLoggingSettings()
+
+        log_dir: LogDir = settings.DJANGO_LOGGING.get(
+            "LOG_DIR", os.path.join(os.getcwd(), default_settings.log_dir)
         )
 
         if not os.path.exists(log_dir):
@@ -86,17 +92,18 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR(f"Failed to send logs: {e}"))
             logger.error(f"Failed to send logs: {e}")
         finally:
-            # Clean up the temporary file
-            os.remove(zip_path)
-            logger.info("Temporary zip file cleaned up successfully.")
+            # Clean up the temporary file if exists
+            if os.path.exists(zip_path):
+                os.remove(zip_path)
+                logger.info("Temporary zip file cleaned up successfully.")
 
-    def validate_email_settings(self):
+    def validate_email_settings(self) -> None:
         """
         Check if all required email settings are present in the settings file.
 
         Raises ImproperlyConfigured if any of the required email settings are missing.
         """
-        errors = check_email_settings()
+        errors = check_email_settings(require_admin_email=False)
         if errors:
             logger.error(errors)
             raise ImproperlyConfigured(errors)

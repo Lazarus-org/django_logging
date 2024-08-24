@@ -1,10 +1,10 @@
-import logging
+from logging import LogRecord, Formatter
 from django_logging.settings.conf import LogConfig
-from django_logging.utils.colorizer import colorize_log_format
+from django_logging.utils.console_colorizer import colorize_log_format
 
 
-class ColorizedFormatter(logging.Formatter):
-    def format(self, record):
+class ColoredFormatter(Formatter):
+    def format(self, record: LogRecord) -> str:
         original_format = self._style._fmt
 
         # checks that the format does not have any color it's self
