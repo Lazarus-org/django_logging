@@ -1,4 +1,4 @@
-from fixtures import (
+from tests.fixtures import (
     debug_log_record,
     error_log_record,
     colored_formatter,
