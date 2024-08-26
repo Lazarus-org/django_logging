@@ -1,32 +1,44 @@
 import os
 from django.conf import settings
 
-from typing import List
-from django_logging.constants import DefaultLoggingSettings
+from typing import Dict
+from django_logging.constants import DefaultLoggingSettings, DefaultConsoleSettings
 
 
-def get_config() -> List:
+# pylint: disable=too-many-locals
+def get_config(extra_info: bool = False) -> Dict:
     """
     Retrieve logging configuration from Django settings.
 
     Returns:
-        A tuple containing all necessary configurations for logging.
+        A Dict containing all necessary configurations for logging.
     """
     log_settings = getattr(settings, "DJANGO_LOGGING", {})
-    defaults = DefaultLoggingSettings()
+    logging_defaults = DefaultLoggingSettings()
+    console_defaults = DefaultConsoleSettings()
 
-    log_levels = log_settings.get("LOG_FILE_LEVELS", defaults.log_levels)
-    log_dir = log_settings.get("LOG_DIR", os.path.join(os.getcwd(), defaults.log_dir))
-    log_file_formats = log_settings.get("LOG_FILE_FORMATS", defaults.log_file_formats)
-    console_level = log_settings.get("LOG_CONSOLE_LEVEL", defaults.log_console_level)
-    console_format = log_settings.get("LOG_CONSOLE_FORMAT", defaults.log_console_format)
-    colorize_console = log_settings.get(
-        "LOG_CONSOLE_COLORIZE", defaults.log_console_colorize
+    log_levels = log_settings.get("LOG_FILE_LEVELS", logging_defaults.log_levels)
+    log_dir = log_settings.get(
+        "LOG_DIR", os.path.join(os.getcwd(), logging_defaults.log_dir)
     )
-    log_date_format = log_settings.get("LOG_DATE_FORMAT", defaults.log_date_format)
+    log_file_formats = log_settings.get(
+        "LOG_FILE_FORMATS", logging_defaults.log_file_formats
+    )
+    console_level = log_settings.get(
+        "LOG_CONSOLE_LEVEL", console_defaults.log_console_level
+    )
+    console_format = log_settings.get(
+        "LOG_CONSOLE_FORMAT", console_defaults.log_console_format
+    )
+    colorize_console = log_settings.get(
+        "LOG_CONSOLE_COLORIZE", console_defaults.log_console_colorize
+    )
+    log_date_format = log_settings.get(
+        "LOG_DATE_FORMAT", logging_defaults.log_date_format
+    )
 
     log_email_notifier = log_settings.get(
-        "LOG_EMAIL_NOTIFIER", defaults.log_email_notifier
+        "LOG_EMAIL_NOTIFIER", logging_defaults.log_email_notifier
     )
     log_email_notifier_enable = log_email_notifier.get("ENABLE")
     log_email_notifier_log_levels = [
@@ -35,19 +47,22 @@ def get_config() -> List:
     ]
     log_email_notifier_log_format = log_email_notifier.get("LOG_FORMAT")
 
-    configs = [
-        log_levels,
-        log_dir,
-        log_file_formats,
-        console_level,
-        console_format,
-        colorize_console,
-        log_date_format,
-        log_email_notifier_enable,
-        log_email_notifier_log_levels,
-        log_email_notifier_log_format,
-    ]
-    return configs
+    config = {
+        "log_levels": log_levels,
+        "log_dir": log_dir,
+        "log_file_formats": log_file_formats,
+        "console_level": console_level,
+        "console_format": console_format,
+        "colorize_console": colorize_console,
+        "log_date_format": log_date_format,
+        "log_email_notifier_enable": log_email_notifier_enable,
+        "log_email_notifier_log_levels": log_email_notifier_log_levels,
+        "log_email_notifier_log_format": log_email_notifier_log_format,
+    }
+    if extra_info:
+        config.update({"log_email_notifier": log_email_notifier})
+
+    return config
 
 
 def use_email_notifier_template() -> bool:
