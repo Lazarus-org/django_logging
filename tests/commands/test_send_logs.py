@@ -4,9 +4,13 @@ import shutil
 
 from unittest.mock import patch, ANY, Mock
 
+import pytest
 from django.core.exceptions import ImproperlyConfigured
 from django.core.management import call_command
 from django.test import TestCase
+
+
+pytestmark = [pytest.mark.commands, pytest.mark.commands_send_logs]
 
 
 class SendLogsCommandTests(TestCase):

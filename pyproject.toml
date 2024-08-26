@@ -2,13 +2,116 @@
 name = "django-logging"
 version = "0.1.0"
 description = "A package for logging in django applications"
-authors = ["ARYAN-NIKNEZHAD <aryan513966@gmail.com>", "MEHRSHAD-MIRSHEKARY"]
+authors = ["ARYAN-NIKNEZHAD <aryan513966@gmail.com>", "MEHRSHAD-MIRSHEKARY <mehrshad_mirshekary@email.com>"]
 license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.8"
 django = ">=3.2,<6.0"
+
+
+[tool.poetry.dev-dependencies]
+pylint = "^3.2.6"
+pylint-django = "^2.5.5"
+mypy = "^1.11.1"
+
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "kernel.settings"
+python_files = ["tests.py", "test_*.py"]
+addopts = "--cov=django_logging --cov-report=html"
+markers = [
+    "commands: Tests for Django management commands in the logging package.",
+    "commands_send_logs: Tests focused on the `send_logs` management command.",
+    "filters: Tests that verify log filtering mechanisms.",
+    "filters_level_filter: Tests for filtering logs based on their severity level.",
+    "formatters: Tests for log formatters that structure log messages.",
+    "colored_formatter: Tests for a formatter that adds color coding to log messages.",
+    "handlers: Tests for components that dispatch log messages to their destinations.",
+    "email_handler: Tests for the handler responsible for sending logs via email.",
+    "middleware: Tests related to middleware components in logging.",
+    "request_middleware: Tests for middleware handling incoming HTTP requests in logging.",
+    "settings: Tests that ensure logging settings are correctly applied.",
+    "settings_checks: Tests for validating the correctness of logging settings.",
+    "settings_conf: Tests for verifying the configuration of logging settings.",
+    "utils: Tests for utility functions supporting the logging package.",
+    "utils_context_manager: Tests for context managers handling resources in logging.",
+    "utils_email_notifier: Tests for utilities that send notifications via email.",
+    "utils_get_conf: Tests for utility functions that retrieve configuration settings.",
+    "utils_log_and_notify: Tests for logging utilities that trigger notifications.",
+    "utils_set_conf: Tests for utility functions that set configuration settings.",
+    "validators: Tests for validating configurations and inputs in the logging package.",
+    "config_validator: Tests focused on validators that check configuration settings.",
+    "email_settings_validator: Tests for validators that ensure email settings are valid."
+]
+
+
+
+[tool.pylint]
+disable = [
+    "C0103",  # Invalid constant name
+    "C0114",  # Missing module docstring
+    "C0115",  # Missing class docstring
+    "C0116",  # Missing function or method docstring
+    "E1101",  # Instance of 'Foo' has no 'bar' member
+    "W0212",  # Access to a protected member
+    "C0301",  # Line too long
+    "C0411",  # Wrong import order
+    "W0611",  # Unused imports
+    "W0613",  # Unused arguments
+    "W0622",  # Redefining built-in names
+    "R0903",  # Too few public methods
+    "R0801",  # Duplicate code
+    "W0621",
+    "C0415",
+    "R1719",  # The if expression can be replaced with 'bool(test)'
+    "R1705",  # Unnecessary "elif" after "return"
+    "R0401",
+]
+max-line-length = 88
+ignore = [
+    "migrations/*",
+    "venv/*",
+    "build/*",
+    "dist/*",
+    ".git/*",
+    "__pycache__/*",
+    "*.egg-info/*",
+    ".mypy_cache/*",
+    ".pytest_cache/*"
+]
+django-settings-module= "kernel.settings"
+load-plugins = [
+    "pylint_django",
+    "pylint.extensions.docparams",
+]
+
+suggestion-mode = true
+const-rgx = "([A-Z_][A-Z0-9_]*)|(__.*__)"
+attr-rgx = "[a-z_][a-z0-9_]{2,30}$"
+variable-rgx = "[a-z_][a-z0-9_]{2,30}$"
+argument-rgx = "[a-z_][a-z0-9_]{2,30}$"
+method-rgx = "[a-z_][a-z0-9_]{2,30}$"
+function-rgx = "[a-z_][a-z0-9_]{2,30}$"
+class-rgx = "[A-Z_][a-zA-Z0-9]+$"
+module-rgx = "(([a-z_][a-z0-9_]*)|(__.*__))$"
+
+
+[tool.mypy]
+mypy_path = "stubs"
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
+explicit_package_bases = true
+exclude = """
+^build/|
+^tests/|
+^stubs/|
+^kernel/
+"""
+
+
 
 [build-system]
 requires = ["poetry-core"]
