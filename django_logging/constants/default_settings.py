@@ -1,15 +1,15 @@
 import os
-from typing import cast
 from dataclasses import dataclass, field
+from typing import cast
 
 from django_logging.constants.config_types import (
-    LogFileFormatsType,
-    LogDir,
-    LogLevel,
-    LogLevels,
     FormatOption,
     LogDateFormat,
+    LogDir,
     LogEmailNotifierType,
+    LogFileFormatsType,
+    LogLevel,
+    LogLevels,
 )
 
 
@@ -34,9 +34,7 @@ class DefaultLoggingSettings:
             },
         )
     )
-    log_console_level: LogLevel = "DEBUG"
-    log_console_format: FormatOption = 1
-    log_console_colorize: bool = True
+
     log_email_notifier: LogEmailNotifierType = field(
         default_factory=lambda: cast(
             LogEmailNotifierType,
@@ -49,3 +47,10 @@ class DefaultLoggingSettings:
             },
         )
     )
+
+
+@dataclass
+class DefaultConsoleSettings:
+    log_console_level: LogLevel = "DEBUG"
+    log_console_format: FormatOption = 1
+    log_console_colorize: bool = True
