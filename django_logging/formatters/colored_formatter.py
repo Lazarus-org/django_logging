@@ -1,4 +1,5 @@
-from logging import LogRecord, Formatter
+from logging import Formatter, LogRecord
+
 from django_logging.settings.conf import LogConfig
 from django_logging.utils.console_colorizer import colorize_log_format
 
