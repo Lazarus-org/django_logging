@@ -1,7 +1,6 @@
 from contextlib import contextmanager
-from logging import getLogger, Logger, PlaceHolder
+from logging import Logger, PlaceHolder, getLogger
 from typing import Dict, Iterator, Union
-from django.conf import settings
 
 from django_logging.settings.conf import LogConfig, LogManager
 from django_logging.utils.get_conf import get_config, is_auto_initialization_enabled
@@ -30,7 +29,7 @@ def config_setup() -> Iterator[LogManager]:
 
     try:
         conf = get_config()
-        log_config = LogConfig(*conf)
+        log_config = LogConfig(**conf)
         log_manager = LogManager(log_config)
         log_manager.create_log_files()
         log_manager.set_conf()

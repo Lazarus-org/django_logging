@@ -1,8 +1,9 @@
 import os
+from typing import Dict
+
 from django.conf import settings
 
-from typing import Dict
-from django_logging.constants import DefaultLoggingSettings, DefaultConsoleSettings
+from django_logging.constants import DefaultConsoleSettings, DefaultLoggingSettings
 
 
 # pylint: disable=too-many-locals
