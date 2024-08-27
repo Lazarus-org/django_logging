@@ -2,8 +2,9 @@ from typing import Generator, List
 from unittest.mock import patch
 
 import pytest
-from django.core.checks import Error
 from django.conf import settings
+from django.core.checks import Error
+
 from django_logging.settings.checks import check_logging_settings
 
 pytestmark = [pytest.mark.settings, pytest.mark.settings_checks]

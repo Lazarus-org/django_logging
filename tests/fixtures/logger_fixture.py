@@ -1,6 +1,6 @@
 from logging import Logger, getLogger
 from typing import Generator
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
 
 import pytest
 

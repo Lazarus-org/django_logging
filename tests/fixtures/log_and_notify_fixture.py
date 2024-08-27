@@ -2,7 +2,6 @@ from typing import Generator
 from unittest.mock import MagicMock
 
 import pytest
-
 from django.conf import settings
 
 

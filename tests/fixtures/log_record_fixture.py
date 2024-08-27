@@ -1,4 +1,5 @@
-from logging import LogRecord, DEBUG, ERROR
+from logging import DEBUG, ERROR, LogRecord
+
 import pytest
 
 

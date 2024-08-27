@@ -1,10 +1,9 @@
-from unittest.mock import patch, MagicMock
 import os
+from unittest.mock import MagicMock, patch
 
 import pytest
 
 from django_logging.constants.ansi_colors import AnsiColors
-
 from django_logging.utils.set_conf import set_config
 
 pytestmark = [pytest.mark.utils, pytest.mark.utils_set_conf]
@@ -207,10 +206,14 @@ class TestSetConf:
             )
             mock_warning.assert_called_once_with(
                 "\n"
-                f"========================{AnsiColors.RED_BACKGROUND}DJANGO LOGGING{AnsiColors.RESET}"
-                f"========================\n"
-                f"{AnsiColors.RED}[CONFIGURATION ERROR]{AnsiColors.RESET}"
-                f" A configuration issue has been detected.\n"
+                "========================%sDJANGO LOGGING%s"
+                "========================\n"
+                "%s[CONFIGURATION ERROR]%s"
+                " A configuration issue has been detected.\n"
                 "System checks will be run to provide more detailed information.\n"
-                "==============================================================\n"
+                "==============================================================\n",
+                AnsiColors.RED_BACKGROUND,
+                AnsiColors.RESET,
+                AnsiColors.RED,
+                AnsiColors.RESET,
             )

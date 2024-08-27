@@ -1,7 +1,7 @@
 import logging
-import pytest
-from unittest.mock import patch, MagicMock, ANY
+from unittest.mock import ANY, MagicMock, patch
 
+import pytest
 from django.conf import settings
 
 from django_logging.handlers.email_handler import EmailHandler

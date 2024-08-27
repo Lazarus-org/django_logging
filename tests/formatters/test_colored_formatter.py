@@ -1,15 +1,11 @@
 import logging
-
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
 from django_logging.formatters import ColoredFormatter
 
-pytestmark = [
-    pytest.mark.formatters,
-    pytest.mark.colored_formatter
-              ]
+pytestmark = [pytest.mark.formatters, pytest.mark.colored_formatter]
 
 
 class TestColoredFormatter:

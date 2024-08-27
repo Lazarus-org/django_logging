@@ -1,8 +1,7 @@
-from typing import Generator, Dict
+from typing import Dict, Generator
 from unittest.mock import patch
 
 import pytest
-
 from django.conf import settings
 
 

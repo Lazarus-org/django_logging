@@ -1,13 +1,14 @@
 from typing import Dict
+from unittest.mock import patch
 
 import pytest
-from unittest.mock import patch
 from django.conf import settings
+
 from django_logging.utils.get_conf import (
     get_config,
-    use_email_notifier_template,
     is_auto_initialization_enabled,
     is_initialization_message_enabled,
+    use_email_notifier_template,
 )
 
 pytestmark = [pytest.mark.utils, pytest.mark.utils_get_conf]
@@ -31,22 +32,48 @@ class TestGetConf:
         - The returned configuration matches the expected values for logging levels, directory,
           file formats, console settings, email notifier settings, etc.
         """
-        expected = [
-            ["DEBUG", "INFO"],  # log_levels
-            "/custom/log/dir",  # log_dir
-            {
+        expected = {
+            "log_levels": ["DEBUG", "INFO"],
+            "log_dir": "/custom/log/dir",
+            "log_file_formats": {
                 "DEBUG": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-            },  # log_file_formats
-            "WARNING",  # console_level
-            "%(levelname)s - %(message)s",  # console_format
-            True,  # colorize_console
-            "%Y-%m-%d",  # log_date_format
-            True,  # log_email_notifier_enable
-            ["ERROR", None],  # log_email_notifier_log_levels
-            "custom_format",  # log_email_notifier_log_format
-        ]
+            },
+            "console_level": "WARNING",
+            "console_format": "%(levelname)s - %(message)s",
+            "colorize_console": True,
+            "log_date_format": "%Y-%m-%d",
+            "log_email_notifier_enable": True,
+            "log_email_notifier_log_levels": ["ERROR", None],
+            "log_email_notifier_log_format": "custom_format",
+        }
+        print(expected)
         result = get_config()
         assert result == expected
+
+        result = get_config(extra_info=True)
+
+        expected_extra = {
+            "log_levels": ["DEBUG", "INFO"],
+            "log_dir": "/custom/log/dir",
+            "log_file_formats": {
+                "DEBUG": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+            },
+            "console_level": "WARNING",
+            "console_format": "%(levelname)s - %(message)s",
+            "colorize_console": True,
+            "log_date_format": "%Y-%m-%d",
+            "log_email_notifier_enable": True,
+            "log_email_notifier_log_levels": ["ERROR", None],
+            "log_email_notifier_log_format": "custom_format",
+            "log_email_notifier": {
+                "ENABLE": True,
+                "NOTIFY_ERROR": True,
+                "NOTIFY_CRITICAL": False,
+                "LOG_FORMAT": "custom_format",
+            },
+        }
+
+        assert result == expected_extra
 
     def test_use_email_notifier_template(self, mock_settings: Dict) -> None:
         """
