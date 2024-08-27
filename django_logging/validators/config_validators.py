@@ -1,16 +1,15 @@
 import os
 import re
 from datetime import datetime
-
 from typing import List
 
 from django.core.checks import Error
 
-from django_logging.constants import LOG_FORMAT_SPECIFIERS, FORMAT_OPTIONS
+from django_logging.constants import FORMAT_OPTIONS, LOG_FORMAT_SPECIFIERS
 from django_logging.constants.config_types import (
     FormatOption,
-    LogLevels,
     LogEmailNotifierType,
+    LogLevels,
 )
 
 
@@ -27,7 +26,7 @@ def validate_directory(path: str, config_name: str) -> List[Error]:
     elif not os.path.exists(path):
         try:
             os.makedirs(os.path.dirname(path), exist_ok=True)
-        except Exception as e:
+        except Exception:  # pylint: disable=broad-exception-caught
             errors.append(
                 Error(
                     f"The path specified in {config_name} is not a valid path.",
@@ -222,7 +221,7 @@ def validate_email_notifier(notifier_config: LogEmailNotifierType) -> List[Error
             errors.append(
                 Error(
                     f"Unknown type '{expected_type}' for {config_name}.",
-                    hint=f"Check the expected types in LogEmailNotifierType.",
+                    hint="Check the expected types in LogEmailNotifierType.",
                     id=f"django_logging.E018_{config_name}",
                 )
             )

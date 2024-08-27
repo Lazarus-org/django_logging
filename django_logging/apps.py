@@ -9,9 +9,10 @@ class DjangoLoggingConfig(AppConfig):
 
     def ready(self) -> None:
         from django_logging.settings import checks
-        from django_logging.utils.set_conf import set_config
         from django_logging.utils.get_conf import get_config
+        from django_logging.utils.set_conf import set_config
+
         conf = get_config()
 
         # Set the logging configuration
-        set_config(*conf)
+        set_config(**conf)
