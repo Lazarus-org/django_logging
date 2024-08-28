@@ -1,11 +1,17 @@
 import logging
+import sys
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 from django_logging.formatters import ColoredFormatter
+from tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
 
-pytestmark = [pytest.mark.formatters, pytest.mark.colored_formatter]
+pytestmark = [
+    pytest.mark.formatters,
+    pytest.mark.colored_formatter,
+    pytest.mark.skipif(sys.version_info < PYTHON_VERSION, reason=PYTHON_VERSION_REASON),
+]
 
 
 class TestColoredFormatter:

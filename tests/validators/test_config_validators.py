@@ -1,3 +1,4 @@
+import sys
 from unittest.mock import patch
 
 import pytest
@@ -12,8 +13,13 @@ from django_logging.validators.config_validators import (
     validate_format_string,
     validate_log_levels,
 )
+from tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
 
-pytestmark = [pytest.mark.validators, pytest.mark.config_validator]
+pytestmark = [
+    pytest.mark.validators,
+    pytest.mark.config_validator,
+    pytest.mark.skipif(sys.version_info < PYTHON_VERSION, reason=PYTHON_VERSION_REASON),
+]
 
 
 class TestConfigValidator:

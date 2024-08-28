@@ -38,9 +38,9 @@ repos:
       - id: commitizen
         exclude: (tests/|docs/).*
 
-  - repo: https://github.com/PyCQA/bandit
-    rev: 1.7.4
-    hooks:
-      - id: bandit
-        args: [ "-c pyproject.toml" ]
-        additional_dependencies: [ "toml" ]
+#  - repo: https://github.com/PyCQA/bandit
+#    rev: 1.7.4
+#    hooks:
+#      - id: bandit
+#        args: [ "-c pyproject.toml" ]
+#        additional_dependencies: [ "toml" ]

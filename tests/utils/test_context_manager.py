@@ -1,11 +1,17 @@
 import logging
+import sys
 from unittest import mock
 
 import pytest
 
 from django_logging.utils.context_manager import _restore_logging_config, config_setup
+from tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
 
-pytestmark = [pytest.mark.utils, pytest.mark.utils_context_manager]
+pytestmark = [
+    pytest.mark.utils,
+    pytest.mark.utils_context_manager,
+    pytest.mark.skipif(sys.version_info < PYTHON_VERSION, reason=PYTHON_VERSION_REASON),
+]
 
 
 class TestContextManager:

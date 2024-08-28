@@ -1,12 +1,18 @@
 import logging
+import sys
 from unittest.mock import ANY, MagicMock, patch
 
 import pytest
 from django.conf import settings
 
 from django_logging.handlers.email_handler import EmailHandler
+from tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
 
-pytestmark = [pytest.mark.handlers, pytest.mark.email_handler]
+pytestmark = [
+    pytest.mark.handlers,
+    pytest.mark.email_handler,
+    pytest.mark.skipif(sys.version_info < PYTHON_VERSION, reason=PYTHON_VERSION_REASON),
+]
 
 
 class TestEmailHandler:

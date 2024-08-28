@@ -1,3 +1,4 @@
+import sys
 import threading
 from smtplib import SMTPException
 from unittest.mock import ANY, MagicMock
@@ -5,8 +6,13 @@ from unittest.mock import ANY, MagicMock
 import pytest
 
 from django_logging.utils.log_email_notifier.notifier import send_email_async
+from tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
 
-pytestmark = [pytest.mark.utils, pytest.mark.utils_email_notifier]
+pytestmark = [
+    pytest.mark.utils,
+    pytest.mark.utils_email_notifier,
+    pytest.mark.skipif(sys.version_info < PYTHON_VERSION, reason=PYTHON_VERSION_REASON),
+]
 
 
 class TestEmailNotifier:

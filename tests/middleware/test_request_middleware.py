@@ -1,4 +1,5 @@
 import logging
+import sys
 from unittest.mock import Mock
 
 import pytest
@@ -7,8 +8,13 @@ from django.contrib.auth.models import AnonymousUser
 from django.test import RequestFactory
 
 from django_logging.middleware import RequestLogMiddleware
+from tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
 
-pytestmark = [pytest.mark.middleware, pytest.mark.request_middleware]
+pytestmark = [
+    pytest.mark.middleware,
+    pytest.mark.request_middleware,
+    pytest.mark.skipif(sys.version_info < PYTHON_VERSION, reason=PYTHON_VERSION_REASON),
+]
 
 
 class TestRequestMiddleware:

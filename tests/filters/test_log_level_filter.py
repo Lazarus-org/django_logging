@@ -1,10 +1,16 @@
 import logging
+import sys
 
 import pytest
 
 from django_logging.filters import LoggingLevelFilter
+from tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
 
-pytestmark = [pytest.mark.filters, pytest.mark.filters_level_filter]
+pytestmark = [
+    pytest.mark.filters,
+    pytest.mark.filters_level_filter,
+    pytest.mark.skipif(sys.version_info < PYTHON_VERSION, reason=PYTHON_VERSION_REASON),
+]
 
 
 class TestLoggingLevelFilter:

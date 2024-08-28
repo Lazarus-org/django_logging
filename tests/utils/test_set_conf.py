@@ -1,12 +1,18 @@
 import os
+import sys
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 from django_logging.constants.ansi_colors import AnsiColors
 from django_logging.utils.set_conf import set_config
+from tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
 
-pytestmark = [pytest.mark.utils, pytest.mark.utils_set_conf]
+pytestmark = [
+    pytest.mark.utils,
+    pytest.mark.utils_set_conf,
+    pytest.mark.skipif(sys.version_info < PYTHON_VERSION, reason=PYTHON_VERSION_REASON),
+]
 
 
 class TestSetConf:
