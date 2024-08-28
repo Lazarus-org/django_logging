@@ -1,4 +1,5 @@
 import logging
+import sys
 from typing import Dict
 from unittest.mock import MagicMock, patch
 
@@ -6,8 +7,13 @@ import pytest
 from django.conf import settings
 
 from django_logging.utils.log_email_notifier.log_and_notify import log_and_notify_admin
+from tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
 
-pytestmark = [pytest.mark.utils, pytest.mark.utils_log_and_notify]
+pytestmark = [
+    pytest.mark.utils,
+    pytest.mark.utils_log_and_notify,
+    pytest.mark.skipif(sys.version_info < PYTHON_VERSION, reason=PYTHON_VERSION_REASON),
+]
 
 
 class TestLogAndNotify:

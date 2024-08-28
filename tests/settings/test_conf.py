@@ -1,4 +1,5 @@
 import os
+import sys
 from shutil import rmtree
 from unittest import mock
 
@@ -6,8 +7,13 @@ import pytest
 
 from django_logging.constants import FORMAT_OPTIONS
 from django_logging.settings.conf import LogConfig, LogManager
+from tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
 
-pytestmark = [pytest.mark.settings, pytest.mark.settings_conf]
+pytestmark = [
+    pytest.mark.settings,
+    pytest.mark.settings_conf,
+    pytest.mark.skipif(sys.version_info < PYTHON_VERSION, reason=PYTHON_VERSION_REASON),
+]
 
 
 class TestConf:
