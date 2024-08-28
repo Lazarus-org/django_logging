@@ -5,9 +5,10 @@ from django.conf import settings
 from django.http import HttpRequest
 from django.template import engines
 from django.utils.timezone import now
-from django_logging.utils.log_email_notifier.notifier import send_email_async
-from django_logging.utils.get_conf import use_email_notifier_template
+
 from django_logging.middleware import RequestLogMiddleware
+from django_logging.utils.get_conf import use_email_notifier_template
+from django_logging.utils.log_email_notifier.notifier import send_email_async
 
 
 class EmailHandler(Handler):
@@ -24,12 +25,14 @@ class EmailHandler(Handler):
             subject = f"New Log Record: {record.levelname}"
             send_email_async(subject, email_body, [settings.ADMIN_EMAIL])
 
-        except Exception as e:
+        except Exception:  # pylint: disable=W0718
             self.handleError(record)
 
     @staticmethod
     def render_template(
-        log_entry: str, request: Optional[HttpRequest] = None, template_path: str = "email_notifier_template.html"
+        log_entry: str,
+        request: Optional[HttpRequest] = None,
+        template_path: str = "email_notifier_template.html",
     ) -> str:
         django_engine = engines["django"]
         template = django_engine.get_template(template_path)

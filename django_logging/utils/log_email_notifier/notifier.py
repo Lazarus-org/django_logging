@@ -1,9 +1,9 @@
 import logging
 import threading
-from typing import List, Optional
-from smtplib import SMTP
-from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from smtplib import SMTP
+from typing import List, Optional
 
 from django.conf import settings
 
@@ -32,10 +32,10 @@ def send_email_async(
                 settings.DEFAULT_FROM_EMAIL, recipient_list, msg.as_string()
             )
             server.quit()
-            logger.info(f"Log Record has been sent to ADMIN EMAIL successfully.")
+            logger.info("Log Record has been sent to ADMIN EMAIL successfully.")
 
-        except Exception as e:
-            logger.warning(f"Email Notifier failed to send Log Record: {e}")
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            logger.warning("Email Notifier failed to send Log Record: %s", e)
 
         finally:
             if event:

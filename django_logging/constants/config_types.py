@@ -1,4 +1,4 @@
-from typing import TypedDict, Union, List, Literal
+from typing import List, Literal, TypedDict, Union
 
 FormatOption = Union[int, str]
 

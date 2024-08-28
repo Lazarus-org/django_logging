@@ -1,11 +1,10 @@
 import logging
+
 import pytest
+
 from django_logging.filters import LoggingLevelFilter
 
-pytestmark = [
-    pytest.mark.filters,
-    pytest.mark.filters_level_filter
-]
+pytestmark = [pytest.mark.filters, pytest.mark.filters_level_filter]
 
 
 class TestLoggingLevelFilter:

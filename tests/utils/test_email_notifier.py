@@ -1,6 +1,9 @@
-import pytest
 import threading
-from unittest.mock import MagicMock
+from smtplib import SMTPException
+from unittest.mock import ANY, MagicMock
+
+import pytest
+
 from django_logging.utils.log_email_notifier.notifier import send_email_async
 
 pytestmark = [pytest.mark.utils, pytest.mark.utils_email_notifier]
@@ -101,7 +104,7 @@ class TestEmailNotifier:
         - The success message was not logged.
         """
         mock_info, mock_warning = notifier_mock_logger
-        mock_smtp.side_effect = Exception("SMTP failure")
+        mock_smtp.side_effect = SMTPException("SMTP failure")
 
         email_sent_event = threading.Event()
 
@@ -112,6 +115,6 @@ class TestEmailNotifier:
         email_sent_event.wait()
 
         mock_warning.assert_called_once_with(
-            "Email Notifier failed to send Log Record: SMTP failure"
+            "Email Notifier failed to send Log Record: %s", ANY
         )
         mock_info.assert_not_called()

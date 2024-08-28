@@ -1,15 +1,17 @@
 import logging
+from typing import Dict
+from unittest.mock import MagicMock, patch
 
 import pytest
-from unittest.mock import patch, MagicMock
 from django.conf import settings
+
 from django_logging.utils.log_email_notifier.log_and_notify import log_and_notify_admin
 
 pytestmark = [pytest.mark.utils, pytest.mark.utils_log_and_notify]
 
 
 class TestLogAndNotify:
-    def mock_log_config(self, email_notifier_enable: bool = True) -> MagicMock:
+    def mock_log_config(self, email_notifier_enable: bool = True) -> Dict:
         """
         Helper function to create a mock LogConfig object.
 
@@ -20,13 +22,13 @@ class TestLogAndNotify:
 
         Returns:
         --------
-        MagicMock
-            A mock object with specified settings.
+        Dict
+            A dictionary with the specified settings.
         """
-        return MagicMock(
-            log_email_notifier_enable=email_notifier_enable,
-            log_email_notifier_log_format=1,
-        )
+        return {
+            "log_email_notifier_enable": email_notifier_enable,
+            "log_email_notifier_log_format": 1,
+        }
 
     def test_log_and_notify_email_notifier_disabled(
         self, magic_mock_logger: MagicMock

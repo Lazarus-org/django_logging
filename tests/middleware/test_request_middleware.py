@@ -5,8 +5,8 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.test import RequestFactory
-from django_logging.middleware import RequestLogMiddleware
 
+from django_logging.middleware import RequestLogMiddleware
 
 pytestmark = [pytest.mark.middleware, pytest.mark.request_middleware]
 
