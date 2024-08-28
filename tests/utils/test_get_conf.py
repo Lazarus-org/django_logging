@@ -1,3 +1,4 @@
+import sys
 from typing import Dict
 from unittest.mock import patch
 
@@ -10,8 +11,13 @@ from django_logging.utils.get_conf import (
     is_initialization_message_enabled,
     use_email_notifier_template,
 )
+from tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
 
-pytestmark = [pytest.mark.utils, pytest.mark.utils_get_conf]
+pytestmark = [
+    pytest.mark.utils,
+    pytest.mark.utils_get_conf,
+    pytest.mark.skipif(sys.version_info < PYTHON_VERSION, reason=PYTHON_VERSION_REASON),
+]
 
 
 class TestGetConf:

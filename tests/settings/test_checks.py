@@ -1,3 +1,4 @@
+import sys
 from typing import Generator, List
 from unittest.mock import patch
 
@@ -6,8 +7,13 @@ from django.conf import settings
 from django.core.checks import Error
 
 from django_logging.settings.checks import check_logging_settings
+from tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
 
-pytestmark = [pytest.mark.settings, pytest.mark.settings_checks]
+pytestmark = [
+    pytest.mark.settings,
+    pytest.mark.settings_checks,
+    pytest.mark.skipif(sys.version_info < PYTHON_VERSION, reason=PYTHON_VERSION_REASON),
+]
 
 
 class TestChecks:

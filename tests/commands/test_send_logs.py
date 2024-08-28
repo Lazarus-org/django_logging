@@ -1,5 +1,6 @@
 import os
 import shutil
+import sys
 import tempfile
 from unittest.mock import ANY, Mock, patch
 
@@ -8,7 +9,13 @@ from django.core.exceptions import ImproperlyConfigured
 from django.core.management import call_command
 from django.test import TestCase
 
-pytestmark = [pytest.mark.commands, pytest.mark.commands_send_logs]
+from tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
+
+pytestmark = [
+    pytest.mark.commands,
+    pytest.mark.commands_send_logs,
+    pytest.mark.skipif(sys.version_info < PYTHON_VERSION, reason=PYTHON_VERSION_REASON),
+]
 
 
 class SendLogsCommandTests(TestCase):
