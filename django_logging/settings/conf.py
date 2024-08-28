@@ -1,21 +1,22 @@
 import logging
 import logging.config
 import os
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional
 
 from django_logging.constants import FORMAT_OPTIONS, DefaultLoggingSettings
 from django_logging.constants.config_types import (
-    LogLevels,
+    FormatOption,
+    LogDateFormat,
     LogDir,
     LogFileFormatsType,
-    LogDateFormat,
-    FormatOption,
     LogLevel,
-    NotifierLogLevels
+    LogLevels,
+    NotifierLogLevels,
 )
 from django_logging.filters.log_level_filter import LoggingLevelFilter
 
 
+# pylint: disable=too-many-instance-attributes, too-many-arguments
 class LogConfig:
     """
     Configuration class for django_logging.
@@ -85,11 +86,13 @@ class LogConfig:
 
     @staticmethod
     def resolve_format(_format: FormatOption, use_colors: bool = False) -> str:
+        resolved_format: str = ""
         if _format:
             if isinstance(_format, int):
                 resolved_format = FORMAT_OPTIONS.get(_format, FORMAT_OPTIONS[1])
-            else:
+            elif isinstance(_format, str):
                 resolved_format = _format
+
         else:
             resolved_format = FORMAT_OPTIONS[1]
 
@@ -122,7 +125,8 @@ class LogManager:
             )
             os.makedirs(os.path.dirname(log_file_path), exist_ok=True)
             if not os.path.exists(log_file_path):
-                open(log_file_path, "w").close()
+                with open(log_file_path, "w", encoding="utf-8"):
+                    pass
             self.log_files[log_level] = log_file_path
 
     def get_log_file(self, log_level: LogLevel) -> Optional[str]:

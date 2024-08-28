@@ -1,14 +1,12 @@
 import os
-import tempfile
 import shutil
-
-from unittest.mock import patch, ANY, Mock
+import tempfile
+from unittest.mock import ANY, Mock, patch
 
 import pytest
 from django.core.exceptions import ImproperlyConfigured
 from django.core.management import call_command
 from django.test import TestCase
-
 
 pytestmark = [pytest.mark.commands, pytest.mark.commands_send_logs]
 
@@ -125,7 +123,7 @@ class SendLogsCommandTests(TestCase):
                 call_command("send_logs", "test@example.com")
 
         self.assertIn(
-            f'ERROR:django_logging.management.commands.send_logs:Log directory "{non_existent_dir}" does not exist.',
+            f"ERROR:django_logging.management.commands.send_logs:Log directory '{non_existent_dir}' does not exist.",
             cm.output,
         )
         mock_validate_email_settings.assert_not_called()

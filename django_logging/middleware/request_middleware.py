@@ -1,7 +1,8 @@
 import logging
-from django.contrib.auth import get_user_model
-from django.http import HttpResponse, HttpRequest
 from typing import Callable
+
+from django.contrib.auth import get_user_model
+from django.http import HttpRequest, HttpResponse
 
 logger = logging.getLogger(__name__)
 
@@ -55,8 +56,11 @@ class RequestLogMiddleware:
         request.browser_type = user_agent
 
         logger.info(
-            f"Request Info: (request_path: {request.path}, user: {user},"
-            f"\nIP: {ip_address}, user_agent: {user_agent})"
+            "Request Info: (request_path: %s, user: %s," "\nIP: %s, user_agent: %s)",
+            request.path,
+            user,
+            ip_address,
+            user_agent,
         )
 
         return response

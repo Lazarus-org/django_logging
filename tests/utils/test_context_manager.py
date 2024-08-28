@@ -1,11 +1,9 @@
 import logging
 from unittest import mock
+
 import pytest
 
-from django_logging.utils.context_manager import (
-    config_setup,
-    _restore_logging_config,
-)
+from django_logging.utils.context_manager import _restore_logging_config, config_setup
 
 pytestmark = [pytest.mark.utils, pytest.mark.utils_context_manager]
 
@@ -29,7 +27,9 @@ class TestContextManager:
             return_value=True,
         ):
             with pytest.raises(ValueError) as excinfo:
+                # fmt: off
                 with config_setup(): ""
+                # fmt: on
 
             assert (
                 str(excinfo.value)
@@ -64,18 +64,18 @@ class TestContextManager:
         ):
             with mock.patch(
                 "django_logging.utils.context_manager.get_config",
-                return_value=(
-                    ["INFO"],
-                    "/tmp/logs",
-                    {"INFO": 1},
-                    "DEBUG",
-                    2,
-                    False,
-                    "",
-                    False,
-                    [],
-                    1,
-                ),
+                return_value={
+                    "log_levels": ["INFO"],
+                    "log_dir": "/tmp/logs",
+                    "log_file_formats": {"INFO": 1},
+                    "console_level": "DEBUG",
+                    "console_format": 2,
+                    "colorize_console": False,
+                    "log_date_format": "",
+                    "log_email_notifier_enable": False,
+                    "log_email_notifier_log_levels": [],
+                    "log_email_notifier_log_format": 1,
+                },
             ):
                 with mock.patch(
                     "django_logging.utils.context_manager.LogManager"
@@ -117,18 +117,18 @@ class TestContextManager:
         ):
             with mock.patch(
                 "django_logging.utils.context_manager.get_config",
-                return_value=(
-                    ["INFO"],
-                    "/tmp/logs",
-                    {"INFO": 1},
-                    "DEBUG",
-                    2,
-                    False,
-                    "",
-                    False,
-                    [],
-                    1,
-                ),
+                return_value={
+                    "log_levels": ["INFO"],
+                    "log_dir": "/tmp/logs",
+                    "log_file_formats": {"INFO": 1},
+                    "console_level": "DEBUG",
+                    "console_format": 2,
+                    "colorize_console": False,
+                    "log_date_format": "",
+                    "log_email_notifier_enable": False,
+                    "log_email_notifier_log_levels": [],
+                    "log_email_notifier_log_format": 1,
+                },
             ):
                 with mock.patch("django_logging.utils.context_manager.LogManager"):
                     with config_setup():

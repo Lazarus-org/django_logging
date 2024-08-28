@@ -1,7 +1,7 @@
 from typing import Dict
+from unittest.mock import patch
 
 import pytest
-from unittest.mock import patch
 from django.conf import settings
 
 from django_logging.validators.email_settings_validator import check_email_settings

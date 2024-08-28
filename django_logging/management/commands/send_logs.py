@@ -1,18 +1,18 @@
+import logging
 import os
 import shutil
 import tempfile
-import logging
 from argparse import ArgumentParser
 from typing import Dict, Tuple
 
+from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.core.mail import EmailMessage
 from django.core.management.base import BaseCommand
-from django.conf import settings
 
+from django_logging.constants import DefaultLoggingSettings
 from django_logging.constants.config_types import LogDir
 from django_logging.validators.email_settings_validator import check_email_settings
-from django_logging.constants import DefaultLoggingSettings
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +60,7 @@ class Command(BaseCommand):
             self.stdout.write(
                 self.style.ERROR(f'Log directory "{log_dir}" does not exist.')
             )
-            logger.error(f'Log directory "{log_dir}" does not exist.')
+            logger.error("Log directory '%s' does not exist.", log_dir)
             return
 
         self.validate_email_settings()
@@ -87,10 +87,10 @@ class Command(BaseCommand):
         try:
             email_message.send()
             self.stdout.write(self.style.SUCCESS(f"Logs sent successfully to {email}."))
-            logger.info(f"Logs sent successfully to {email}.")
-        except Exception as e:
+            logger.info("Logs sent successfully to %s.", email)
+        except Exception as e:  # pylint: disable=W0718
             self.stdout.write(self.style.ERROR(f"Failed to send logs: {e}"))
-            logger.error(f"Failed to send logs: {e}")
+            logger.error("Failed to send logs: %s", e)
         finally:
             # Clean up the temporary file if exists
             if os.path.exists(zip_path):

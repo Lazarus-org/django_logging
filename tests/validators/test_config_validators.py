@@ -4,13 +4,13 @@ import pytest
 
 from django_logging.constants.config_types import LogLevels
 from django_logging.validators.config_validators import (
-    validate_directory,
-    validate_log_levels,
-    validate_format_string,
-    validate_format_option,
     validate_boolean_setting,
     validate_date_format,
+    validate_directory,
     validate_email_notifier,
+    validate_format_option,
+    validate_format_string,
+    validate_log_levels,
 )
 
 pytestmark = [pytest.mark.validators, pytest.mark.config_validator]

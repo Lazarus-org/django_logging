@@ -1,6 +1,8 @@
 from typing import List
+
 from django.conf import settings
 from django.core.checks import Error
+
 from django_logging.constants.required_email_settings import (
     EMAIL_REQUIRED_SETTINGS,
     NOTIFIER_EXTRA_REQUIRED_SETTING,

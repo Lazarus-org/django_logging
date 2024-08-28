@@ -1,10 +1,11 @@
-import pytest
-from unittest import mock
 import os
+from shutil import rmtree
+from unittest import mock
 
-from django_logging.settings.conf import LogConfig, LogManager
+import pytest
+
 from django_logging.constants import FORMAT_OPTIONS
-
+from django_logging.settings.conf import LogConfig, LogManager
 
 pytestmark = [pytest.mark.settings, pytest.mark.settings_conf]
 
@@ -92,7 +93,7 @@ class TestConf:
                 expected_file_path = os.path.join(
                     "/tmp/logs", f"{log_level.lower()}.log"
                 )
-                open_mock.assert_any_call(expected_file_path, "w")
+                open_mock.assert_any_call(expected_file_path, "w", encoding="utf-8")
 
                 log_manager.log_files[log_level] = expected_file_path
 
@@ -142,6 +143,9 @@ class TestConf:
 
             assert "handlers" in config["root"]
             assert "disable_existing_loggers" in config
+
+            # Remove the log dir created by test
+            rmtree("/tmp", ignore_errors=True)
 
     def test_log_manager_get_log_file(self, log_manager: LogManager) -> None:
         """
