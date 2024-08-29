@@ -1,6 +1,7 @@
 import sys
 import threading
 from smtplib import SMTPException
+from typing import Tuple
 from unittest.mock import ANY, MagicMock
 
 import pytest
@@ -21,7 +22,7 @@ class TestEmailNotifier:
         self,
         mock_smtp: MagicMock,
         email_mock_settings: MagicMock,
-        notifier_mock_logger: tuple[MagicMock, MagicMock],
+        notifier_mock_logger: Tuple[MagicMock, MagicMock],
     ) -> None:
         """
         Test that the send_email_async function successfully sends an email.
@@ -91,7 +92,7 @@ class TestEmailNotifier:
         self,
         mock_smtp: MagicMock,
         email_mock_settings: MagicMock,
-        notifier_mock_logger: tuple[MagicMock, MagicMock],
+        notifier_mock_logger: Tuple[MagicMock, MagicMock],
     ) -> None:
         """
         Test that the send_email_async function handles SMTP failures.
