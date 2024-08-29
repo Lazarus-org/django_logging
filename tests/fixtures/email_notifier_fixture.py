@@ -1,4 +1,4 @@
-from typing import Generator
+from typing import Generator, Tuple
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -46,7 +46,7 @@ def email_mock_settings() -> Generator[MagicMock, None, None]:
 
 
 @pytest.fixture
-def notifier_mock_logger() -> Generator[tuple[MagicMock, MagicMock], None, None]:
+def notifier_mock_logger() -> Generator[Tuple[MagicMock, MagicMock], None, None]:
     """
     Fixture to mock the logger used for logging messages.
 
