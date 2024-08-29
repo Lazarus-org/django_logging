@@ -56,7 +56,7 @@ class RequestLogMiddleware:
         request.browser_type = user_agent
 
         logger.info(
-            "Request Info: (request_path: %s, user: %s," "\nIP: %s, user_agent: %s)",
+            "Request Info: (request_path: %s, user: %s,\n IP: %s, user_agent: %s)",
             request.path,
             user,
             ip_address,
