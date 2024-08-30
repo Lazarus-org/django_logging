@@ -16,7 +16,7 @@ The [`django_logging`](https://github.com/ARYAN-NIKNEZHAD/django_logging) is a D
 
 - Language: Python > 3.8
 - Framework: Django > 4.2
-              |
+-
 
 ## Documentation
 
@@ -77,7 +77,7 @@ Email notifier enabled: False.
 ```
 
 
-That's it! `django_logging` is ready to use with default settings. For further customization, refer to the Settings section
+That's it! `django_logging` is ready to use with default settings. For further customization, refer to the [Settings](#settings) section
 
 
 ## Usage
@@ -97,8 +97,10 @@ logger.error("This is an error message")
 logger.critical("This is a critical message")
 ```
 These logs will be handled according to the configurations set up by `django_logging`, using either the default settings or any custom settings you've provided.
-Request Logging Middleware
-To log request information such as the request path, user, IP address, and user agent, add `django_logging`.middleware.RequestLogMiddleware to your MIDDLEWARE setting:
+
+2. **Request Logging Middleware**
+
+To log the detail of each request to the server and capture information such as the request path, user, IP address, and user agent, add `django_logging.middleware.RequestLogMiddleware` to your MIDDLEWARE setting:
 
 ```python
 MIDDLEWARE = [
@@ -108,7 +110,7 @@ MIDDLEWARE = [
 ]
 ```
 
-This middleware will log request details at info level, here is an example with default format:
+This middleware will log th request details at info level, here is an example with default format:
 ```shell
 INFO | 'datetime' | django_logging | Request Info: (request_path: /example-path, user: example_user,
 IP: 192.168.1.1, user_agent: Mozilla/5.0)
@@ -150,7 +152,7 @@ logger = logging.getLogger(__name__)
 
 log_and_notify_admin(logger, logging.INFO, "This is a log message")
 ```
-You can also include additional request information in the email by passing an `extra` dictionary:
+You can also include additional request information (`ip_address` and `browser_type`) in the email by passing an `extra` dictionary:
 ```python
 from django_logging.utils.log_email_notifier.log_and_notify import log_and_notify_admin
 import logging
@@ -183,12 +185,7 @@ This command will attach the log directory and send a zip file to the provided e
 
 ## Settings
 
-The `DJANGO_LOGGING` configuration allows you to customize various aspects of logging within your Django project. Below is a detailed description of each configurable option.
-
-**Configuration Options**
-The settings are defined in the `DJANGO_LOGGING` dictionary in your
-`settings.py` file. Here’s a breakdown of each option:
-By default, `django_logging` uses a built-in configuration that requires no additional setup. However, you can customize the logging settings by adding a `DJANGO_LOGGING` configuration to your Django settings file.
+By default, `django_logging` uses a built-in configuration that requires no additional setup. However, you can customize the logging settings by adding the `DJANGO_LOGGING` dictionary configuration to your Django `settings` file.
 
 Example configuration:
 ```python
