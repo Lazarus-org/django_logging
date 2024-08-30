@@ -110,7 +110,7 @@ MIDDLEWARE = [
 ]
 ```
 
-This middleware will log details of  at info level, here is an example with default format:
+This middleware will log th request details at info level, here is an example with default format:
 ```shell
 INFO | 'datetime' | django_logging | Request Info: (request_path: /example-path, user: example_user,
 IP: 192.168.1.1, user_agent: Mozilla/5.0)
