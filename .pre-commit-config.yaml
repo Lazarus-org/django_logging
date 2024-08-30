@@ -3,44 +3,82 @@ repos:
     rev: v4.4.0
     hooks:
       - id: trailing-whitespace
-        exclude: (tests/|docs/).*
+        exclude: (migrations/|tests/|docs/).*
       - id: end-of-file-fixer
-        exclude: (tests/|docs/).*
-      - id: check-yaml
-        exclude: (tests/|docs/).*
+        exclude: (migrations/|tests/|docs/).*
       - id: check-added-large-files
-        exclude: (tests/|docs/).*
+        exclude: (migrations/|tests/|docs/).*
       - id: check-case-conflict
-        exclude: (tests/|docs/).*
+        exclude: (migrations/|tests/|docs/).*
       - id: check-merge-conflict
-        exclude: (tests/|docs/).*
+        exclude: (migrations/|tests/|docs/).*
       - id: check-docstring-first
-        exclude: (tests/|docs/).*
-
-
-  - repo: https://github.com/psf/black
-    rev: 24.4.2
-    hooks:
-      - id: black
-        exclude: (tests/|docs/).*
-
+        exclude: (migrations/|tests/|docs/).*
 
   - repo: https://github.com/pre-commit/mirrors-isort
     rev: v5.10.1
     hooks:
       - id: isort
-        exclude: (tests/|docs/).*
+        exclude: (migrations/|tests/|docs/).*
 
+  - repo: https://github.com/psf/black
+    rev: 23.3.0
+    hooks:
+      - id: black
+        args: ["--config=pyproject.toml"]
+        exclude: (migrations/|tests/|docs/).*
 
   - repo: https://github.com/commitizen-tools/commitizen
     rev: v3.28.0
     hooks:
       - id: commitizen
-        exclude: (tests/|docs/).*
+        exclude: (migrations/|tests/|docs/).*
 
-#  - repo: https://github.com/PyCQA/bandit
-#    rev: 1.7.4
-#    hooks:
-#      - id: bandit
-#        args: [ "-c pyproject.toml" ]
-#        additional_dependencies: [ "toml" ]
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.4
+    hooks:
+      - id: bandit
+        args: ["-c", "pyproject.toml", "-r", "."]
+        additional_dependencies: [ "bandit[toml]" ]
+        exclude: (migrations/|tests/|docs/).*
+
+  - repo: https://github.com/PyCQA/docformatter
+    rev: v1.7.5
+    hooks:
+      - id: docformatter
+        args: ["--in-place", "--recursive", "--blank"]
+        exclude: (migrations/|tests/|docs/).*
+
+  - repo: https://github.com/rstcheck/rstcheck
+    rev: "v6.2.4"
+    hooks:
+      - id: rstcheck
+        args: ["--report-level=warning"]
+        files: ^(docs/(.*/)*.*\.rst)
+        additional_dependencies: [Sphinx==6.2.1]
+
+  - repo: local
+    hooks:
+      - id: pytest
+        name: Pytest
+        entry: poetry run pytest -v
+        language: system
+        types: [python]
+        stages: [commit]
+        pass_filenames: false
+        always_run: true
+
+      - id: pylint
+        name: pylint
+        entry: pylint
+        language: system
+        types: [python]
+        require_serial: true
+        args:
+          - "-rn"
+          - "-sn"
+          - "--rcfile=pyproject.toml"
+        files: ^django_logging/
+
+ci:
+  skip: [pylint]

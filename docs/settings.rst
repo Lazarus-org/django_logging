@@ -1,16 +1,7 @@
 Settings
 ========
 
-The `DJANGO_LOGGING` configuration allows you to customize various aspects of logging within your Django project. Below is a detailed description of each configurable option.
-
-Configuration Options
-----------------------
-
-The settings are defined in the `DJANGO_LOGGING` dictionary in your `settings.py` file. Here’s a breakdown of each option:
-
-
-
-By default, `django_logging` uses a built-in configuration that requires no additional setup. However, you can customize the logging settings by adding a `DJANGO_LOGGING` configuration to your Django settings file.
+By default, `django_logging` uses a built-in configuration that requires no additional setup. However, you can customize the logging settings by adding the `DJANGO_LOGGING` dictionary configuration to your Django `settings` file.
 
 Example configuration:
 

@@ -23,7 +23,7 @@ Once `django_logging` is installed and added to your `INSTALLED_APPS`, you can s
 
 2. **Request Logging Middleware**
 
-   To log request information such as the request path, user, IP address, and user agent, add `django_logging.middleware.RequestLogMiddleware` to your `MIDDLEWARE` setting:
+   To capture and log information of each request to the server, such as the request path, user, IP address, and user agent, add `django_logging.middleware.RequestLogMiddleware` to your `MIDDLEWARE` setting:
 
    .. code-block:: python
 
@@ -33,7 +33,7 @@ Once `django_logging` is installed and added to your `INSTALLED_APPS`, you can s
           ...
       ]
 
-   This middleware will log request details at info level, here is an example with default format:
+   This middleware will log the request details at info level, here is an example with default format:
 
    .. code-block:: text
 
