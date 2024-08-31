@@ -1,11 +1,14 @@
 import os
 import re
-from datetime import datetime
 from typing import List
 
 from django.core.checks import Error
 
-from django_logging.constants import FORMAT_OPTIONS, LOG_FORMAT_SPECIFIERS
+from django_logging.constants import (
+    FORMAT_OPTIONS,
+    LOG_FORMAT_SPECIFIERS,
+    VALID_DIRECTIVES,
+)
 from django_logging.constants.config_types import (
     FormatOption,
     LogEmailNotifierType,
@@ -172,6 +175,10 @@ def validate_boolean_setting(value: bool, config_name: str) -> List[Error]:
 
 
 def validate_date_format(date_format: str, config_name: str) -> List[Error]:
+    def parse_format_string(format_string: str) -> set:
+        """Extract format specifiers from the format string."""
+        return set(re.findall(r"%[a-zA-Z]", format_string))
+
     errors = []
     if not isinstance(date_format, str):
         errors.append(
@@ -182,13 +189,17 @@ def validate_date_format(date_format: str, config_name: str) -> List[Error]:
             )
         )
     else:
-        try:
-            datetime.now().strftime(date_format)
-        except ValueError as e:
+        # Extract directives from the provided format string
+        directives = parse_format_string(date_format)
+
+        # Validate against allowed directives
+        invalid_directives = directives - VALID_DIRECTIVES
+        if invalid_directives:
             errors.append(
                 Error(
-                    f"{config_name} is not a valid date format string.",
-                    hint=f"Error: {e}. Refer to Python's strftime directives for valid formats.",
+                    f"{config_name} contains invalid format directives.",
+                    hint=f"Invalid directives: {', '.join(invalid_directives)}."
+                    f"\n Ensure {config_name} follows valid strftime directives.",
                     id=f"django_logging.E016_{config_name}",
                 )
             )
