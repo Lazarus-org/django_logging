@@ -18,12 +18,12 @@ from django_logging.filters.log_level_filter import LoggingLevelFilter
 
 # pylint: disable=too-many-instance-attributes, too-many-arguments
 class LogConfig:
-    """
-    Configuration class for django_logging.
+    """Configuration class for django_logging.
 
     Attributes:
         log_levels (List[str]): A list of log levels to be used in logging.
         log_dir (str): The directory where log files will be stored.
+
     """
 
     def __init__(
@@ -39,7 +39,6 @@ class LogConfig:
         log_email_notifier_log_levels: NotifierLogLevels,
         log_email_notifier_log_format: FormatOption,
     ) -> None:
-
         self.log_levels = log_levels
         self.log_dir = log_dir
         self.log_file_formats = self._resolve_file_formats(log_file_formats)
@@ -76,9 +75,7 @@ class LogConfig:
 
     @staticmethod
     def remove_ansi_escape_sequences(log_message: str) -> str:
-        """
-        Remove ANSI escape sequences from log messages.
-        """
+        """Remove ANSI escape sequences from log messages."""
         import re
 
         ansi_escape = re.compile(r"(?:\x1B[@-_][0-?]*[ -/]*[@-~])")
@@ -104,16 +101,15 @@ class LogConfig:
 
 
 class LogManager:
-    """
-    Manages the creation and configuration of log files.
+    """Manages the creation and configuration of log files.
 
     Attributes:
         log_config (LogConfig): The logging configuration.
         log_files (Dict[str, str]): A dictionary mapping log levels to file paths.
+
     """
 
     def __init__(self, log_config: LogConfig) -> None:
-
         self.log_config = log_config
         self.log_files: Dict[str, str] = {}
 
@@ -130,14 +126,14 @@ class LogManager:
             self.log_files[log_level] = log_file_path
 
     def get_log_file(self, log_level: LogLevel) -> Optional[str]:
-        """
-        Retrieves the file path for a given log level.
+        """Retrieves the file path for a given log level.
 
         Args:
             log_level (str): The log level to retrieve the file for.
 
         Returns:
             Optional[str]: The file path associated with the log level, or None if not found.
+
         """
         return self.log_files.get(log_level)
 
