@@ -4,7 +4,7 @@ import sys
 import pytest
 
 from django_logging.filters import LoggingLevelFilter
-from tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
+from django_logging.tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
 
 pytestmark = [
     pytest.mark.filters,

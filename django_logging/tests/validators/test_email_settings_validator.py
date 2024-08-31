@@ -6,7 +6,7 @@ import pytest
 from django.conf import settings
 
 from django_logging.validators.email_settings_validator import check_email_settings
-from tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
+from django_logging.tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
 
 pytestmark = [
     pytest.mark.validators,

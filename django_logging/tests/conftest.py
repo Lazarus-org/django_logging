@@ -1,4 +1,4 @@
-from tests.fixtures import (
+from django_logging.tests.fixtures import (
     admin_email_mock_settings,
     colored_formatter,
     debug_log_record,
@@ -18,3 +18,5 @@ from tests.fixtures import (
     request_middleware,
     reset_settings,
 )
+from django_logging.tests.fixtures.setup_django import configure_django_settings
+configure_django_settings()

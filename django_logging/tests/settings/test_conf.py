@@ -7,7 +7,7 @@ import pytest
 
 from django_logging.constants import FORMAT_OPTIONS
 from django_logging.settings.conf import LogConfig, LogManager
-from tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
+from django_logging.tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
 
 pytestmark = [
     pytest.mark.settings,
@@ -173,7 +173,10 @@ class TestConf:
 
             log_manager.create_log_files()
 
-            assert log_manager.get_log_file("INFO") == "/tmp/logs\\info.log"
-            assert log_manager.get_log_file("ERROR") == "/tmp/logs\\error.log"
+            expected_info_log_path = os.path.join("/tmp/logs", "info.log")
+            expected_error_log_path = os.path.join("/tmp/logs", "error.log")
+
+            assert log_manager.get_log_file("INFO") == expected_info_log_path
+            assert log_manager.get_log_file("ERROR") == expected_error_log_path
 
             assert log_manager.get_log_file("DEBUG") is None

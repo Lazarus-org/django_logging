@@ -10,10 +10,11 @@ from django_logging.constants.required_email_settings import (
 
 
 def check_email_settings(require_admin_email: bool = True) -> List[Error]:
-    """
-    Check if all required email settings are present in the settings file.
+    """Check if all required email settings are present in the settings file.
 
-    Returns a list of errors if any of the required email settings are missing.
+    Returns a list of errors if any of the required email settings are
+    missing.
+
     """
     errors: List[Error] = []
     if require_admin_email:

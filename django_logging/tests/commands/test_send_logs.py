@@ -9,7 +9,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.core.management import call_command
 from django.test import TestCase
 
-from tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
+from django_logging.tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
 
 pytestmark = [
     pytest.mark.commands,

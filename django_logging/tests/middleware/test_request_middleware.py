@@ -8,7 +8,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.test import RequestFactory
 
 from django_logging.middleware import RequestLogMiddleware
-from tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
+from django_logging.tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
 
 pytestmark = [
     pytest.mark.middleware,
