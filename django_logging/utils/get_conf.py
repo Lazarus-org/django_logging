@@ -8,11 +8,11 @@ from django_logging.constants import DefaultConsoleSettings, DefaultLoggingSetti
 
 # pylint: disable=too-many-locals
 def get_config(extra_info: bool = False) -> Dict:
-    """
-    Retrieve logging configuration from Django settings.
+    """Retrieve logging configuration from Django settings.
 
     Returns:
         A Dict containing all necessary configurations for logging.
+
     """
     log_settings = getattr(settings, "DJANGO_LOGGING", {})
     logging_defaults = DefaultLoggingSettings()
@@ -67,11 +67,12 @@ def get_config(extra_info: bool = False) -> Dict:
 
 
 def use_email_notifier_template() -> bool:
-    """
-    Check whether the email notifier should use a template based on Django settings.
+    """Check whether the email notifier should use a template based on Django
+    settings.
 
     Returns:
         bool: True if the email notifier should use a template, False otherwise.
+
     """
     log_settings = getattr(settings, "DJANGO_LOGGING", {})
     defaults = DefaultLoggingSettings()
@@ -83,12 +84,13 @@ def use_email_notifier_template() -> bool:
 
 
 def is_auto_initialization_enabled() -> bool:
-    """
-    Check if the AUTO_INITIALIZATION_ENABLE for the logging system is set to True in Django settings.
+    """Check if the AUTO_INITIALIZATION_ENABLE for the logging system is set to
+    True in Django settings.
 
     Returns:
         bool: True if AUTO_INITIALIZATION_ENABLE, False otherwise.
          Defaults to True if not specified.
+
     """
     log_settings = getattr(settings, "DJANGO_LOGGING", {})
     defaults = DefaultLoggingSettings()
@@ -99,12 +101,13 @@ def is_auto_initialization_enabled() -> bool:
 
 
 def is_initialization_message_enabled() -> bool:
-    """
-    Check if the INITIALIZATION_MESSAGE_ENABLE is set to True in Django settings.
+    """Check if the INITIALIZATION_MESSAGE_ENABLE is set to True in Django
+    settings.
 
     Returns:
         bool: True if INITIALIZATION_MESSAGE_ENABLE is True, False otherwise.
          Defaults to True if not specified.
+
     """
     log_settings = getattr(settings, "DJANGO_LOGGING", {})
     defaults = DefaultLoggingSettings()

@@ -16,7 +16,7 @@ The [`django_logging`](https://github.com/ARYAN-NIKNEZHAD/django_logging) is a D
 
 - Language: Python > 3.8
 - Framework: Django > 4.2
--
+
 
 ## Documentation
 

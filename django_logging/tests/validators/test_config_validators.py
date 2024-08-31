@@ -13,7 +13,7 @@ from django_logging.validators.config_validators import (
     validate_format_string,
     validate_log_levels,
 )
-from tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
+from django_logging.tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
 
 pytestmark = [
     pytest.mark.validators,
@@ -327,7 +327,7 @@ class TestConfigValidator:
         assert len(errors) == 1
         assert errors[0].id == "django_logging.E015_date_format"
 
-        date_format = "%invalid"
+        date_format = "%Q"  # invalid format
         errors = validate_date_format(date_format, "date_format")
         assert len(errors) == 1
         assert errors[0].id == "django_logging.E016_date_format"

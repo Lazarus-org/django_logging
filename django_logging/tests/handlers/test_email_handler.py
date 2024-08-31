@@ -6,7 +6,7 @@ import pytest
 from django.conf import settings
 
 from django_logging.handlers.email_handler import EmailHandler
-from tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
+from django_logging.tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
 
 pytestmark = [
     pytest.mark.handlers,

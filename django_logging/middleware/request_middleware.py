@@ -8,33 +8,33 @@ logger = logging.getLogger(__name__)
 
 
 class RequestLogMiddleware:
-    """
-    Middleware to log information about each incoming request.
+    """Middleware to log information about each incoming request.
 
-    This middleware logs the request path, the user making the request (if authenticated),
-    and the user's IP address.
+    This middleware logs the request path, the user making the request
+    (if authenticated), and the user's IP address.
+
     """
 
     def __init__(self, get_response: Callable[[HttpRequest], HttpResponse]) -> None:
-        """
-        Initializes the RequestLogMiddleware instance.
+        """Initializes the RequestLogMiddleware instance.
 
         Args:
             get_response: A callable that returns an HttpResponse object.
+
         """
         self.get_response = get_response
         user_model = get_user_model()
         self.username_field = user_model.USERNAME_FIELD
 
     def __call__(self, request: HttpRequest) -> HttpResponse:
-        """
-        Processes an incoming request and logs relevant information.
+        """Processes an incoming request and logs relevant information.
 
         Args:
             request: The incoming request object.
 
         Returns:
             The response object returned by the view function.
+
         """
         # Before view (and later middleware) are called.
         response = self.get_response(request)
@@ -67,9 +67,7 @@ class RequestLogMiddleware:
 
     @staticmethod
     def get_ip_address(request: HttpRequest) -> str:
-        """
-        Retrieves the client's IP address from the request object.
-        """
+        """Retrieves the client's IP address from the request object."""
         ip_address = request.META.get("HTTP_X_FORWARDED_FOR")
         if ip_address:
             ip_address = ip_address.split(",")[0]
@@ -82,7 +80,5 @@ class RequestLogMiddleware:
 
     @staticmethod
     def get_user_agent(request: HttpRequest) -> str:
-        """
-        Retrieves the client's user agent from the request object.
-        """
+        """Retrieves the client's user agent from the request object."""
         return request.META.get("HTTP_USER_AGENT", "Unknown User Agent")

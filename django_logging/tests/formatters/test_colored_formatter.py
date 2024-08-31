@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from django_logging.formatters import ColoredFormatter
-from tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
+from django_logging.tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
 
 pytestmark = [
     pytest.mark.formatters,

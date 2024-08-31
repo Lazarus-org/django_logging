@@ -7,7 +7,7 @@ from django.conf import settings
 from django.core.checks import Error
 
 from django_logging.settings.checks import check_logging_settings
-from tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
+from django_logging.tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
 
 pytestmark = [
     pytest.mark.settings,
