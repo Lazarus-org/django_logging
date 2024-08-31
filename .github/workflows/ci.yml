@@ -6,39 +6,30 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        python-version: [3.8, 3.9, 3.10, 3.11, 3.12]
-        django-version: [4.2, 5.0, 5.1]
-
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install poetry tox
-        poetry install
-        pip install coverage codecov pytest
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install coverage codecov pytest poetry
+          pip install -r packages/requirements-dev.txt
 
-    - name: Run tests with coverage
-      run: coverage run -m pytest
+      - name: Run tests with coverage
+        run: pytest --cov=django_logging --cov-report=xml
 
-    - name: Generate coverage report
-      run: coverage xml
+      - name: Run Tox tests
+        run: tox
 
-    - name: Run Tox tests
-      run: tox
+      - name: Run pre-commit hooks
+        run: tox -e pre-commit
 
-    - name: Run pre-commit hooks
-      run: tox -e pre-commit
-
-    - name: Upload coverage to Codecov
-      run: codecov
-      env:
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      - name: Upload coverage to Codecov
+        run: codecov
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
