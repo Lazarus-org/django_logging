@@ -8,14 +8,14 @@ from django_logging.utils.get_conf import get_config, is_auto_initialization_ena
 
 @contextmanager
 def config_setup() -> Iterator[LogManager]:
-    """
-    Context manager to temporarily apply a custom logging configuration.
+    """Context manager to temporarily apply a custom logging configuration.
 
     Raises:
         ValueError: If 'AUTO_INITIALIZATION_ENABLE' in DJNAGO_LOGGING is set to True.
 
     Yields:
         LogManager: The log manager instance with the custom configuration.
+
     """
     if is_auto_initialization_enabled():
         raise ValueError(
@@ -47,14 +47,14 @@ def _restore_logging_config(
     original_level: int,
     original_handlers: list,
 ) -> None:
-    """
-    Restore the original logging configuration.
+    """Restore the original logging configuration.
 
     Args:
         logger (Logger): The root logger instance.
         original_config (Dict[str, Logger | PlaceHolder]): The original logger dictionary.
         original_level (int): The original root logger level.
         original_handlers (list): The original root logger handlers.
+
     """
     logger.manager.loggerDict.clear()
     logger.manager.loggerDict.update(original_config)

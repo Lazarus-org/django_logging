@@ -32,8 +32,7 @@ def set_config(
     log_email_notifier_log_levels: NotifierLogLevels,
     log_email_notifier_log_format: FormatOption,
 ) -> None:
-    """
-    Sets up the logging configuration based on the provided parameters.
+    """Sets up the logging configuration based on the provided parameters.
 
     This function initializes and configures logging for the application,
     including file-based logging, console output, and optional email notifications.
@@ -74,6 +73,7 @@ def set_config(
     Notes:
         - The function performs system checks and logs warnings if configuration issues are detected.
         - It also logs the current logging setup upon successful initialization.
+
     """
     if not is_auto_initialization_enabled():
         return
