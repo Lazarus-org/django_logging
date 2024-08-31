@@ -79,6 +79,7 @@ repos:
           - "-sn"
           - "--rcfile=pyproject.toml"
         files: ^django_logging/
+        exclude: (migrations/|tests/|docs/).*
 
 ci:
   skip: [pylint]

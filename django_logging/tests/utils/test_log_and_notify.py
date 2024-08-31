@@ -7,7 +7,7 @@ import pytest
 from django.conf import settings
 
 from django_logging.utils.log_email_notifier.log_and_notify import log_and_notify_admin
-from tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
+from django_logging.tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
 
 pytestmark = [
     pytest.mark.utils,

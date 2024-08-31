@@ -6,7 +6,7 @@ import pytest
 
 from django_logging.constants.ansi_colors import AnsiColors
 from django_logging.utils.set_conf import set_config
-from tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
+from django_logging.tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
 
 pytestmark = [
     pytest.mark.utils,

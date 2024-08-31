@@ -11,7 +11,7 @@ from django_logging.utils.get_conf import (
     is_initialization_message_enabled,
     use_email_notifier_template,
 )
-from tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
+from django_logging.tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
 
 pytestmark = [
     pytest.mark.utils,

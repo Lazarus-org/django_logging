@@ -5,7 +5,7 @@ from unittest import mock
 import pytest
 
 from django_logging.utils.context_manager import _restore_logging_config, config_setup
-from tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
+from django_logging.tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
 
 pytestmark = [
     pytest.mark.utils,

@@ -7,7 +7,7 @@ from unittest.mock import ANY, MagicMock
 import pytest
 
 from django_logging.utils.log_email_notifier.notifier import send_email_async
-from tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
+from django_logging.tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
 
 pytestmark = [
     pytest.mark.utils,
