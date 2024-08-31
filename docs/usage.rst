@@ -25,7 +25,7 @@ Once `django_logging` is installed and added to your `INSTALLED_APPS`, you can s
 
    To capture and log information of each request to the server, such as the request path, user, IP address, and user agent, add `django_logging.middleware.RequestLogMiddleware` to your `MIDDLEWARE` setting:
 
-   .. code-block:: python
+   .. code-block::
 
       MIDDLEWARE = [
           ...
@@ -53,11 +53,13 @@ Once `django_logging` is installed and added to your `INSTALLED_APPS`, you can s
 
       logger = logging.getLogger(__name__)
 
+
       def foo():
-        logger.info("This log will use the configuration set in the context manager!")
+          logger.info("This log will use the configuration set in the context manager!")
+
 
       with config_setup():
-          """ Your logging configuration changes here"""
+          """Your logging configuration changes here"""
           foo()
 
 
@@ -89,12 +91,10 @@ Once `django_logging` is installed and added to your `INSTALLED_APPS`, you can s
 
       logger = logging.getLogger(__name__)
 
+
       def some_view(request):
           log_and_notify_admin(
-              logger,
-              logging.INFO,
-              "This is a log message",
-              extra={"request": request}
+              logger, logging.INFO, "This is a log message", extra={"request": request}
           )
 
    Note: To use the email notifier, `LOG_EMAIL_NOTIFIER["ENABLE"]` must be set to `True`. If it is not enabled, calling `log_and_notify_admin` will raise a `ValueError`:

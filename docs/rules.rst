@@ -26,7 +26,7 @@ Available Roles
 
    **Example Configuration:**
 
-   .. code-block:: python
+   .. code-block::
 
       MIDDLEWARE = [
           ...

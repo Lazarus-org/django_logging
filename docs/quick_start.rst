@@ -15,7 +15,7 @@ Getting Started with `django_logging` is simple. Follow these steps to get up an
 
    Add `django_logging` to your `INSTALLED_APPS` in your Django settings file:
 
-   .. code-block:: python
+   .. code-block::
 
       INSTALLED_APPS = [
           ...

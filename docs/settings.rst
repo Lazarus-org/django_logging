@@ -28,28 +28,43 @@ Example configuration:
               "NOTIFY_ERROR": False,
               "NOTIFY_CRITICAL": False,
               "LOG_FORMAT": 1,
-              "USE_TEMPLATE": True
-          }
+              "USE_TEMPLATE": True,
+          },
       }
 
 
 Here's a breakdown of the available configuration options:
 
 - **AUTO_INITIALIZATION_ENABLE**: Accepts `bool`. Enables automatic initialization of logging configurations. Defaults to `True`.
+
 - **INITIALIZATION_MESSAGE_ENABLE**: Accepts `bool`. Enables logging of the initialization message. Defaults to `True`.
+
 - **LOG_FILE_LEVELS**: Accepts a list of valid log levels (a list of `str` where each value must be one of the valid levels). Defines the log levels for file logging. Defaults to `['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']`.
+
 - **LOG_DIR**: Accepts `str` like `"path/to/logs"` or a path using functions like `os.path.join()`. Specifies the directory where log files will be stored.  Defaults to `"logs"`.
+
 - **LOG_FILE_FORMATS**: Accepts log levels as keys and format options as values. The format option can be an `int` chosen from predefined options or a user-defined format `str`. Defines the format for log files. Defaults to `1` for all levels.
+
  - **Note**:See the **Available Format Options** below for available formats.
+
 - **LOG_CONSOLE_LEVEL**: Accepts `str` that is a valid log level. Specifies the log level for console output. Defaults to `'DEBUG'`,
+
 - **LOG_CONSOLE_FORMAT**: Accepts the same options as `LOG_FILE_FORMATS`. Defines the format for console output. Defaults to `1`.
+
 - **LOG_CONSOLE_COLORIZE**: Accepts `bool`. Determines whether to colorize console output. Defaults to `True`.
+
 - **LOG_DATE_FORMAT**: Accepts `str` that is a valid datetime format. Specifies the date format for log messages. Defaults to `'%Y-%m-%d %H:%M:%S'`.
+
 - **LOG_EMAIL_NOTIFIER**: Is a dictionary where:
+
  - **ENABLE**: Accepts `bool`. Determines whether the email notifier is enabled. Defaults to `False`.
+
  - **NOTIFY_ERROR**: Accepts `bool`. Determines whether to notify on error logs. Defaults to `False`.
+
  - **NOTIFY_CRITICAL**: Accepts `bool`. Determines whether to notify on critical logs. Defaults to `False`.
+
  - **LOG_FORMAT**: Accepts the same options as other log formats (`int` or `str`). Defines the format for log messages sent via email.  Defaults to `1`.
+
  - **USE_TEMPLATE**: Accepts `bool`. Determines whether the email includes an HTML template.  Defaults to `True`.
 
 
@@ -99,12 +114,12 @@ Below is an example configuration for the email settings in your `settings.py`:
 
 .. code-block:: python
 
-   EMAIL_HOST = 'smtp.example.com'
+   EMAIL_HOST = "smtp.example.com"
    EMAIL_PORT = 587
-   EMAIL_HOST_USER = 'your-email@example.com'
-   EMAIL_HOST_PASSWORD = 'your-password'
+   EMAIL_HOST_USER = "your-email@example.com"
+   EMAIL_HOST_PASSWORD = "your-password"
    EMAIL_USE_TLS = True
-   DEFAULT_FROM_EMAIL = 'your-email@example.com'
-   ADMIN_EMAIL = 'admin@example.com'
+   DEFAULT_FROM_EMAIL = "your-email@example.com"
+   ADMIN_EMAIL = "admin@example.com"
 
 These settings ensure that the email notifier is correctly configured to send log notifications to the specified `ADMIN_EMAIL` address.
