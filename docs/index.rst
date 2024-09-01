@@ -5,21 +5,38 @@ Welcome to django_logging Documentation!
 
    <br />
 
+.. image:: https://img.shields.io/github/license/ARYAN-NIKNEZHAD/django_logging
+    :target: https://github.com/ARYAN-NIKNEZHAD/django_logging/blob/main/LICENSE
+    :alt: License
+
 .. image:: https://img.shields.io/pypi/v/django_logging
-   :target: https://pypi.org/project/django_logging/
-   :alt: PyPI release
+    :target: https://pypi.org/project/django_logging/
+    :alt: PyPI release
 
 .. image:: https://img.shields.io/pypi/pyversions/django_logging
-   :target: https://pypi.org/project/django_logging/
-   :alt: Supported Python versions
+    :target: https://pypi.org/project/django_logging/
+    :alt: Supported Python versions
 
 .. image:: https://img.shields.io/pypi/djversions/django_logging
-   :target: https://pypi.org/project/django_logging/
-   :alt: Supported Django versions
+    :target: https://pypi.org/project/django_logging/
+    :alt: Supported Django versions
 
 .. image:: https://img.shields.io/readthedocs/django_logging
-   :target: https://django_logging.readthedocs.io/
-   :alt: Documentation
+    :target: https://django_logging.readthedocs.io/en/latest/
+    :alt: Documentation
+
+.. image:: https://img.shields.io/github/last-commit/ARYAN-NIKNEZHAD/django_logging
+    :target: https://github.com/ARYAN-NIKNEZHAD/django_logging/commits/main
+    :alt: Last Commit
+
+.. image:: https://img.shields.io/github/languages/top/ARYAN-NIKNEZHAD/django_logging
+    :target: https://github.com/ARYAN-NIKNEZHAD/django_logging
+    :alt: Languages
+
+.. image:: https://img.shields.io/github/issues/ARYAN-NIKNEZHAD/django_logging
+    :target: https://github.com/ARYAN-NIKNEZHAD/django_logging/issues
+    :alt: Open Issues
+
 
 |br|
 
