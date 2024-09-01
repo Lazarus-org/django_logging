@@ -27,7 +27,7 @@ jobs:
         run: tox
 
       - name: Run pre-commit hooks
-        run: tox -e pre-commit
+        run: pre-commit run --all-files --config=.pre-commit-config-ci.yaml
 
       - name: Upload coverage to Codecov
         run: codecov
