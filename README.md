@@ -35,11 +35,11 @@ Getting started with `django_logging` is simple. Follow these steps to get up an
 
 1. **Installation**
 
-   Install `django_logging` via pip:
+Install `django_logging` via pip:
 
-   ```shell
-   $ pip install django_logging
-   ```
+```shell
+$ pip install django_logging
+```
 
 2. **Add to Installed Apps**
 
@@ -84,6 +84,7 @@ That's it! `django_logging` is ready to use with default settings. For further c
 Once `django_logging` is installed and added to your INSTALLED_APPS, you can start using it right away. The package provides several features to customize and enhance logging in your Django project. Below is a guide on how to use the various features provided by `django_logging`.
 
 1. **Basic Logging Usage**
+
 At its core, `django_logging` is built on top of Python’s built-in logging module. This means you can use the standard logging module to log messages across your Django project. Here’s a basic example of logging usage:
 ```python
 import logging
