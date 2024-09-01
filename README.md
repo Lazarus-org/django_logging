@@ -7,8 +7,10 @@ The [`django_logging`](https://github.com/ARYAN-NIKNEZHAD/django_logging) is a D
 ![Supported Python versions](https://img.shields.io/pypi/pyversions/django_logging)
 ![Supported Django versions](https://img.shields.io/pypi/djversions/django_logging)
 ![Documentation](https://img.shields.io/readthedocs/django_logging)
-![Last Commit](https://img.shields.io/github/)
-![Languages](https://img.shields.io/github/)
+![Last Commit](https://img.shields.io/github/last-commit/ARYAN-NIKNEZHAD/django_logging)
+![Languages](https://img.shields.io/github/languages/top/ARYAN-NIKNEZHAD/django_logging)
+![CI Workflow](https://github.com/ARYAN-NIKNEZHAD/django_logging/actions/workflows/ci.yml/badge.svg)
+![Open Issues](https://img.shields.io/github/issues/ARYAN-NIKNEZHAD/django_logging)
 
 
 
