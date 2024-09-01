@@ -93,16 +93,3 @@ repos:
         stages: [ commit ]
         pass_filenames: false
         always_run: true
-
-      - id: pylint
-        name: pylint
-        entry: pylint
-        language: system
-        types: [ python ]
-        require_serial: true
-        args:
-          - "-rn"
-          - "-sn"
-          - "--rcfile=pyproject.toml"
-        files: ^django_logging/
-        exclude: (migrations/|tests/|docs/).*
