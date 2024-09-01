@@ -7,8 +7,10 @@ The [`django_logging`](https://github.com/ARYAN-NIKNEZHAD/django_logging) is a D
 ![Supported Python versions](https://img.shields.io/pypi/pyversions/django_logging)
 ![Supported Django versions](https://img.shields.io/pypi/djversions/django_logging)
 ![Documentation](https://img.shields.io/readthedocs/django_logging)
-![Last Commit](https://img.shields.io/github/)
-![Languages](https://img.shields.io/github/)
+![Last Commit](https://img.shields.io/github/last-commit/ARYAN-NIKNEZHAD/django_logging)
+![Languages](https://img.shields.io/github/languages/top/ARYAN-NIKNEZHAD/django_logging)
+![CI Workflow](https://github.com/ARYAN-NIKNEZHAD/django_logging/actions/workflows/ci.yml/badge.svg)
+![Open Issues](https://img.shields.io/github/issues/ARYAN-NIKNEZHAD/django_logging)
 
 
 
@@ -35,11 +37,11 @@ Getting started with `django_logging` is simple. Follow these steps to get up an
 
 1. **Installation**
 
-   Install `django_logging` via pip:
+Install `django_logging` via pip:
 
-   ```shell
-   $ pip install django_logging
-   ```
+```shell
+$ pip install django_logging
+```
 
 2. **Add to Installed Apps**
 
@@ -84,6 +86,7 @@ That's it! `django_logging` is ready to use with default settings. For further c
 Once `django_logging` is installed and added to your INSTALLED_APPS, you can start using it right away. The package provides several features to customize and enhance logging in your Django project. Below is a guide on how to use the various features provided by `django_logging`.
 
 1. **Basic Logging Usage**
+
 At its core, `django_logging` is built on top of Python’s built-in logging module. This means you can use the standard logging module to log messages across your Django project. Here’s a basic example of logging usage:
 ```python
 import logging
