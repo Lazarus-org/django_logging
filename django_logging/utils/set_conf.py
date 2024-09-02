@@ -19,7 +19,7 @@ from django_logging.utils.get_conf import (
 )
 
 
-# pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments, too-many-locals
 def set_config(
     log_levels: LogLevels,
     log_dir: LogDir,
@@ -98,6 +98,8 @@ def set_config(
     except (ValueError, ImproperlyConfigured, AttributeError, FileNotFoundError):
         import logging
 
+        colors = AnsiColors()
+
         logging.warning(
             "\n"
             "========================%sDJANGO LOGGING%s"
@@ -106,10 +108,10 @@ def set_config(
             " A configuration issue has been detected.\n"
             "System checks will be run to provide more detailed information.\n"
             "==============================================================\n",
-            AnsiColors.RED_BACKGROUND,
-            AnsiColors.RESET,
-            AnsiColors.RED,
-            AnsiColors.RESET,
+            colors.RED_BACKGROUND,
+            colors.RESET,
+            colors.RED,
+            colors.RESET,
         )
         return
 
