@@ -39,6 +39,7 @@ packages = [
 [tool.poetry.urls]
 "Documentation" = "https://django-logging.readthedocs.io"
 "Source Code" = "https://github.com/ARYAN-NIKNEZHAD/django_logging"
+"Changelog" = "https://github.com/ARYAN-NIKNEZHAD/django_logging/blob/main/CHANGELOG.md"
 "Issues" = "https://github.com/ARYAN-NIKNEZHAD/django_logging/issues"
 
 [tool.poetry.dependencies]
@@ -240,9 +241,8 @@ B104 = { check_typed_list = true }
 
 [tool.commitizen]
 name = "cz_conventional_commits"
-version = "1.0.1"
-changelog_file = "CHANGELOG.md"
+version = "1.0.2"
+tag_format = "v$version"
 
 [tool.commitizen.settings]
-tag_format = "v$version"
 increment_types = [ "feat", "fix" ]
