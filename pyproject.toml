@@ -240,7 +240,9 @@ B104 = { check_typed_list = true }
 
 [tool.commitizen]
 name = "cz_conventional_commits"
-version = "0.1.0"
+version = "1.0.1"
+changelog_file = "CHANGELOG.md"
 
 [tool.commitizen.settings]
+tag_format = "v$version"
 increment_types = [ "feat", "fix" ]
