@@ -9,20 +9,20 @@ Welcome to django_logging Documentation!
     :target: https://github.com/ARYAN-NIKNEZHAD/django_logging/blob/main/LICENSE
     :alt: License
 
-.. image:: https://img.shields.io/pypi/v/django_logging
-    :target: https://pypi.org/project/django_logging/
+.. image:: https://img.shields.io/pypi/v/dj-logging
+    :target: https://pypi.org/project/dj-logging/
     :alt: PyPI release
 
-.. image:: https://img.shields.io/pypi/pyversions/django_logging
-    :target: https://pypi.org/project/django_logging/
+.. image:: https://img.shields.io/pypi/pyversions/dj-logging
+    :target: https://pypi.org/project/dj-logging/
     :alt: Supported Python versions
 
-.. image:: https://img.shields.io/pypi/djversions/django_logging
-    :target: https://pypi.org/project/django_logging/
+.. image:: https://img.shields.io/pypi/djversions/dj-logging
+    :target: https://pypi.org/project/dj-logging/
     :alt: Supported Django versions
 
-.. image:: https://img.shields.io/readthedocs/django_logging
-    :target: https://django_logging.readthedocs.io/en/latest/
+.. image:: https://img.shields.io/readthedocs/django-logging
+    :target: https://django-logging.readthedocs.io/en/latest/
     :alt: Documentation
 
 .. image:: https://img.shields.io/github/last-commit/ARYAN-NIKNEZHAD/django_logging
@@ -37,7 +37,7 @@ Welcome to django_logging Documentation!
     :target: https://github.com/ARYAN-NIKNEZHAD/django_logging/issues
     :alt: Open Issues
 
-.. image:: https://codecov.io/gh/ARYAN-NIKNEZHAD/django_logging/branch/main/graph/badge.svg
+.. image:: https://img.shields.io/codecov/c/github/ARYAN-NIKNEZHAD/django_logging/main
    :target: https://codecov.io/gh/ARYAN-NIKNEZHAD/django_logging
    :alt: Coverage
 

@@ -9,7 +9,7 @@ Getting Started with `django_logging` is simple. Follow these steps to get up an
 
 .. code-block:: shell
 
-  $ pip install django_logging
+  $ pip install dj-logging
 
 2. **Add to Installed Apps**
 
