@@ -11,7 +11,7 @@ The [`django_logging`](https://github.com/ARYAN-NIKNEZHAD/django_logging) is a D
 ![Languages](https://img.shields.io/github/languages/top/ARYAN-NIKNEZHAD/django_logging)
 ![CI Workflow](https://github.com/ARYAN-NIKNEZHAD/django_logging/actions/workflows/ci.yml/badge.svg)
 ![Open Issues](https://img.shields.io/github/issues/ARYAN-NIKNEZHAD/django_logging)
-
+[![codecov](https://codecov.io/gh/ARYAN-NIKNEZHAD/django_logging/branch/main/graph/badge.svg)](https://codecov.io/gh/ARYAN-NIKNEZHAD/django_logging)
 
 
 ## Project Detail

@@ -37,6 +37,11 @@ Welcome to django_logging Documentation!
     :target: https://github.com/ARYAN-NIKNEZHAD/django_logging/issues
     :alt: Open Issues
 
+.. image:: https://codecov.io/gh/ARYAN-NIKNEZHAD/django_logging/branch/main/graph/badge.svg
+   :target: https://codecov.io/gh/ARYAN-NIKNEZHAD/django_logging
+   :alt: Coverage
+
+
 
 |br|
 
