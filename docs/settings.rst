@@ -3,34 +3,36 @@ Settings
 
 By default, `django_logging` uses a built-in configuration that requires no additional setup. However, you can customize the logging settings by adding the `DJANGO_LOGGING` dictionary configuration to your Django `settings` file.
 
-Example configuration:
+Example configuration
+---------------------
+here is an example of DJANGO_LOGGING in project settings:
 
-   .. code-block:: python
+.. code-block:: python
 
-      DJANGO_LOGGING = {
-          "AUTO_INITIALIZATION_ENABLE": True,
-          "INITIALIZATION_MESSAGE_ENABLE": True,
-          "LOG_FILE_LEVELS": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
-          "LOG_DIR": "logs",
-          "LOG_FILE_FORMATS": {
-              "DEBUG": 1,
-              "INFO": 1,
-              "WARNING": 1,
-              "ERROR": 1,
-              "CRITICAL": 1,
-          },
-          "LOG_CONSOLE_LEVEL": "DEBUG",
-          "LOG_CONSOLE_FORMAT": 1,
-          "LOG_CONSOLE_COLORIZE": True,
-          "LOG_DATE_FORMAT": "%Y-%m-%d %H:%M:%S",
-          "LOG_EMAIL_NOTIFIER": {
-              "ENABLE": False,
-              "NOTIFY_ERROR": False,
-              "NOTIFY_CRITICAL": False,
-              "LOG_FORMAT": 1,
-              "USE_TEMPLATE": True,
-          },
-      }
+  DJANGO_LOGGING = {
+      "AUTO_INITIALIZATION_ENABLE": True,
+      "INITIALIZATION_MESSAGE_ENABLE": True,
+      "LOG_FILE_LEVELS": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+      "LOG_DIR": "logs",
+      "LOG_FILE_FORMATS": {
+          "DEBUG": 1,
+          "INFO": 1,
+          "WARNING": 1,
+          "ERROR": 1,
+          "CRITICAL": 1,
+      },
+      "LOG_CONSOLE_LEVEL": "DEBUG",
+      "LOG_CONSOLE_FORMAT": 1,
+      "LOG_CONSOLE_COLORIZE": True,
+      "LOG_DATE_FORMAT": "%Y-%m-%d %H:%M:%S",
+      "LOG_EMAIL_NOTIFIER": {
+          "ENABLE": False,
+          "NOTIFY_ERROR": False,
+          "NOTIFY_CRITICAL": False,
+          "LOG_FORMAT": 1,
+          "USE_TEMPLATE": True,
+      },
+  }
 
 
 Here's a breakdown of the available configuration options:
@@ -69,7 +71,7 @@ Here's a breakdown of the available configuration options:
 
 
 Available Format Options
-=========================
+------------------------
 
 The `django_logging` package provides predefined log format options that you can use in configuration. These options can be applied to log formats. Below are the available format options:
 

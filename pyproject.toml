@@ -10,7 +10,6 @@ authors = [ "ARYAN-NIKNEZHAD <aryan513966@gmail.com>", "MEHRSHAD-MIRSHEKARY <meh
 license = "MIT"
 readme = "README.md"
 keywords = [ "django_logging", "django", "logging" ]
-repository = "https://github.com/ARYAN-NIKNEZHAD/django_logging"
 
 classifiers = [
   "Development Status :: 3 - Alpha",
@@ -38,7 +37,7 @@ packages = [
 ]
 
 [tool.poetry.urls]
-"Documentation" = "https://django_logging.readthedocs.io"
+"Documentation" = "https://django-logging.readthedocs.io"
 "Source Code" = "https://github.com/ARYAN-NIKNEZHAD/django_logging"
 "Issues" = "https://github.com/ARYAN-NIKNEZHAD/django_logging/issues"
 

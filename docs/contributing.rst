@@ -1,4 +1,4 @@
-Contributing to django_logging
+Contributing
 ==============================
 
 We’re excited that you’re interested in contributing to `django_logging`! Whether you’re fixing a bug, adding a feature, or improving the project, your help is appreciated.

@@ -3,10 +3,10 @@
 The [`django_logging`](https://github.com/ARYAN-NIKNEZHAD/django_logging) is a Django package designed to extend and enhance Python’s built-in logging capabilities. By providing customizable configurations and advanced features, it offers developers a comprehensive logging solution tailored specifically for Django applications.
 
 ![License](https://img.shields.io/github/license/ARYAN-NIKNEZHAD/django_logging)
-![PyPI release](https://img.shields.io/pypi/v/django_logging)
-![Supported Python versions](https://img.shields.io/pypi/pyversions/django_logging)
-![Supported Django versions](https://img.shields.io/pypi/djversions/django_logging)
-![Documentation](https://img.shields.io/readthedocs/django_logging)
+![PyPI release](https://img.shields.io/pypi/v/dj-logging)
+![Supported Python versions](https://img.shields.io/pypi/pyversions/dj-logging)
+![Supported Django versions](https://img.shields.io/pypi/djversions/dj-logging)
+![Documentation](https://img.shields.io/readthedocs/django-logging)
 ![Last Commit](https://img.shields.io/github/last-commit/ARYAN-NIKNEZHAD/django_logging)
 ![Languages](https://img.shields.io/github/languages/top/ARYAN-NIKNEZHAD/django_logging)
 ![CI Workflow](https://github.com/ARYAN-NIKNEZHAD/django_logging/actions/workflows/ci.yml/badge.svg)
@@ -40,7 +40,7 @@ Getting started with `django_logging` is simple. Follow these steps to get up an
 first, Install `django_logging` via pip:
 
 ```shell
-$ pip install django_logging
+$ pip install dj-logging
 ```
 
 2. **Add to Installed Apps**

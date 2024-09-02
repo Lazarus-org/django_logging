@@ -3,7 +3,8 @@ Usage
 
 Once `django_logging` is installed and added to your `INSTALLED_APPS`, you can start using it right away. The package provides several features to customize and enhance logging in your Django project. Below is a guide on how to use the various features provided by `django_logging`.
 
-1. **Basic Logging Usage**
+Basic Logging Usage
+-------------------
 
    At its core, `django_logging` is built on top of Python’s built-in logging module. This means you can use the standard logging module to log messages across your Django project. Here’s a basic example of logging usage:
 
@@ -21,7 +22,8 @@ Once `django_logging` is installed and added to your `INSTALLED_APPS`, you can s
 
    These logs will be handled according to the configurations set up by `django_logging`, using either the default settings or any custom settings you've provided.
 
-2. **Request Logging Middleware**
+Request Logging Middleware
+--------------------------
 
    To capture and log information of each request to the server, such as the request path, user, IP address, and user agent, add `django_logging.middleware.RequestLogMiddleware` to your `MIDDLEWARE` setting:
 
@@ -40,8 +42,8 @@ Once `django_logging` is installed and added to your `INSTALLED_APPS`, you can s
       INFO | 'datetime' | django_logging | Request Info: (request_path: /example-path, user: example_user,
       IP: 192.168.1.1, user_agent: Mozilla/5.0)
 
-3. **Context Manager**
-
+Context Manager
+---------------
    You can use the `config_setup` context manager to temporarily apply `django_logging` configurations within a specific block of code.
 
    Example usage:
@@ -69,7 +71,8 @@ Once `django_logging` is installed and added to your `INSTALLED_APPS`, you can s
 
       "You must set 'AUTO_INITIALIZATION_ENABLE' to False in DJANGO_LOGGING in your settings to use the context manager."
 
-4. **Log and Notify Utility**
+Log and Notify Utility
+----------------------
 
    To send specific logs as email, use the `log_and_notify_admin` function. Ensure that the `ENABLE` option in `LOG_EMAIL_NOTIFIER` is sent to `True` in your settings:
 
@@ -106,7 +109,8 @@ Once `django_logging` is installed and added to your `INSTALLED_APPS`, you can s
    Additionally, ensure that all required email settings are configured in your Django settings file.
     - **Note**: For more detailed configuration options, refer to the [Settings](settings.rst) section.
 
-5. **Send Logs Command**
+Send Logs Command
+-----------------
 
    To send the entire log directory to a specified email address, use the `send_logs` management command:
 
