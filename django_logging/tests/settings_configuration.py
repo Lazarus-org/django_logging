@@ -49,7 +49,3 @@ def configure_django_settings():
             ADMIN_EMAIL="admin@test.com",
         )
         django.setup()
-
-
-# Call this function before running your tests
-configure_django_settings()
