@@ -3,7 +3,7 @@ build-backend = "poetry.core.masonry.api"
 requires = [ "poetry-core" ]
 
 [tool.poetry]
-name = "django-logging"
+name = "django_logging"
 version = "0.1.0"
 description = "A package for logging in django applications"
 authors = [ "ARYAN-NIKNEZHAD <aryan513966@gmail.com>", "MEHRSHAD-MIRSHEKARY <mehrshad_mirshekary@email.com>" ]
