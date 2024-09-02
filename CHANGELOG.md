@@ -2,6 +2,7 @@
 **Added**
 - tag_format in commitizen configuration in pyproject.toml
 - changelog path in poetry urls
+- Add FUNDING.yml file
 
 **Refactored**
 - Renamed setup_django into settings_configuration in tests dir
