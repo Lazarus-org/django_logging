@@ -1,16 +1,17 @@
 # Django Logging
 
-The [`django_logging`](https://github.com/ARYAN-NIKNEZHAD/django_logging) is a Django package designed to extend and enhance Python’s built-in logging capabilities. By providing customizable configurations and advanced features, it offers developers a comprehensive logging solution tailored specifically for Django applications.
+The [`django_logging`](https://github.com/lazarus-org/django_logging) is a Django package designed to extend and enhance Python’s built-in logging capabilities. By providing customizable configurations and advanced features, it offers developers a comprehensive logging solution tailored specifically for Django applications.
 
-![License](https://img.shields.io/github/license/ARYAN-NIKNEZHAD/django_logging)
+![License](https://img.shields.io/github/license/lazarus-org/django_logging)
 ![PyPI release](https://img.shields.io/pypi/v/dj-logging)
-![Supported Python versions](https://img.shields.io/pypi/pyversions/dj-logging)
-![Supported Django versions](https://img.shields.io/pypi/djversions/dj-logging)
 ![Documentation](https://img.shields.io/readthedocs/django-logging)
-![Last Commit](https://img.shields.io/github/last-commit/ARYAN-NIKNEZHAD/django_logging)
-![Languages](https://img.shields.io/github/languages/top/ARYAN-NIKNEZHAD/django_logging)
-![CI Workflow](https://github.com/ARYAN-NIKNEZHAD/django_logging/actions/workflows/ci.yml/badge.svg)
-![Open Issues](https://img.shields.io/github/issues/ARYAN-NIKNEZHAD/django_logging)
+![CI Workflow](https://github.com/lazarus-org/django_logging/actions/workflows/ci.yml/badge.svg)
+![Supported Python versions](https://img.shields.io/pypi/pyversions/dj-logging)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
+![Supported Django versions](https://img.shields.io/pypi/djversions/dj-logging)
+![Last Commit](https://img.shields.io/github/last-commit/lazarus-org/django_logging)
+![Languages](https://img.shields.io/github/languages/top/lazarus-org/django_logging)
+![Open Issues](https://img.shields.io/github/issues/lazarus-org/django_logging)
 [![codecov](https://codecov.io/gh/ARYAN-NIKNEZHAD/django_logging/branch/main/graph/badge.svg)](https://codecov.io/gh/ARYAN-NIKNEZHAD/django_logging)
 
 
@@ -289,6 +290,6 @@ These settings ensure that the email notifier is correctly configured to send lo
 
 ## Conclusion
 
-Thank you for using `django_logging`. We hope this package enhances your Django application's logging capabilities. For more detailed documentation, customization options, and updates, please refer to the official documentation on [Read the Docs](https://django_logging.readthedocs.io/). If you have any questions or issues, feel free to open an issue on our [GitHub repository](https://github.com/ARYAN-NIKNEZHAD/django_logging).
+Thank you for using `django_logging`. We hope this package enhances your Django application's logging capabilities. For more detailed documentation, customization options, and updates, please refer to the official documentation on [Read the Docs](https://django-logging.readthedocs.io/). If you have any questions or issues, feel free to open an issue on our [GitHub repository](https://github.com/lazarus-org/django_logging).
 
 Happy logging!
