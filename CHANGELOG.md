@@ -1,3 +1,17 @@
+## v1.0.3 (2024-09-05)
+### ✨ Added
+- **chore(pyproject)**: Added `python-semantic-release` configuration to automate versioning and releases. (`945c648`)
+- **docs**: Added pre-commit badge to display status in documentation. (`f40a9e5`, `7fca7b7`)
+
+### 🛠️ Changed
+- **docs**: Updated badge URLs and paths in documentation for correct references. (`f40a9e5`, `7fca7b7`)
+
+### 🐛 Fixed
+- **pyproject**: Updated dependencies and development requirements in the `pyproject.toml` configuration. (`945c648`)
+
+### 🔀 Merged
+- **Merge PR #77**: Merged the `chore/pyproject-config` branch into the main branch. (`c2ebad3`)
+
 ## v1.0.2 (2024-09-02)
 **Added**
 - tag_format in commitizen configuration in pyproject.toml
