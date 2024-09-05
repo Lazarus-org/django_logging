@@ -10,8 +10,6 @@ jobs:
     name: Build and Release
     runs-on: ubuntu-latest
 
-    # This job will only run if the 'test' job from the CI passes
-    needs: [test]
 
     steps:
       - uses: actions/checkout@v4
