@@ -53,4 +53,4 @@ By default, django_logging will log each level to its own file:
 
 In addition, logs will be displayed in **colorized** mode in the `console`, making it easier to distinguish between different log levels.
 
-That's it! `django_logging` is ready to use. For further customization, refer to the Settings section.
+That's it! `django_logging` is ready to use. For further customization, refer to the :doc:`Settings <settings>`.

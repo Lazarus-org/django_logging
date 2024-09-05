@@ -154,6 +154,6 @@ Here are some additional resources that might be helpful:
 - `pylint Documentation <https://pylint.pycqa.org/en/latest/>`_
 - `Pre-commit Documentation <https://pre-commit.com/>`_
 
----
+----
 
 Thank you for your interest in contributing to `django_logging`! We look forward to your contributions.

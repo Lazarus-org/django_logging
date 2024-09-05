@@ -17,6 +17,10 @@ Welcome to django_logging Documentation!
     :target: https://django-logging.readthedocs.io/en/latest/
     :alt: Documentation
 
+.. image:: https://img.shields.io/badge/pylint-10/10-brightgreen?logo=python&logoColor=blue
+   :target: https://www.pylint.org/
+   :alt: Pylint
+
 .. image:: https://img.shields.io/pypi/pyversions/dj-logging
     :target: https://pypi.org/project/dj-logging/
     :alt: Supported Python versions

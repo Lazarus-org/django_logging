@@ -47,7 +47,7 @@ Here's a breakdown of the available configuration options:
 
 - **LOG_FILE_FORMATS**: Accepts log levels as keys and format options as values. The format option can be an `int` chosen from predefined options or a user-defined format `str`. Defines the format for log files. Defaults to `1` for all levels.
 
- - **Note**:See the **Available Format Options** below for available formats.
+ - **Note**:See the `Available Format Options`_ below for available formats.
 
 - **LOG_CONSOLE_LEVEL**: Accepts `str` that is a valid log level. Specifies the log level for console output. Defaults to `'DEBUG'`,
 
@@ -69,6 +69,8 @@ Here's a breakdown of the available configuration options:
 
  - **USE_TEMPLATE**: Accepts `bool`. Determines whether the email includes an HTML template.  Defaults to `True`.
 
+
+.. _available_format_options:
 
 Available Format Options
 ------------------------
