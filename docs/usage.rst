@@ -107,7 +107,7 @@ Log and Notify Utility
       "Email notifier is disabled. Please set the 'ENABLE' option to True in the 'LOG_EMAIL_NOTIFIER' in DJANGO_LOGGING in your settings to activate email notifications."
 
    Additionally, ensure that all required email settings are configured in your Django settings file.
-    - **Note**: For more detailed configuration options, refer to the [Settings](settings.rst) section.
+    - **Note**: For more detailed configuration options, refer to the :doc:`Settings <settings>`.
 
 Send Logs Command
 -----------------

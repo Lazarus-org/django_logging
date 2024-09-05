@@ -1,3 +1,23 @@
+## Unreleased (2024-09-05)
+
+### 🚀 CI
+- **ci**: Added automated build and release process. ([1a3bb2b](https://github.com/lazarus-org/django_logging/commit/1a3bb2b))
+  - Added a GitHub Actions workflow for automated build and release.
+  - Workflow triggers on new tags matching the `v*.*.*` pattern.
+  - Includes steps to set up Python, install dependencies, and build the package using Poetry.
+  - Automatically publishes the built package to PyPI using stored PyPI token secrets.
+  - Ensures the release job only runs after the 'test' job passes successfully.
+
+### ⚡️🔨📚 Refactor
+- **docs**: Updated badges in README MarkDown file. ([c82f452](https://github.com/lazarus-org/django_logging/commit/c82f452))
+  - Added pylint badge to display code quality rating in `README.md`.
+  - Updated pre-commit badge color.
+
+- **docs**: Updated badges and references in RST docs. ([c82f452](https://github.com/lazarus-org/django_logging/commit/c82f452))
+  - Added pylint badge to the documentation.
+  - Updated the settings section in various `.rst` files to reflect recent changes.
+  - Enhanced documentation for better readability and accuracy.
+
 ## v1.0.3 (2024-09-05)
 ### ✨ Added
 - **chore(pyproject)**: Added `python-semantic-release` configuration to automate versioning and releases. (`945c648`)

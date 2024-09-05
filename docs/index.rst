@@ -17,11 +17,15 @@ Welcome to django_logging Documentation!
     :target: https://django-logging.readthedocs.io/en/latest/
     :alt: Documentation
 
+.. image:: https://img.shields.io/badge/pylint-10/10-brightgreen?logo=python&logoColor=blue
+   :target: https://www.pylint.org/
+   :alt: Pylint
+
 .. image:: https://img.shields.io/pypi/pyversions/dj-logging
     :target: https://pypi.org/project/dj-logging/
     :alt: Supported Python versions
 
-.. image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
+.. image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=yellow
    :target: https://github.com/pre-commit/pre-commit
    :alt: pre-commit
 
