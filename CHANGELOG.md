@@ -1,4 +1,4 @@
-## Unreleased (2024-09-05)
+## v1.0.4 (2024-09-05)
 
 ### 🚀 CI
 - **ci**: Added automated build and release process. ([1a3bb2b](https://github.com/lazarus-org/django_logging/commit/1a3bb2b))
