@@ -7,12 +7,13 @@ The [`django_logging`](https://github.com/lazarus-org/django_logging) is a Djang
 ![Documentation](https://img.shields.io/readthedocs/django-logging)
 ![CI Workflow](https://github.com/lazarus-org/django_logging/actions/workflows/ci.yml/badge.svg)
 ![Supported Python versions](https://img.shields.io/pypi/pyversions/dj-logging)
-[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=yellow)](https://github.com/pre-commit/pre-commit)
 ![Supported Django versions](https://img.shields.io/pypi/djversions/dj-logging)
 ![Last Commit](https://img.shields.io/github/last-commit/lazarus-org/django_logging)
 ![Languages](https://img.shields.io/github/languages/top/lazarus-org/django_logging)
 ![Open Issues](https://img.shields.io/github/issues/lazarus-org/django_logging)
 [![codecov](https://codecov.io/gh/ARYAN-NIKNEZHAD/django_logging/branch/main/graph/badge.svg)](https://codecov.io/gh/ARYAN-NIKNEZHAD/django_logging)
+[![pylint](https://img.shields.io/badge/pylint-10/10-brightgreen?logo=python&logoColor=blue)](https://www.pylint.org/)
 
 
 ## Project Detail

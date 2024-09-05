@@ -25,7 +25,7 @@ Welcome to django_logging Documentation!
     :target: https://pypi.org/project/dj-logging/
     :alt: Supported Python versions
 
-.. image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
+.. image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=yellow
    :target: https://github.com/pre-commit/pre-commit
    :alt: pre-commit
 
