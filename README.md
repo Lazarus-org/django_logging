@@ -144,7 +144,7 @@ with config_setup():
 
 # the logging configuration will restore to what it was before, in here outside of with block
 ```
-- Note: `AUTO_INITIALIZATION_ENABLE` must be set to `False` in the settings to use the context manager. If `AUTO_INITIALIZATION_ENABLE` is `True`, attempting to use the context manager will raise a `ValueError` with the message:
+- Note: `AUTO_INITIALIZATION_ENABLE` must be set to `False` in the settings to use the context manager. If it is `True`, attempting to use the context manager will raise a `ValueError` with the message:
 ```
 "You must set 'AUTO_INITIALIZATION_ENABLE' to False in DJANGO_LOGGING in your settings to use the context manager."
 ```

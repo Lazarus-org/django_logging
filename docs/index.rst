@@ -25,13 +25,13 @@ Welcome to django_logging Documentation!
     :target: https://pypi.org/project/dj-logging/
     :alt: Supported Python versions
 
-.. image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=yellow
-   :target: https://github.com/pre-commit/pre-commit
-   :alt: pre-commit
-
 .. image:: https://img.shields.io/pypi/djversions/dj-logging
     :target: https://pypi.org/project/dj-logging/
     :alt: Supported Django versions
+
+.. image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=yellow
+   :target: https://github.com/pre-commit/pre-commit
+   :alt: pre-commit
 
 .. image:: https://img.shields.io/github/issues/ARYAN-NIKNEZHAD/django_logging
     :target: https://github.com/lazarus-org/django_logging/issues
