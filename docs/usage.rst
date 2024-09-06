@@ -1,7 +1,7 @@
 Usage
 =====
 
-Once `django_logging` is installed and added to your `INSTALLED_APPS`, you can start using it right away. The package provides several features to customize and enhance logging in your Django project. Below is a guide on how to use the various features provided by `django_logging`.
+Once ``django_logging`` is installed and added to your ``INSTALLED_APPS``, you can start using it right away. The package provides several features to customize and enhance logging in your Django project. Below is a guide on how to use the various features provided by `django_logging`.
 
 Basic Logging Usage
 -------------------
@@ -25,7 +25,7 @@ Basic Logging Usage
 Request Logging Middleware
 --------------------------
 
-   To capture and log information of each request to the server, such as the request path, user, IP address, and user agent, add `django_logging.middleware.RequestLogMiddleware` to your `MIDDLEWARE` setting:
+   To capture and log information of each request to the server, such as the ``request path``, ``user``, ``IP address`` and ``user agent``, add ``django_logging.middleware.RequestLogMiddleware`` to your ``MIDDLEWARE`` setting:
 
    .. code-block::
 
@@ -35,7 +35,7 @@ Request Logging Middleware
           ...
       ]
 
-   This middleware will log the request details at info level, here is an example with default format:
+   This middleware will log the request details at ``INFO`` level, here is an example with default format:
 
    .. code-block:: text
 
@@ -44,7 +44,7 @@ Request Logging Middleware
 
 Context Manager
 ---------------
-   You can use the `config_setup` context manager to temporarily apply `django_logging` configurations within a specific block of code.
+   You can use the ``config_setup`` context manager to temporarily apply `django_logging` configurations within a specific block of code.
 
    Example usage:
 
@@ -65,7 +65,7 @@ Context Manager
           foo()
 
 
-   Note: `AUTO_INITIALIZATION_ENABLE` must be set to `False` in the settings to use the context manager. If `AUTO_INITIALIZATION_ENABLE` is `True`, attempting to use the context manager will raise a `ValueError` with the message:
+   Note: ``AUTO_INITIALIZATION_ENABLE`` must be set to ``False`` in the settings to use the context manager. If it is ``True``, attempting to use the context manager will raise a ``ValueError`` with the message:
 
    .. code-block:: text
 
@@ -74,7 +74,7 @@ Context Manager
 Log and Notify Utility
 ----------------------
 
-   To send specific logs as email, use the `log_and_notify_admin` function. Ensure that the `ENABLE` option in `LOG_EMAIL_NOTIFIER` is sent to `True` in your settings:
+   To send specific logs as email, use the ``log_and_notify_admin`` function. Ensure that the ``ENABLE`` option in ``LOG_EMAIL_NOTIFIER`` is set to ``True`` in your settings:
 
    .. code-block:: python
 
@@ -85,7 +85,7 @@ Log and Notify Utility
 
       log_and_notify_admin(logger, logging.INFO, "This is a log message")
 
-   You can also include additional request information in the email by passing an `extra` dictionary:
+   You can also include additional request information (``ip_address`` and ``browser_type``) in the email by passing an ``extra`` dictionary:
 
    .. code-block:: python
 
@@ -100,7 +100,7 @@ Log and Notify Utility
               logger, logging.INFO, "This is a log message", extra={"request": request}
           )
 
-   Note: To use the email notifier, `LOG_EMAIL_NOTIFIER["ENABLE"]` must be set to `True`. If it is not enabled, calling `log_and_notify_admin` will raise a `ValueError`:
+   Note: To use the email notifier, ``LOG_EMAIL_NOTIFIER["ENABLE"]`` must be set to ``True``. If it is not, calling ``log_and_notify_admin`` will raise a ``ValueError``:
 
    .. code-block:: text
 
@@ -112,7 +112,7 @@ Log and Notify Utility
 Send Logs Command
 -----------------
 
-   To send the entire log directory to a specified email address, use the `send_logs` management command:
+   To send the entire log directory to a specified email address, use the ``send_logs`` management command:
 
    .. code-block:: shell
 

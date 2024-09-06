@@ -13,7 +13,7 @@ Getting Started with `django_logging` is simple. Follow these steps to get up an
 
 2. **Add to Installed Apps**
 
-   Add `django_logging` to your `INSTALLED_APPS` in your Django settings file:
+   Add `django_logging` to your ``INSTALLED_APPS`` in your Django settings file:
 
 .. code-block::
 
@@ -45,12 +45,12 @@ when the server starts, you'll see an initialization message like this in your *
 
 By default, django_logging will log each level to its own file:
 
-- DEBUG : `logs/debug.log`
-- INFO : `logs/info.log`
-- WARNING : `logs/warning.log`
-- ERROR : `logs/error.log`
-- CRITICAL : `logs/critical.log`
+- DEBUG : ``logs/debug.log``
+- INFO : ``logs/info.log``
+- WARNING : ``logs/warning.log``
+- ERROR : ``logs/error.log``
+- CRITICAL : ``logs/critical.log``
 
-In addition, logs will be displayed in **colorized** mode in the `console`, making it easier to distinguish between different log levels.
+In addition, logs will be displayed in **colorized** mode in the ``console``, making it easier to distinguish between different log levels.
 
 That's it! `django_logging` is ready to use. For further customization, refer to the :doc:`Settings <settings>`.
