@@ -188,6 +188,8 @@ markers = [
   "validators: Tests for validating configurations and inputs in the logging package.",
   "config_validator: Tests focused on validators that check configuration settings.",
   "email_settings_validator: Tests for validators that ensure email settings are valid.",
+  "decorators: Tests focused on custom decorators used throughout the package.",
+  "decorators_execution_tracking: Tests specifically for the execution_tracking module.",
 ]
 
 [tool.coverage.run]
