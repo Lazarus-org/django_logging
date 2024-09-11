@@ -120,4 +120,53 @@ Send Logs Command
 
    This command will attach the log directory and send a zip file to the provided email address.
 
+Execution Tracker Decorator
+---------------------------
+
+The ``execution_tracker`` decorator is used to log the performance metrics of any function. It tracks execution time and the number of database queries for decorated function (if enabled).
+
+Example Usage:
+
+.. code-block:: python
+
+    from django_logging.decorators import execution_tracker
+
+
+    @execution_tracker(
+        logging_level=logging.INFO,
+        log_queries=True,
+        query_threshold=10,
+        query_exceed_warning=False,
+    )
+    def some_function():
+        # function code
+        pass
+
+**Arguments:**
+
+- ``logging_level`` (``int``): The logging level at which performance details will be logged. Defaults to ``logging.INFO``.
+
+- ``log_queries`` (``bool``): Whether to log the number of database queries for decorated function(if ``DEBUG`` is ``True`` in your settings). If ``log_queries=True``, the number of queries will be included in the logs. Defaults to ``False``.
+
+- ``query_threshold`` (``int``): If provided, the number of database queries will be checked. If the number of queries exceeds the given threshold, a warning will be logged. Defaults to ``None``.
+
+- ``query_exceed_warning`` (``bool``): Whether to log a ``WARNING`` message if the number of queries exceeds the threshold. Defaults to ``False``.
+
+**Example Log Output:**
+
+.. code-block:: shell
+
+    INFO | 'datetime' | execution_tracking | Performance Metrics for Function: 'some_function'
+      Module: some_module
+      File: /path/to/file.py, Line: 123
+      Execution Time: 0 minute(s) and 0.2132 second(s)
+      Database Queries: 15 queries (exceeds threshold of 10)
+
+If `log_queries` is set to ``True`` but ``DEBUG`` is ``False``, a ``WARNING`` will be logged:
+
+.. code-block:: shell
+
+    WARNING | 'datetime' | execution_tracking | DEBUG mode is disabled, so database queries are not tracked.
+    To include the number of queries, set ``DEBUG`` to ``True`` in your Django settings.
+
 
