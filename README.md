@@ -191,6 +191,45 @@ python manage.py send_logs example@domain.com
 ```
 This command will attach the log directory and send a zip file to the provided email address.
 
+6. **Execution Tracker Decorator**
+
+The `execution_tracker` decorator is used to log the performance metrics of any function. It tracks execution time and the number of database queries for decorated function (if enabled).
+
+Example Usage:
+```python
+from django_logging.decorators import execution_tracker
+
+@execution_tracker(logging_level=logging.INFO, log_queries=True, query_threshold=10, query_exceed_warning=False)
+def some_function():
+    # function code
+    pass
+```
+
+Arguments:
+
+`logging_level` (`int`): The logging level at which performance details will be logged. Defaults to `logging.INFO`.
+
+`log_queries` (`bool`): Whether to log the number of database queries for decorated function(if `DEBUG` is `True` in your settings). If `log_queries=True`, the number of queries will be included in the logs. Defaults to `False`.
+
+`query_threshold` (`int`): If provided, the number of database queries will be checked. If the number of queries exceeded the given threshold, a warning will be logged. Defaults to `None`.
+
+`query_exceed_warning` (`int`): Whether to log a `WARNING` message if number of queries exceeded the threshold. Defaults to `False`.
+
+Example Log Output:
+```shell
+INFO | 'datetime' | execution_tracking | Performance Metrics for Function: 'some_function'
+  Module: some_module
+  File: /path/to/file.py, Line: 123
+  Execution Time: 0 minute(s) and 0.2132 second(s)
+  Database Queries: 15 queries (exceeds threshold of 10)
+
+```
+If `log_queries` is set to `True` but `DEBUG` is `False`, a WARNING will be logged:
+
+```shell
+WARNING | 'datetime' | execution_tracking | DEBUG mode is disabled, so database queries are not tracked. To include number of queries, set `DEBUG` to `True` in your django settings.
+```
+
 ## Settings
 
 By default, `django_logging` uses a built-in configuration that requires no additional setup. However, you can customize the logging settings by adding the `DJANGO_LOGGING` dictionary configuration to your Django `settings` file.
@@ -225,20 +264,34 @@ DJANGO_LOGGING = {
 
 Here's a breakdown of the available configuration options:
 - `AUTO_INITIALIZATION_ENABLE`: Accepts `bool`. Enables automatic initialization of logging configurations. Defaults to `True`.
+
 - `INITIALIZATION_MESSAGE_ENABLE`: Accepts bool. Enables logging of the initialization message. Defaults to `True`.
+
 - `LOG_FILE_LEVELS`: Accepts a list of valid log levels (a list of `str` where each value must be one of the valid levels). Defines the log levels for file logging. Defaults to `['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']`.
+
 - `LOG_DIR`: Accepts `str` like `"path/to/logs"` or a path using functions like `os.path.join()`. Specifies the directory where log files will be stored. Defaults to `"logs"`.
+
 - `LOG_FILE_FORMATS`: Accepts log levels as keys and format options as values. The format option can be an `int` chosen from predefined options or a user-defined format `str`. Defines the format for log files. Defaults to `1` for all levels.
   - **Note**: See the [Available Format Options](#available-format-options) below for available formats.
+
 - `LOG_CONSOLE_LEVEL`: Accepts `str` that is a valid log level. Specifies the log level for console output. Defaults to `'DEBUG'`.
+
 - `LOG_CONSOLE_FORMAT`: Accepts the same options as `LOG_FILE_FORMATS`. Defines the format for console output. Defaults to `1`.
+
 - `LOG_CONSOLE_COLORIZE`: Accepts `bool`. Determines whether to colorize console output. Defaults to `True`.
+
 - `LOG_DATE_FORMAT`: Accepts `str` that is a valid datetime format. Specifies the date format for log messages. Defaults to `'%Y-%m-%d %H:%M:%S'`.
+
 - `LOG_EMAIL_NOTIFIER`: Is a dictionary where:
+
   - `ENABLE`: Accepts `bool`. Determines whether the email notifier is enabled. Defaults to `False`.
+
   - `NOTIFY_ERROR`: Accepts `bool`. Determines whether to notify on error logs. Defaults to `False`.
+
   - `NOTIFY_CRITICAL`: Accepts `bool`. Determines whether to notify on critical logs. Defaults to `False`.
+
   - `LOG_FORMAT`: Accepts the same options as other log formats (`int` or `str`). Defines the format for log messages sent via email. Defaults to `1`.
+
   - `USE_TEMPLATE`: Accepts `bool`. Determines whether the email includes an HTML template. Defaults to `True`.
 
 ## Available Format Options
