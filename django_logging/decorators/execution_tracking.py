@@ -7,7 +7,10 @@ from typing import Callable, Optional
 from django.conf import settings
 from django.db import connection
 
-from django_logging.validators.config_validators import validate_boolean_setting
+from django_logging.validators.config_validators import (
+    validate_boolean_setting,
+    validate_integer_setting,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -43,11 +46,18 @@ def execution_tracker(
 
     """
     errors = []
-
+    errors.extend(
+        validate_integer_setting(logging_level, "execution_tracker.logging_level")
+    )
     errors.extend(
         validate_boolean_setting(log_queries, "execution_tracker.log_queries")
     )
-
+    if query_threshold:
+        errors.extend(
+            validate_integer_setting(
+                query_threshold, "execution_tracker.query_threshold"
+            )
+        )
     errors.extend(
         validate_boolean_setting(
             query_exceed_warning, "execution_tracker.query_exceed_warning"

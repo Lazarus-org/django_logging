@@ -237,3 +237,16 @@ def validate_email_notifier(notifier_config: LogEmailNotifierType) -> List[Error
                 )
             )
     return errors
+
+
+def validate_integer_setting(value: int, config_name: str) -> List[Error]:
+    errors: List[Error] = []
+    if not isinstance(value, int) or value < 0:
+        errors.append(
+            Error(
+                f"{config_name} is not a valid integer.",
+                hint=f"Ensure {config_name} is a valid positive integer",
+                id=f"django_logging.E019_{config_name}",
+            )
+        )
+    return errors
