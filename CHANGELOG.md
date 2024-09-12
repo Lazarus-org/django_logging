@@ -1,3 +1,38 @@
+## v1.1.0 (2024-09-12)
+
+### 🔧 Chore
+- **chore(pyproject)**: Added new markers to pytest configurations. ([3a1448c](https://github.com/lazarus-org/django_logging/commit/3a1448c))
+  - Updated pytest configuration with new markers for improved testing control.
+
+### 📚 Documentation
+- **docs(Usage)**: Add documentation for `execution_tracker` decorator. ([2713377](https://github.com/lazarus-org/django_logging/commit/2713377))
+  - Added detailed usage instructions for the new `execution_tracker` decorator.
+  - Provided examples and log output descriptions for different configurations.
+
+- **README**: Update documentation for `execution_tracker`. ([9272093](https://github.com/lazarus-org/django_logging/commit/9272093))
+  - Expanded README with detailed explanations of the `execution_tracker` decorator, including argument descriptions and usage examples.
+
+### ✨ Features
+- **feat(decorators)**: Add `execution_tracker` for performance metrics. ([3650c32](https://github.com/lazarus-org/django_logging/commit/3650c32))
+  - Added a decorator that logs execution time, database queries, and query thresholds for performance monitoring.
+  - Includes error handling and warnings when query thresholds are exceeded.
+
+- **feat(validators)**: Add `integer_setting` validator in `config_validators`. ([890b2c1](https://github.com/lazarus-org/django_logging/commit/890b2c1))
+  - Introduced a validator to ensure positive integer settings, improving configuration validation in `execution_tracker`.
+
+### ✅ Tests
+- **tests(decorators)**: Add tests for `execution_tracker` decorator. ([d6d3d8b](https://github.com/lazarus-org/django_logging/commit/d6d3d8b))
+  - Comprehensive test coverage for the `execution_tracker` decorator, including performance, query logging, and error handling scenarios.
+
+### ⚡ Refactor
+- **docs**: Improve RST docs readability and highlights. ([6b6c12a](https://github.com/lazarus-org/django_logging/commit/6b6c12a))
+  - Enhanced readability and formatting in reStructuredText documentation files for better user guidance.
+
+### 🔀 Merged
+- **Merge PR #83**: Merged `chore/pytest` into main. ([e3b3beb](https://github.com/lazarus-org/django_logging/commit/e3b3beb))
+- **Merge PR #82**: Merged `update/docs` into main. ([8647a37](https://github.com/lazarus-org/django_logging/8647a37))
+- **Merge PR #81**: Merged `feat/execution-tracker` into main. ([76b5621](https://github.com/lazarus-org/django_logging/commit/76b5621))
+
 ## v1.0.4 (2024-09-05)
 
 ### 🚀 CI
