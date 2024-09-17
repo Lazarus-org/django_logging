@@ -197,6 +197,7 @@ class TestEmailHandler:
         mock_template.render.assert_called_once_with(
             {
                 "message": "Test message",
+                "date": ANY,  # The actual date is not critical to the test
                 "time": ANY,  # The actual time is not critical to the test
                 "browser_type": "Mozilla/5.0",
                 "ip_address": "127.0.0.1",

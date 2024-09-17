@@ -4,40 +4,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Log Record Notification</title>
+
+
+
 </head>
-<body style="margin: 0; padding: 0; background-color: #544FBA;">
-    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #544FBA; padding: 20px;">
+<body style="margin: 0; padding: 0; background-color: #2C333B; font-family: Arial, sans-serif;">
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; background-color: #2C333B; box-sizing: border-box;">
         <tr>
-            <td align="center">
-                <table role="presentation" width="650px" cellspacing="0" cellpadding="0" border="0" style="background-color: #ffffff; box-shadow: rgba(50, 50, 93, 0.758) 0px 50px 100px -20px,
-    rgba(0, 0, 0, 0.745) 0px 30px 60px -30px,
-    rgba(10, 37, 64, 0.758) -2px -2px 6px 0px inset; ;border-radius: 15px; padding: 40px 20px;">
+            <td align="center" style="padding: 20px;">
+                <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="background-color: #ECE9E1; border-radius: 10px; box-shadow: 10px 10px 10px rgba(0,0,0,0.5); width: 700px ;margin: 0 auto; min-height: 500px;">
                     <tr>
-                        <td align="left" style="padding-bottom: 50px;">
-                            <div style="display: flex; align-items: center;">
-                                <div style="width: 20px; height: 20px; background-color: #544FBA; border-radius: 50%; margin-right: 10px;"></div>
-                                <span style="font-family: Arial, sans-serif; font-size: 16px;">django_logging</span>
+                        <td style="text-align: left; padding-left: 20px; padding-bottom: 20px; padding-top: 20px;">
+                            <div style="display: inline-block; text-align: right;">
+                                <img src="https://avatars.githubusercontent.com/u/180335989?s=200&v=4" alt="" style="width: 40px; height: 40px; border-radius: 50%; vertical-align: middle; box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.393);">
+                                <span class="logo-name" style="font-family: Italiana, serif; font-size: 1.3em; color: #333; margin-left: 10px; font-weight: 100; vertical-align: middle;">LAZARUS</span>
                             </div>
+
                         </td>
                     </tr>
                     <tr>
-                        <td align="left" style="padding-bottom: 15%;">
-                            <p style="font-family: Arial, sans-serif; font-size: 20px; margin: 0;"><b>Log Message:</b><br>{{ message }}</p>
+                        <td>
+                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td style="padding: 5px 20px; text-align: left; font-family: Istok Web;">
+                                        {{date}}
+                                    </td>
+                                    <td style="padding: 5px 20px; text-align: center; width: 40%;">
+                                        <p style="background-color: #2C333B; color: #ECE9E1; padding: 5px 20px; border-radius: 20px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); font-family: Istok Web;">
+                                            Email prepared at {{time}}
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding: 20px; text-align: left; padding-top: 0px; padding-bottom: 40px;">
+                            <h1 style="font-family: Kotta One, serif; font-size: 1.8em; color: #131313; margin-top: 0; margin-bottom: 12px;">Log Message:</h1>
+                            <p style="color: #454545; font-size: 0.9em; margin: 0;">{{ message }}</p>
                             {% if ip_address != "Unknown" %}
-                                <p style="font-family: Arial, sans-serif; font-size: 16px;"><b>IP Address:</b> {{ ip_address }}</p>
+                                <h2 style="font-family: Kotta One, serif; font-size: 1.1em; color: #131313; margin-top: 20px;">IP Address:</h2>
+                                <p style="color: #454545; font-size: 0.9em; margin: 0;">{{ ip_address }}</p>
                             {% endif %}
                             {% if browser_type != "Unknown" %}
-                                <p style="font-family: Arial, sans-serif; font-size: 16px;"><b>Browser Type:</b> {{ browser_type }}</p>
+                                <h2 style="font-family: Kotta One, serif; font-size: 1.1em; color: #131313; margin-top: 20px;">Browser Type:</h2>
+                                <p style="color: #454545; font-size: 0.9em; margin: 0; margin-bottom: 40px;">{{ browser_type }}</p>
                             {% endif %}
-                            <p style="font-family: Arial, sans-serif; font-size: 14px;">This email was prepared to send at {{ time }}</p>
                         </td>
-<!--                        <td align="right" style="padding-bottom: 30px;">-->
-<!--                            <img src="data:image/svg+xml;base64," alt="Character" width="170px" height="300px" style="display: block;">-->
-<!--                        </td>-->
                     </tr>
                     <tr>
-                        <td align="left" colspan="2">
-                            <p style="font-family: Arial, sans-serif; font-size: 12px;color: #555454; margin: 0;">This is an automated message.</p><p style="font-family: Arial, sans-serif; font-size: 12px;color: #555454; margin: 0;">Please do not reply.</p>
+                        <td style="padding: 10px; text-align: start;padding-left: 20px; padding-top: 50px;">
+                            <p style="color: #333333e2; font-size: 0.7em; margin: 0;">This is an automated message.</p>
+                            <p style="color: #333333e2; font-size: 0.7em; margin: 2px 0 20px;">Please do not reply.</p>
                         </td>
                     </tr>
                 </table>
