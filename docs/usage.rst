@@ -1,9 +1,10 @@
 Usage
 =====
 
-Once `django_logging` is installed and added to your `INSTALLED_APPS`, you can start using it right away. The package provides several features to customize and enhance logging in your Django project. Below is a guide on how to use the various features provided by `django_logging`.
+Once ``django_logging`` is installed and added to your ``INSTALLED_APPS``, you can start using it right away. The package provides several features to customize and enhance logging in your Django project. Below is a guide on how to use the various features provided by `django_logging`.
 
-1. **Basic Logging Usage**
+Basic Logging Usage
+-------------------
 
    At its core, `django_logging` is built on top of Python’s built-in logging module. This means you can use the standard logging module to log messages across your Django project. Here’s a basic example of logging usage:
 
@@ -21,9 +22,10 @@ Once `django_logging` is installed and added to your `INSTALLED_APPS`, you can s
 
    These logs will be handled according to the configurations set up by `django_logging`, using either the default settings or any custom settings you've provided.
 
-2. **Request Logging Middleware**
+Request Logging Middleware
+--------------------------
 
-   To capture and log information of each request to the server, such as the request path, user, IP address, and user agent, add `django_logging.middleware.RequestLogMiddleware` to your `MIDDLEWARE` setting:
+   To capture and log information of each request to the server, such as the ``request path``, ``user``, ``IP address`` and ``user agent``, add ``django_logging.middleware.RequestLogMiddleware`` to your ``MIDDLEWARE`` setting:
 
    .. code-block::
 
@@ -33,16 +35,16 @@ Once `django_logging` is installed and added to your `INSTALLED_APPS`, you can s
           ...
       ]
 
-   This middleware will log the request details at info level, here is an example with default format:
+   This middleware will log the request details at ``INFO`` level, here is an example with default format:
 
    .. code-block:: text
 
       INFO | 'datetime' | django_logging | Request Info: (request_path: /example-path, user: example_user,
       IP: 192.168.1.1, user_agent: Mozilla/5.0)
 
-3. **Context Manager**
-
-   You can use the `config_setup` context manager to temporarily apply `django_logging` configurations within a specific block of code.
+Context Manager
+---------------
+   You can use the ``config_setup`` context manager to temporarily apply `django_logging` configurations within a specific block of code.
 
    Example usage:
 
@@ -63,15 +65,16 @@ Once `django_logging` is installed and added to your `INSTALLED_APPS`, you can s
           foo()
 
 
-   Note: `AUTO_INITIALIZATION_ENABLE` must be set to `False` in the settings to use the context manager. If `AUTO_INITIALIZATION_ENABLE` is `True`, attempting to use the context manager will raise a `ValueError` with the message:
+   Note: ``AUTO_INITIALIZATION_ENABLE`` must be set to ``False`` in the settings to use the context manager. If it is ``True``, attempting to use the context manager will raise a ``ValueError`` with the message:
 
    .. code-block:: text
 
       "You must set 'AUTO_INITIALIZATION_ENABLE' to False in DJANGO_LOGGING in your settings to use the context manager."
 
-4. **Log and Notify Utility**
+Log and Notify Utility
+----------------------
 
-   To send specific logs as email, use the `log_and_notify_admin` function. Ensure that the `ENABLE` option in `LOG_EMAIL_NOTIFIER` is sent to `True` in your settings:
+   To send specific logs as email, use the ``log_and_notify_admin`` function. Ensure that the ``ENABLE`` option in ``LOG_EMAIL_NOTIFIER`` is set to ``True`` in your settings:
 
    .. code-block:: python
 
@@ -82,7 +85,7 @@ Once `django_logging` is installed and added to your `INSTALLED_APPS`, you can s
 
       log_and_notify_admin(logger, logging.INFO, "This is a log message")
 
-   You can also include additional request information in the email by passing an `extra` dictionary:
+   You can also include additional request information (``ip_address`` and ``browser_type``) in the email by passing an ``extra`` dictionary:
 
    .. code-block:: python
 
@@ -97,23 +100,73 @@ Once `django_logging` is installed and added to your `INSTALLED_APPS`, you can s
               logger, logging.INFO, "This is a log message", extra={"request": request}
           )
 
-   Note: To use the email notifier, `LOG_EMAIL_NOTIFIER["ENABLE"]` must be set to `True`. If it is not enabled, calling `log_and_notify_admin` will raise a `ValueError`:
+   Note: To use the email notifier, ``LOG_EMAIL_NOTIFIER["ENABLE"]`` must be set to ``True``. If it is not, calling ``log_and_notify_admin`` will raise a ``ValueError``:
 
    .. code-block:: text
 
       "Email notifier is disabled. Please set the 'ENABLE' option to True in the 'LOG_EMAIL_NOTIFIER' in DJANGO_LOGGING in your settings to activate email notifications."
 
    Additionally, ensure that all required email settings are configured in your Django settings file.
-    - **Note**: For more detailed configuration options, refer to the [Settings](settings.rst) section.
+    - **Note**: For more detailed configuration options, refer to the :doc:`Settings <settings>`.
 
-5. **Send Logs Command**
+Send Logs Command
+-----------------
 
-   To send the entire log directory to a specified email address, use the `send_logs` management command:
+   To send the entire log directory to a specified email address, use the ``send_logs`` management command:
 
    .. code-block:: shell
 
       python manage.py send_logs example@domain.com
 
    This command will attach the log directory and send a zip file to the provided email address.
+
+Execution Tracker Decorator
+---------------------------
+
+The ``execution_tracker`` decorator is used to log the performance metrics of any function. It tracks execution time and the number of database queries for decorated function (if enabled).
+
+Example Usage:
+
+.. code-block:: python
+
+    from django_logging.decorators import execution_tracker
+
+
+    @execution_tracker(
+        logging_level=logging.INFO,
+        log_queries=True,
+        query_threshold=10,
+        query_exceed_warning=False,
+    )
+    def some_function():
+        # function code
+        pass
+
+**Arguments:**
+
+- ``logging_level`` (``int``): The logging level at which performance details will be logged. Defaults to ``logging.INFO``.
+
+- ``log_queries`` (``bool``): Whether to log the number of database queries for decorated function(if ``DEBUG`` is ``True`` in your settings). If ``log_queries=True``, the number of queries will be included in the logs. Defaults to ``False``.
+
+- ``query_threshold`` (``int``): If provided, the number of database queries will be checked. If the number of queries exceeds the given threshold, a warning will be logged. Defaults to ``None``.
+
+- ``query_exceed_warning`` (``bool``): Whether to log a ``WARNING`` message if the number of queries exceeds the threshold. Defaults to ``False``.
+
+**Example Log Output:**
+
+.. code-block:: shell
+
+    INFO | 'datetime' | execution_tracking | Performance Metrics for Function: 'some_function'
+      Module: some_module
+      File: /path/to/file.py, Line: 123
+      Execution Time: 0 minute(s) and 0.2132 second(s)
+      Database Queries: 15 queries (exceeds threshold of 10)
+
+If `log_queries` is set to ``True`` but ``DEBUG`` is ``False``, a ``WARNING`` will be logged:
+
+.. code-block:: shell
+
+    WARNING | 'datetime' | execution_tracking | DEBUG mode is disabled, so database queries are not tracked.
+    To include the number of queries, set ``DEBUG`` to ``True`` in your Django settings.
 
 

@@ -194,6 +194,7 @@ class TestSetConf:
         -------
         - A warning message indicating a configuration error is logged.
         """
+        colors = AnsiColors()
         mock_is_auto_initialization_enabled.return_value = True
         mock_LogManager.side_effect = ValueError("Invalid configuration")
 
@@ -218,8 +219,8 @@ class TestSetConf:
                 " A configuration issue has been detected.\n"
                 "System checks will be run to provide more detailed information.\n"
                 "==============================================================\n",
-                AnsiColors.RED_BACKGROUND,
-                AnsiColors.RESET,
-                AnsiColors.RED,
-                AnsiColors.RESET,
+                colors.RED_BACKGROUND,
+                colors.RESET,
+                colors.RED,
+                colors.RESET,
             )

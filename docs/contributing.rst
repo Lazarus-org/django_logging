@@ -1,4 +1,4 @@
-Contributing to django_logging
+Contributing
 ==============================
 
 We’re excited that you’re interested in contributing to `django_logging`! Whether you’re fixing a bug, adding a feature, or improving the project, your help is appreciated.
@@ -32,7 +32,7 @@ Setting Up Your Environment
 
 3. **Install Dependencies:**
 
-   Install the necessary dependencies using `Poetry`. If Poetry isn't installed on your machine, you can find installation instructions on the `Poetry website <https://python-poetry.org/docs/#installation>`_.
+   Install the necessary dependencies using ``Poetry``. If Poetry isn't installed on your machine, you can find installation instructions on the `Poetry website <https://python-poetry.org/docs/#installation>`_.
 
    .. code-block:: bash
 
@@ -49,7 +49,7 @@ Setting Up Your Environment
 Testing Your Changes
 --------------------
 
-We use `pytest` for running tests. Before submitting your changes, ensure that all tests pass:
+We use ``pytest`` for running tests. Before submitting your changes, ensure that all tests pass:
 
 .. code-block:: bash
 
@@ -60,14 +60,14 @@ If you’re adding a new feature or fixing a bug, don’t forget to write tests 
 Code Style Guidelines
 ----------------------
 
-Maintaining a consistent code style is crucial. We use `black` for code formatting and `isort` for import sorting. Make sure your code adheres to these styles:
+Maintaining a consistent code style is crucial. We use ``black`` for code formatting and ``isort`` for import sorting. Make sure your code adheres to these styles:
 
 .. code-block:: bash
 
     poetry run black .
     poetry run isort .
 
-For linting, `pylint` is used to enforce style and catch potential errors:
+For linting, ``pylint`` is used to enforce style and catch potential errors:
 
 .. code-block:: bash
 
@@ -123,7 +123,7 @@ Once your changes are ready, follow these steps to submit them:
 
 3. **Open a Pull Request:**
 
-   Go to the original `django_logging` repository and open a pull request. Include a detailed description of your changes and link any related issues.
+   Go to the original `django_logging <https://github.com/Lazarus-org/django_logging>`_ repository and open a pull request. Include a detailed description of your changes and link any related issues.
 
 4. **Respond to Feedback:**
 
@@ -154,6 +154,6 @@ Here are some additional resources that might be helpful:
 - `pylint Documentation <https://pylint.pycqa.org/en/latest/>`_
 - `Pre-commit Documentation <https://pre-commit.com/>`_
 
----
+----
 
 Thank you for your interest in contributing to `django_logging`! We look forward to your contributions.

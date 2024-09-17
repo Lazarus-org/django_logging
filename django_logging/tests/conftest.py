@@ -18,5 +18,6 @@ from django_logging.tests.fixtures import (
     request_middleware,
     reset_settings,
 )
-from django_logging.tests.fixtures.setup_django import configure_django_settings
+from django_logging.tests.settings_configuration import configure_django_settings
+
 configure_django_settings()

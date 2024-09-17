@@ -1,0 +1,8 @@
+# These are supported funding model platforms
+
+github: django_logging
+patreon:
+open_collective: django_logging
+ko_fi: # Replace with a single Ko-fi username
+tidelift: "pypi/dj-logging"
+custom: # Replace with a single custom sponsorship URL

@@ -45,9 +45,19 @@ class EmailHandler(Handler):
             RequestLogMiddleware.get_user_agent(request) if request else "Unknown"
         )
 
+        # Get current time
+        current_time = now()
+
+        # Format date and time separately
+        formatted_date = current_time.strftime("%d %B %Y").replace(
+            current_time.strftime("%B"), current_time.strftime("%B").upper()
+        )
+        formatted_time = current_time.strftime("%I:%M %p")
+
         context = {
             "message": log_entry,
-            "time": now(),
+            "date": formatted_date,
+            "time": formatted_time,
             "browser_type": user_agent,
             "ip_address": ip_address,
         }

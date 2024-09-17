@@ -1,15 +1,19 @@
 # Django Logging
 
-The [`django_logging`](https://github.com/ARYAN-NIKNEZHAD/django_logging) is a Django package designed to extend and enhance Python’s built-in logging capabilities. By providing customizable configurations and advanced features, it offers developers a comprehensive logging solution tailored specifically for Django applications.
+The [`django_logging`](https://github.com/lazarus-org/django_logging) is a Django package designed to extend and enhance Python’s built-in logging capabilities. By providing customizable configurations and advanced features, it offers developers a comprehensive logging solution tailored specifically for Django applications.
 
-![License](https://img.shields.io/github/license/ARYAN-NIKNEZHAD/django_logging)
-![PyPI release](https://img.shields.io/pypi/v/django_logging)
-![Supported Python versions](https://img.shields.io/pypi/pyversions/django_logging)
-![Supported Django versions](https://img.shields.io/pypi/djversions/django_logging)
-![Documentation](https://img.shields.io/readthedocs/django_logging)
-![Last Commit](https://img.shields.io/github/)
-![Languages](https://img.shields.io/github/)
-
+![License](https://img.shields.io/github/license/lazarus-org/django_logging)
+![PyPI release](https://img.shields.io/pypi/v/dj-logging)
+![Documentation](https://img.shields.io/readthedocs/django-logging)
+![CI Workflow](https://github.com/lazarus-org/django_logging/actions/workflows/ci.yml/badge.svg)
+![Supported Python versions](https://img.shields.io/pypi/pyversions/dj-logging)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=yellow)](https://github.com/pre-commit/pre-commit)
+![Supported Django versions](https://img.shields.io/pypi/djversions/dj-logging)
+![Last Commit](https://img.shields.io/github/last-commit/lazarus-org/django_logging)
+![Languages](https://img.shields.io/github/languages/top/lazarus-org/django_logging)
+![Open Issues](https://img.shields.io/github/issues/lazarus-org/django_logging)
+[![codecov](https://codecov.io/gh/ARYAN-NIKNEZHAD/django_logging/branch/main/graph/badge.svg)](https://codecov.io/gh/ARYAN-NIKNEZHAD/django_logging)
+[![pylint](https://img.shields.io/badge/pylint-10/10-brightgreen?logo=python&logoColor=blue)](https://www.pylint.org/)
 
 
 ## Project Detail
@@ -33,13 +37,13 @@ The documentation is organized into the following sections:
 
 Getting started with `django_logging` is simple. Follow these steps to get up and running quickly:
 
-1. **Installation**
+1. **Install the Package**
 
-   Install `django_logging` via pip:
+first, Install `django_logging` via pip:
 
-   ```shell
-   $ pip install django_logging
-   ```
+```shell
+$ pip install dj-logging
+```
 
 2. **Add to Installed Apps**
 
@@ -53,19 +57,15 @@ INSTALLED_APPS = [
 ]
 ```
 
-3. **Default Configuration**
 
-By default, `django_logging` is configured to use its built-in settings. You do not need to configure anything manually unless you want to customize the behavior. The default settings will automatically handle logging with predefined formats and options.
+3. **Run Your Server**
 
-
-4. **Verify Installation**
-
-To ensure everything is set up correctly, run your Django development server:
+Start your Django Development server to verify the installation:
 ```shell
 python manage.py runserver
 ```
 
-By default, `django_logging` will log an initialization message to the console that looks like this:
+when the server starts, you'll see an initialization message like this in your *console*:
 ```shell
 INFO | 'datetime' | django_logging | Logging initialized with the following configurations:
 Log File levels: ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'].
@@ -75,15 +75,23 @@ Colorize console: True.
 Log date format: %Y-%m-%d %H:%M:%S.
 Email notifier enabled: False.
 ```
+By default, django_logging will log each level to its own file:
+- DEBUG : `logs/debug.log`
+- INFO : `logs/info.log`
+- WARNING : `logs/warning.log`
+- ERROR : `logs/error.log`
+- CRITICAL : `logs/critical.log`
 
+In addition, logs will be displayed in ***colorized*** mode in the `console`, making it easier to distinguish between different log levels.
 
-That's it! `django_logging` is ready to use with default settings. For further customization, refer to the [Settings](#settings) section
+That's it! `django_logging` is ready to use. For further customization, refer to the [Settings](#settings) section
 
 
 ## Usage
 Once `django_logging` is installed and added to your INSTALLED_APPS, you can start using it right away. The package provides several features to customize and enhance logging in your Django project. Below is a guide on how to use the various features provided by `django_logging`.
 
 1. **Basic Logging Usage**
+
 At its core, `django_logging` is built on top of Python’s built-in logging module. This means you can use the standard logging module to log messages across your Django project. Here’s a basic example of logging usage:
 ```python
 import logging
@@ -136,7 +144,7 @@ with config_setup():
 
 # the logging configuration will restore to what it was before, in here outside of with block
 ```
-- Note: `AUTO_INITIALIZATION_ENABLE` must be set to `False` in the settings to use the context manager. If `AUTO_INITIALIZATION_ENABLE` is `True`, attempting to use the context manager will raise a `ValueError` with the message:
+- Note: `AUTO_INITIALIZATION_ENABLE` must be set to `False` in the settings to use the context manager. If it is `True`, attempting to use the context manager will raise a `ValueError` with the message:
 ```
 "You must set 'AUTO_INITIALIZATION_ENABLE' to False in DJANGO_LOGGING in your settings to use the context manager."
 ```
@@ -183,6 +191,45 @@ python manage.py send_logs example@domain.com
 ```
 This command will attach the log directory and send a zip file to the provided email address.
 
+6. **Execution Tracker Decorator**
+
+The `execution_tracker` decorator is used to log the performance metrics of any function. It tracks execution time and the number of database queries for decorated function (if enabled).
+
+Example Usage:
+```python
+from django_logging.decorators import execution_tracker
+
+@execution_tracker(logging_level=logging.INFO, log_queries=True, query_threshold=10, query_exceed_warning=False)
+def some_function():
+    # function code
+    pass
+```
+
+Arguments:
+
+`logging_level` (`int`): The logging level at which performance details will be logged. Defaults to `logging.INFO`.
+
+`log_queries` (`bool`): Whether to log the number of database queries for decorated function(if `DEBUG` is `True` in your settings). If `log_queries=True`, the number of queries will be included in the logs. Defaults to `False`.
+
+`query_threshold` (`int`): If provided, the number of database queries will be checked. If the number of queries exceeded the given threshold, a warning will be logged. Defaults to `None`.
+
+`query_exceed_warning` (`int`): Whether to log a `WARNING` message if number of queries exceeded the threshold. Defaults to `False`.
+
+Example Log Output:
+```shell
+INFO | 'datetime' | execution_tracking | Performance Metrics for Function: 'some_function'
+  Module: some_module
+  File: /path/to/file.py, Line: 123
+  Execution Time: 0 minute(s) and 0.2132 second(s)
+  Database Queries: 15 queries (exceeds threshold of 10)
+
+```
+If `log_queries` is set to `True` but `DEBUG` is `False`, a WARNING will be logged:
+
+```shell
+WARNING | 'datetime' | execution_tracking | DEBUG mode is disabled, so database queries are not tracked. To include number of queries, set `DEBUG` to `True` in your django settings.
+```
+
 ## Settings
 
 By default, `django_logging` uses a built-in configuration that requires no additional setup. However, you can customize the logging settings by adding the `DJANGO_LOGGING` dictionary configuration to your Django `settings` file.
@@ -217,20 +264,34 @@ DJANGO_LOGGING = {
 
 Here's a breakdown of the available configuration options:
 - `AUTO_INITIALIZATION_ENABLE`: Accepts `bool`. Enables automatic initialization of logging configurations. Defaults to `True`.
+
 - `INITIALIZATION_MESSAGE_ENABLE`: Accepts bool. Enables logging of the initialization message. Defaults to `True`.
+
 - `LOG_FILE_LEVELS`: Accepts a list of valid log levels (a list of `str` where each value must be one of the valid levels). Defines the log levels for file logging. Defaults to `['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']`.
+
 - `LOG_DIR`: Accepts `str` like `"path/to/logs"` or a path using functions like `os.path.join()`. Specifies the directory where log files will be stored. Defaults to `"logs"`.
+
 - `LOG_FILE_FORMATS`: Accepts log levels as keys and format options as values. The format option can be an `int` chosen from predefined options or a user-defined format `str`. Defines the format for log files. Defaults to `1` for all levels.
   - **Note**: See the [Available Format Options](#available-format-options) below for available formats.
+
 - `LOG_CONSOLE_LEVEL`: Accepts `str` that is a valid log level. Specifies the log level for console output. Defaults to `'DEBUG'`.
+
 - `LOG_CONSOLE_FORMAT`: Accepts the same options as `LOG_FILE_FORMATS`. Defines the format for console output. Defaults to `1`.
+
 - `LOG_CONSOLE_COLORIZE`: Accepts `bool`. Determines whether to colorize console output. Defaults to `True`.
+
 - `LOG_DATE_FORMAT`: Accepts `str` that is a valid datetime format. Specifies the date format for log messages. Defaults to `'%Y-%m-%d %H:%M:%S'`.
+
 - `LOG_EMAIL_NOTIFIER`: Is a dictionary where:
+
   - `ENABLE`: Accepts `bool`. Determines whether the email notifier is enabled. Defaults to `False`.
+
   - `NOTIFY_ERROR`: Accepts `bool`. Determines whether to notify on error logs. Defaults to `False`.
+
   - `NOTIFY_CRITICAL`: Accepts `bool`. Determines whether to notify on critical logs. Defaults to `False`.
+
   - `LOG_FORMAT`: Accepts the same options as other log formats (`int` or `str`). Defines the format for log messages sent via email. Defaults to `1`.
+
   - `USE_TEMPLATE`: Accepts `bool`. Determines whether the email includes an HTML template. Defaults to `True`.
 
 ## Available Format Options
@@ -283,6 +344,6 @@ These settings ensure that the email notifier is correctly configured to send lo
 
 ## Conclusion
 
-Thank you for using `django_logging`. We hope this package enhances your Django application's logging capabilities. For more detailed documentation, customization options, and updates, please refer to the official documentation on [Read the Docs](https://django_logging.readthedocs.io/). If you have any questions or issues, feel free to open an issue on our [GitHub repository](https://github.com/ARYAN-NIKNEZHAD/django_logging).
+Thank you for using `django_logging`. We hope this package enhances your Django application's logging capabilities. For more detailed documentation, customization options, and updates, please refer to the official documentation on [Read the Docs](https://django-logging.readthedocs.io/). If you have any questions or issues, feel free to open an issue on our [GitHub repository](https://github.com/lazarus-org/django_logging).
 
 Happy logging!

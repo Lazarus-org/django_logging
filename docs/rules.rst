@@ -17,7 +17,7 @@ Available Roles
 
 2. **Request Logging Role**
 
-   The Request Logging Role is specifically designed to log HTTP request details. This role captures information such as the request path, user, IP address, and user agent.
+   The Request Logging Role is specifically designed to log HTTP request details. This role captures information such as the ``request path``, ``user``, ``IP address``, and ``user agent``.
 
    **Key Features:**
    - Logs details of incoming requests.
@@ -54,7 +54,7 @@ Available Roles
 
       log_and_notify_admin(logger, logging.CRITICAL, "Critical error occurred!")
 
-   **Note:** To use this role, ensure that `LOG_EMAIL_NOTIFIER` is enabled and properly configured.
+   **Note:** To use this role, ensure that ``ENABLE`` option of ``LOG_EMAIL_NOTIFIER`` is set to ``True``.
 
 4. **Context Manager Role**
 
