@@ -14,7 +14,7 @@ We would like to thank the following people for their contributions to the `djan
 
 ## Special Thanks
 
-- **Fatemeh Zahra** 
+- **Fatemeh Zahra**
     - Refactoring and improving the email template design and styles for the `django_logging` package.
 
 ---

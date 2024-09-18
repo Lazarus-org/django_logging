@@ -44,4 +44,3 @@ When a vulnerability is confirmed:
 We strongly encourage responsible disclosure and will work to fix issues in a timely manner. We appreciate any effort to help make `dj-logging` more secure for all users.
 
 Thank you for helping us improve the security of `dj-logging`!
-
