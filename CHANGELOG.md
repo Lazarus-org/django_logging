@@ -1,3 +1,27 @@
+## v1.2.0 (2024-09-18)
+
+### ✨ Features
+- **refactor(templates)**: Update email template with new design and improved styles. ([a0902b7](https://github.com/lazarus-org/django_logging/commit/a0902b7))
+  - Refactored the email template for log notifications to introduce a new design.
+  - Updated styles with a darker background and a lighter content area.
+  - Added branding with logo (LAZARUS), improved structure and readability, and modernized the look with rounded corners and shadows.
+
+### ⚡ Refactor
+- **refactor(handlers)**: Update template context data to include formatted date and time. ([55f1ded](https://github.com/lazarus-org/django_logging/commit/55f1ded))
+  - Added formatted date (`%d %B %Y`) and time (`%I:%M %p`) to email context.
+  - Ensured backward compatibility with existing log entries.
+
+### ✅ Tests
+- **tests(email_handler)**: Update tests to return context in `test_email_handler`. ([6e3e8cf](https://github.com/lazarus-org/django_logging/commit/6e3e8cf))
+  - Modified test cases for email handling to return the context for verification.
+
+### 📝 Documentation
+- **docs**: Update LICENSE file. ([d3c00dd](https://github.com/lazarus-org/django_logging/commit/d3c00dd))
+
+### 🔀 Merged
+- **Merge PR #87**: Merged `develop` branch into `main`. ([610ecbd](https://github.com/lazarus-org/django_logging/commit/610ecbd))
+- **Merge PR #86**: Merged `refactor/email-template` branch into `develop`. ([b170f99](https://github.com/lazarus-org/django_logging/commit/b170f99))
+
 ## v1.1.0 (2024-09-12)
 
 ### 🔧 Chore
