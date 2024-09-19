@@ -47,5 +47,9 @@ def configure_django_settings():
             EMAIL_HOST_PASSWORD="the_password",
             DEFAULT_FROM_EMAIL="example@test.com",
             ADMIN_EMAIL="admin@test.com",
+            LANGUAGE_CODE="en-us",
+            TIME_ZONE="UTC",
+            USE_I18N=True,
+            USE_TZ=True,
         )
         django.setup()
