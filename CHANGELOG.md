@@ -1,3 +1,25 @@
+## v1.2.1 (2024-09-19)
+
+### 🐛 Bug Fixes
+- **fix(handlers)**: Use `localtime()` to respect `TIME_ZONE` setting. ([80322cf](https://github.com/lazarus-org/django_logging/commit/80322cf))
+  - Replaced `timezone.now()` with `timezone.localtime()` in `EmailHandler` to ensure the correct local time is used for log emails, matching the configured `TIME_ZONE` setting.
+
+### 📚 Documentation
+- **docs(handlers)**: Add detailed docstrings to `EmailHandler` class and methods. ([4dc7db1](https://github.com/lazarus-org/django_logging/commit/4dc7db1))
+  - Added comprehensive docstrings to the `EmailHandler` class and its methods (`emit` and `render_template`) to improve code documentation and readability.
+
+### ✅ Tests
+- **tests(settings)**: Update test settings to include `TIME_ZONE` configuration. ([94bc68a](https://github.com/lazarus-org/django_logging/commit/94bc68a))
+  - Updated test settings to include `TIME_ZONE` related configurations to ensure the correct behavior when `timezone.localtime()` is used in `EmailHandler`.
+
+### ⚡️ Miscellaneous
+- **Update(SECURITY)**: Fix typo in Markdown file. ([23a9260](https://github.com/lazarus-org/django_logging/commit/23a9260))
+  - Minor typo correction in the security documentation.
+
+### 🔀 Merged
+- **Merge PR #89**: Merged pull request `fix/email-timestamp`. ([2cbeb3b](https://github.com/lazarus-org/django_logging/commit/2cbeb3b))
+  - Fixes an issue with incorrect timestamps in log emails by ensuring the timestamp respects the configured `TIME_ZONE` setting.
+
 ## v1.2.0 (2024-09-18)
 
 ### ✨ Features
