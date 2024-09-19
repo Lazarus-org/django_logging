@@ -4,7 +4,7 @@ from typing import Optional
 from django.conf import settings
 from django.http import HttpRequest
 from django.template import engines
-from django.utils.timezone import now
+from django.utils.timezone import localtime
 
 from django_logging.middleware import RequestLogMiddleware
 from django_logging.utils.get_conf import use_email_notifier_template
@@ -46,7 +46,7 @@ class EmailHandler(Handler):
         )
 
         # Get current time
-        current_time = now()
+        current_time = localtime()
 
         # Format date and time separately
         formatted_date = current_time.strftime("%d %B %Y").replace(
