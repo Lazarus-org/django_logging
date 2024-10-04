@@ -2,11 +2,12 @@ import logging
 import os
 import time
 from functools import wraps
-from typing import Callable, Optional
+from typing import Any, Callable, Optional
 
 from django.conf import settings
 from django.db import connection
 
+from django_logging.utils.time import format_elapsed_time
 from django_logging.validators.config_validators import (
     validate_boolean_setting,
     validate_integer_setting,
@@ -69,7 +70,7 @@ def execution_tracker(
 
     def decorator(func: Callable) -> Callable:
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             start_time = time.time()
 
             # Check if DEBUG is True and log_queries is enabled; if not, ignore query tracking
@@ -82,7 +83,6 @@ def execution_tracker(
 
                 # Calculate execution time
                 elapsed_time = time.time() - start_time
-                minutes, seconds = divmod(elapsed_time, 60)
 
                 # Get detailed function information
                 module_name = func.__module__
@@ -90,7 +90,7 @@ def execution_tracker(
                 file_path = os.path.abspath(func.__code__.co_filename)
                 line_number = func.__code__.co_firstlineno
 
-                time_message = f"{minutes} minute(s) and {seconds:.4f} second(s)"
+                time_message = format_elapsed_time(elapsed_time)
                 log_message = (
                     f"Performance Metrics for Function: '{function_name}'\n"
                     f"  Module: {module_name}\n"

@@ -15,4 +15,5 @@ LOG_FORMAT_SPECIFIERS = [
     "thread",
     "threadName",
     "message",
+    "context",
 ]

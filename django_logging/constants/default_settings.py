@@ -3,28 +3,33 @@ from dataclasses import dataclass, field
 from typing import cast
 
 from django_logging.constants.config_types import (
+    ExtraLogFiles,
     FormatOption,
     LogDateFormat,
     LogDir,
-    LogEmailNotifierType,
-    LogFileFormatsType,
+    LogEmailNotifier,
+    LogFileFormats,
+    LogFileFormatTypes,
     LogLevel,
     LogLevels,
 )
 
 
+# pylint: disable=too-many-instance-attributes
 @dataclass(frozen=True)
 class DefaultLoggingSettings:
     log_dir: LogDir = field(default_factory=lambda: os.path.join(os.getcwd(), "logs"))
+    log_dir_size_limit: int = 1024  # MB
     log_levels: LogLevels = field(
         default_factory=lambda: ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
     )
     log_date_format: LogDateFormat = "%Y-%m-%d %H:%M:%S"
     auto_initialization_enable: bool = True
     initialization_message_enable: bool = True
-    log_file_formats: LogFileFormatsType = field(
+    log_sql_queries_enable: bool = False
+    log_file_formats: LogFileFormats = field(
         default_factory=lambda: cast(
-            LogFileFormatsType,
+            LogFileFormats,
             {
                 "DEBUG": 1,
                 "INFO": 1,
@@ -34,10 +39,35 @@ class DefaultLoggingSettings:
             },
         )
     )
-
-    log_email_notifier: LogEmailNotifierType = field(
+    log_file_format_types: LogFileFormatTypes = field(
         default_factory=lambda: cast(
-            LogEmailNotifierType,
+            LogFileFormatTypes,
+            {
+                "DEBUG": "normal",
+                "INFO": "normal",
+                "WARNING": "normal",
+                "ERROR": "normal",
+                "CRITICAL": "normal",
+            },
+        )
+    )
+
+    extra_log_files: ExtraLogFiles = field(
+        default_factory=lambda: cast(
+            ExtraLogFiles,
+            {
+                "DEBUG": False,
+                "INFO": False,
+                "WARNING": False,
+                "ERROR": False,
+                "CRITICAL": False,
+            },
+        )
+    )
+
+    log_email_notifier: LogEmailNotifier = field(
+        default_factory=lambda: cast(
+            LogEmailNotifier,
             {
                 "ENABLE": False,
                 "NOTIFY_ERROR": False,

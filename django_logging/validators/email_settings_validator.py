@@ -31,7 +31,7 @@ def check_email_settings(require_admin_email: bool = True) -> List[Error]:
         errors.append(
             Error(
                 f"Missing required email settings: {missing}",
-                hint="Email settings required because you set LOG_EMAIL_NOTIFIER['ENABLE'] to True,\n"
+                hint="Email settings required because you trying to send an email,"
                 "Ensure all required email settings are properly configured in your settings file.",
                 id="django_logging.E021",
             )
