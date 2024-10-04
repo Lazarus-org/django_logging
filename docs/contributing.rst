@@ -82,7 +82,7 @@ Pre-commit hooks are used to automatically check and format code before you make
 
    .. code-block:: bash
 
-       poetry add --dev pre-commit
+       poetry add --group dev pre-commit
 
 2. **Set Up the Hooks:**
 

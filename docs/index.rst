@@ -5,7 +5,7 @@ Welcome to django_logging Documentation!
 
    <br />
 
-.. image:: https://img.shields.io/github/license/ARYAN-NIKNEZHAD/django_logging
+.. image:: https://img.shields.io/github/license/lazarus-org/django_logging
     :target: https://github.com/lazarus-org/django_logging/blob/main/LICENSE
     :alt: License
 
@@ -33,19 +33,19 @@ Welcome to django_logging Documentation!
    :target: https://github.com/pre-commit/pre-commit
    :alt: pre-commit
 
-.. image:: https://img.shields.io/github/issues/ARYAN-NIKNEZHAD/django_logging
+.. image:: https://img.shields.io/github/issues/lazarus-org/django_logging
     :target: https://github.com/lazarus-org/django_logging/issues
     :alt: Open Issues
 
-.. image:: https://img.shields.io/github/last-commit/ARYAN-NIKNEZHAD/django_logging
+.. image:: https://img.shields.io/github/last-commit/lazarus-org/django_logging
     :target: https://github.com/lazarus-org/django_logging/commits/main
     :alt: Last Commit
 
-.. image:: https://img.shields.io/github/languages/top/ARYAN-NIKNEZHAD/django_logging
+.. image:: https://img.shields.io/github/languages/top/lazarus-org/django_logging
     :target: https://github.com/lazarus-org/django_logging
     :alt: Languages
 
-.. image:: https://img.shields.io/codecov/c/github/ARYAN-NIKNEZHAD/django_logging/main
+.. image:: https://img.shields.io/codecov/c/github/lazarus-org/django_logging/main
    :target: https://codecov.io/gh/lazarus-org/django_logging
    :alt: Coverage
 
@@ -53,7 +53,11 @@ Welcome to django_logging Documentation!
 
 |br|
 
-`django_logging` is a Django package designed to extend and enhance Python’s built-in logging capabilities. By providing customizable configurations and advanced features, it offers developers a comprehensive logging solution tailored specifically for Django applications.
+`django_logging` is a powerful yet simple Django package that extends and enhances Python's built-in ``logging`` without relying on any **third-party** libraries. Our goal is to keep things straightforward while providing flexible and customizable logging solutions that are specifically designed for Django applications.
+
+One of the key advantages of ``django_logging`` is its seamless integration. Get started with django_logging in your existing projects without refactoring any code. Even if you're already using the **default logging setup**, you can instantly upgrade to advanced features with just a simple installation. No extra changes or complicated setup required!
+
+imagine you have a Django package that was developed a few years ago and already uses Python's built-in ``logging``. Refactoring the entire codebase to use another logging package would be a daunting task. But with ``django_logging``, you don't have to worry about that. Simply install django_logging and enjoy all its advanced features with logging each ``LEVEL`` in separate files with three extra formats (``json``, ``xml``, ``flat``)  **without having to make any changes** to your existing code.
 
 Supported Versions
 ------------------

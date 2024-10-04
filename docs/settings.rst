@@ -3,102 +3,168 @@ Settings
 
 By default, `django_logging` uses a built-in configuration that requires no additional setup. However, you can customize the logging settings by adding the ``DJANGO_LOGGING`` dictionary configuration to your Django ``settings`` file.
 
-Example configuration
+Default configuration
 ---------------------
-here is an example of DJANGO_LOGGING in project settings:
 
 .. code-block:: python
 
-  DJANGO_LOGGING = {
-      "AUTO_INITIALIZATION_ENABLE": True,
-      "INITIALIZATION_MESSAGE_ENABLE": True,
-      "LOG_FILE_LEVELS": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
-      "LOG_DIR": "logs",
-      "LOG_FILE_FORMATS": {
-          "DEBUG": 1,
-          "INFO": 1,
-          "WARNING": 1,
-          "ERROR": 1,
-          "CRITICAL": 1,
-      },
-      "LOG_CONSOLE_LEVEL": "DEBUG",
-      "LOG_CONSOLE_FORMAT": 1,
-      "LOG_CONSOLE_COLORIZE": True,
-      "LOG_DATE_FORMAT": "%Y-%m-%d %H:%M:%S",
-      "LOG_EMAIL_NOTIFIER": {
-          "ENABLE": False,
-          "NOTIFY_ERROR": False,
-          "NOTIFY_CRITICAL": False,
-          "LOG_FORMAT": 1,
-          "USE_TEMPLATE": True,
-      },
-  }
+    DJANGO_LOGGING = {
+        "AUTO_INITIALIZATION_ENABLE": True,
+        "INITIALIZATION_MESSAGE_ENABLE": True,
+        "LOG_SQL_QUERIES_ENABLE": True,
+        "LOG_FILE_LEVELS": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        "LOG_DIR": "logs",
+        "LOG_DIR_SIZE_LIMIT": 1024,  # MB
+        "LOG_FILE_FORMATS": {
+            "DEBUG": 1,
+            "INFO": 1,
+            "WARNING": 1,
+            "ERROR": 1,
+            "CRITICAL": 1,
+        },
+        "LOG_FILE_FORMAT_TYPES": {
+            "DEBUG": "normal",
+            "INFO": "normal",
+            "WARNING": "normal",
+            "ERROR": "normal",
+            "CRITICAL": "normal",
+        },
+        "EXTRA_LOG_FILES": {  # for extra formats (JSON, XML)
+            "DEBUG": False,
+            "INFO": False,
+            "WARNING": False,
+            "ERROR": False,
+            "CRITICAL": False,
+        },
+        "LOG_CONSOLE_LEVEL": "DEBUG",
+        "LOG_CONSOLE_FORMAT": 1,
+        "LOG_CONSOLE_COLORIZE": True,
+        "LOG_DATE_FORMAT": "%Y-%m-%d %H:%M:%S",
+        "LOG_EMAIL_NOTIFIER": {
+            "ENABLE": False,
+            "NOTIFY_ERROR": False,
+            "NOTIFY_CRITICAL": False,
+            "LOG_FORMAT": 1,
+            "USE_TEMPLATE": True,
+        },
+    }
 
-
+Configuration Options
+---------------------
 Here's a breakdown of the available configuration options:
 
 ``AUTO_INITIALIZATION_ENABLE``
 ------------------------------
 
-Accepts ``bool``. Enables automatic initialization of logging configurations. Defaults to ``True``.
+- **Type**: ``bool``
+- **Description**: Enables automatic initialization of logging configurations. Defaults to ``True``.
 
 ``INITIALIZATION_MESSAGE_ENABLE``
 ---------------------------------
 
-Accepts ``bool``. Enables logging of the initialization message. Defaults to ``True``.
+- **Type**: ``bool``
+- **Description**: Enables logging of the initialization message when logging starts. Defaults to ``True``.
+
+``LOG_SQL_QUERIES_ENABLE``
+--------------------------
+
+- **Type**: ``bool``
+- **Description**: Enables logging of SQL queries within ``RequestLogMiddleware`` logs. Defaults to ``False``. When enabled, SQL queries executed in each request will be included in the log output.
 
 ``LOG_FILE_LEVELS``
 -------------------
 
-Accepts a list of valid log levels (a list of ``str`` where each value must be one of the valid levels). Defines the log levels for file logging. Defaults to ``['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']``.
+- **Type**: ``list[str]``
+- **Description**: Specifies which log levels should be captured in log files. Defaults to ``["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]``.
 
 ``LOG_DIR``
 -----------
 
-Accepts ``str`` like ``"path/to/logs"`` or a path using functions like ``os.path.join()``. Specifies the directory where log files will be stored.  Defaults to ``"logs"``.
+- **Type**: ``str``
+- **Description**: Specifies the directory where log files will be stored. Defaults to ``"logs"``.
+
+``LOG_DIR_SIZE_LIMIT``
+----------------------
+
+- **Type**: ``int``
+- **Description**: Specifies the maximum allowed size of the log directory in megabytes (MB). If the directory exceeds this limit and ``MonitorLogSizeMiddleware`` is enabled, a warning email will be sent to the admin weekly. Defaults to ``1024 MB`` (1 GB).
 
 ``LOG_FILE_FORMATS``
 --------------------
 
-Accepts log levels as keys and format options as values. The format option can be an ``int`` chosen from predefined options or a user-defined format ``str``. Defines the format for log files. Defaults to ``1`` for all levels.
+- **Type**: ``dict[str, int | str]``
+- **Description**: Maps each log level to its corresponding log format. The format can be an ``int`` representing predefined formats or a custom ``str`` format.
+- **Default**: Format ``1`` for all levels.
 
- - **Note**:
-    See the `Available Format Options`_ below for available formats.
+``LOG_FILE_FORMAT_TYPES``
+-------------------------
+
+- **Type**: ``dict[str, str]``
+- **Description**: Defines the format type (e.g., ``normal``, ``JSON``, ``XML``, ``FLAT``) for each log level. The keys are log levels, and the values are the format types.
+
+    - **Format Types**:
+
+      - ``normal``: Standard text log.
+      - ``JSON``: Structured logs in JSON format.
+      - ``XML``: Structured logs in XML format.
+      - ``FLAT``: logs with Flat format.
+
+``EXTRA_LOG_FILES``
+-------------------
+
+- **Type**: ``dict[str, bool]``
+- **Description**: Determines whether separate log files for ``JSON`` or ``XML`` formats should be created for each log level. When set to ``True`` for a specific level, a dedicated directory (e.g., ``logs/json`` or ``logs/xml``) will be created with files like ``info.json`` or ``info.xml``. if ``False``, json and xml logs will be written to ``.log`` files.
+- **Default**: ``False`` for all levels.
 
 ``LOG_CONSOLE_LEVEL``
 ---------------------
 
-Accepts ``str`` that is a valid log level. Specifies the log level for console output. Defaults to ``'DEBUG'``,
+- **Type**: ``str``
+- **Description**: Specifies the log level for console output. Defaults to ``"DEBUG"``.
 
 ``LOG_CONSOLE_FORMAT``
 ----------------------
 
-Accepts the same options as ``LOG_FILE_FORMATS``. Defines the format for console output. Defaults to ``1``.
+- **Type**: ``int | str``
+- **Description**: Specifies the format for console logs, similar to ``LOG_FILE_FORMATS``. Defaults to format ``1``.
 
 ``LOG_CONSOLE_COLORIZE``
 ------------------------
 
-Accepts ``bool``. Determines whether to colorize console output. Defaults to ``True``.
+- **Type**: ``bool``
+- **Description**: Determines whether console output should be colorized. Defaults to ``True``.
 
 ``LOG_DATE_FORMAT``
 -------------------
 
-Accepts ``str`` that is a valid datetime format. Specifies the date format for log messages. Defaults to ``'%Y-%m-%d %H:%M:%S'``.
+- **Type**: ``str``
+- **Description**: Specifies the date format for log messages. Defaults to ``"%Y-%m-%d %H:%M:%S"``.
 
 ``LOG_EMAIL_NOTIFIER``
 ----------------------
 
-Is a dictionary where:
+- **Type**: ``dict``
+- **Description**: Configures the email notifier for sending log-related alerts.
 
- - ``ENABLE``: Accepts ``bool``. Determines whether the email notifier is enabled. Defaults to ``False``.
+    - ``ENABLE``:
+      - **Type**: ``bool``
+      - **Description**: Enables or disables the email notifier. Defaults to ``False``.
 
- - ``NOTIFY_ERROR``: Accepts ``bool``. Determines whether to notify on error logs. Defaults to ``False``.
+    - ``NOTIFY_ERROR``:
+      - **Type**: ``bool``
+      - **Description**: Sends an email notification for ``ERROR`` log level events. Defaults to ``False``.
 
- - ``NOTIFY_CRITICAL``: Accepts ``bool``. Determines whether to notify on critical logs. Defaults to ``False``.
+    - ``NOTIFY_CRITICAL``:
+      - **Type**: ``bool``
+      - **Description**: Sends an email notification for ``CRITICAL`` log level events. Defaults to ``False``.
 
- - ``LOG_FORMAT``: Accepts the same options as other log formats (``int`` or ``str``). Defines the format for log messages sent via email.  Defaults to ``1``.
+    - ``LOG_FORMAT``:
+      - **Type**: ``int | str``
+      - **Description**: Specifies the log format for email notifications. Defaults to format ``1``.
 
- - ``USE_TEMPLATE``: Accepts ``bool``. Determines whether the email includes an HTML template.  Defaults to ``True``.
+    - ``USE_TEMPLATE``:
+      - **Type**: ``bool``
+      - **Description**: Determines whether the email should include an HTML template. Defaults to ``True``.
 
 
 .. _available_format_options:
@@ -111,19 +177,26 @@ The `django_logging` package provides predefined log format options that you can
 .. code-block:: python
 
     FORMAT_OPTIONS = {
-        1: "%(levelname)s | %(asctime)s | %(module)s | %(message)s",
-        2: "%(levelname)s | %(asctime)s | %(message)s",
-        3: "%(levelname)s | %(message)s",
-        4: "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        5: "%(levelname)s | %(message)s | [in %(pathname)s:%(lineno)d]",
-        6: "%(asctime)s | %(levelname)s | %(message)s",
-        7: "%(levelname)s | %(asctime)s | in %(module)s: %(message)s",
-        8: "%(levelname)s | %(message)s | [%(filename)s:%(lineno)d]",
-        9: "[%(asctime)s] | %(levelname)s | in %(module)s: %(message)s",
-        10: "%(asctime)s | %(processName)s | %(name)s | %(levelname)s | %(message)s",
-        11: "%(asctime)s | %(threadName)s | %(name)s | %(levelname)s | %(message)s",
-        12: "%(levelname)s | [%(asctime)s] | (%(filename)s:%(lineno)d) | %(message)s",
-        13: "%(levelname)s | [%(asctime)s] | {%(name)s} | (%(filename)s:%(lineno)d): %(message)s",
+        1: "%(levelname)s | %(asctime)s | %(module)s | %(message)s | %(context)s",
+        2: "%(levelname)s | %(asctime)s | %(context)s | %(message)s",
+        3: "%(levelname)s | %(context)s | %(message)s",
+        4: "%(context)s | %(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        5: "%(levelname)s | %(message)s | %(context)s | [in %(pathname)s:%(lineno)d]",
+        6: "%(asctime)s | %(context)s | %(levelname)s | %(message)s",
+        7: "%(levelname)s | %(asctime)s | %(context)s | in %(module)s: %(message)s",
+        8: "%(levelname)s | %(context)s | %(message)s | [%(filename)s:%(lineno)d]",
+        9: "[%(asctime)s] | %(levelname)s | %(context)s | in %(module)s: %(message)s",
+        10: "%(asctime)s | %(processName)s | %(context)s | %(name)s | %(levelname)s | %(message)s",
+        11: "%(asctime)s | %(context)s | %(threadName)s | %(name)s | %(levelname)s | %(message)s",
+        12: "%(levelname)s | [%(asctime)s] | %(context)s | (%(filename)s:%(lineno)d) | %(message)s",
+        13: "%(levelname)s | [%(asctime)s] | %(context)s | {%(name)s} | (%(filename)s:%(lineno)d): %(message)s",
+        14: "[%(asctime)s] | %(levelname)s | %(context)s | %(name)s | %(module)s | %(message)s",
+        15: "%(levelname)s | %(context)s | %(asctime)s | %(filename)s:%(lineno)d | %(message)s",
+        16: "%(levelname)s | %(context)s | %(message)s | [%(asctime)s] | %(module)s",
+        17: "%(levelname)s | %(context)s | [%(asctime)s] | %(process)d | %(message)s",
+        18: "%(levelname)s | %(context)s | %(asctime)s | %(name)s | %(message)s",
+        19: "%(levelname)s | %(asctime)s | %(context)s | %(module)s:%(lineno)d | %(message)s",
+        20: "[%(asctime)s] | %(levelname)s | %(context)s | %(thread)d | %(message)s",
     }
 
 You can reference these formats by their corresponding **integer keys** in your logging configuration settings.
