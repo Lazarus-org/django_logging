@@ -3,9 +3,7 @@ from logging import LogRecord
 from typing import Any
 from xml.dom import minidom  # nosec B408
 
-from django_logging.formatters.base import (  # pylint: disable=E0401, E0611
-    BaseStructuredFormatter,
-)
+from django_logging.formatters.base import BaseStructuredFormatter
 
 
 class XMLFormatter(BaseStructuredFormatter):
