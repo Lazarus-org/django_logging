@@ -51,8 +51,10 @@ we’re thrilled that you want to contribute to `django_logging`! to ensure a po
 
 10. **Export Dependencies**: Export the project dependencies for development and production:
     ```bash
+    pip install poetry-plugin-export
+
     poetry export -f requirements.txt --output packages/requirements.txt --without-hashes
-    poetry export -f requirements.txt --dev --output packages/requirements-dev.txt --without-hashes
+    poetry export -f requirements.txt --with dev --output packages/requirements-dev.txt --without-hashes
     ```
 
 ## Commitizen Message Rule
