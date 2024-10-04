@@ -1,5 +1,4 @@
 import re
-from datetime import datetime
 from logging import Formatter, LogRecord
 from typing import Any, Dict, List, Optional, Union
 

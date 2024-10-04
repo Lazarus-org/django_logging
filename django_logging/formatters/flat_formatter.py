@@ -1,8 +1,6 @@
 from logging import LogRecord
 
-from django_logging.formatters.base import (  # pylint: disable=E0401, E0611
-    BaseStructuredFormatter,
-)
+from django_logging.formatters.base import BaseStructuredFormatter
 
 
 class FLATFormatter(BaseStructuredFormatter):

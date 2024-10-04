@@ -2,23 +2,29 @@ from typing import Any, Dict, List
 
 from django.core.checks import Error, register
 
-from django_logging.constants import DefaultLoggingSettings
+from django_logging.constants import ALLOWED_FILE_FORMAT_TYPES, DefaultLoggingSettings
 from django_logging.utils.get_conf import (
     get_config,
+    get_log_dir_size_limit,
     is_auto_initialization_enabled,
     is_initialization_message_enabled,
+    is_log_sql_queries_enabled,
 )
 from django_logging.validators.config_validators import (
     validate_boolean_setting,
     validate_date_format,
     validate_directory,
     validate_email_notifier,
+    validate_extra_log_files,
     validate_format_option,
+    validate_integer_setting,
+    validate_log_file_format_types,
     validate_log_levels,
 )
 from django_logging.validators.email_settings_validator import check_email_settings
 
 
+# pylint: disable=too-many-locals
 @register()
 def check_logging_settings(app_configs: Dict[str, Any], **kwargs: Any) -> List[Error]:
     """Check and validate logging settings in the Django configuration.
@@ -109,6 +115,25 @@ def check_logging_settings(app_configs: Dict[str, Any], **kwargs: Any) -> List[E
             )
         )
 
+    # Validate LOG_FILE_FORMAT_TYPES
+    log_file_format_types = log_settings.get("log_file_format_types", {})
+    errors.extend(
+        validate_log_file_format_types(
+            log_file_format_types,
+            "LOG_FILE_FORMAT_TYPES",
+            logging_defaults.log_levels,
+            ALLOWED_FILE_FORMAT_TYPES + ["NORMAL"],
+        )
+    )
+
+    # Validate EXTRA_LOG_FILES
+    extra_log_files = log_settings.get("extra_log_files", {})
+    errors.extend(
+        validate_extra_log_files(
+            extra_log_files, "EXTRA_LOG_FILES", logging_defaults.log_levels
+        )
+    )
+
     # Validate LOG_CONSOLE_FORMAT
     log_console_format = log_settings.get("console_format")
     errors.extend(validate_format_option(log_console_format, "LOG_CONSOLE_FORMAT"))  # type: ignore
@@ -143,6 +168,16 @@ def check_logging_settings(app_configs: Dict[str, Any], **kwargs: Any) -> List[E
         validate_boolean_setting(
             is_initialization_message_enabled(), "INITIALIZATION_MESSAGE_ENABLE"
         )
+    )
+
+    # Validate LOG_SQL_QUERIES_ENABLE
+    errors.extend(
+        validate_boolean_setting(is_log_sql_queries_enabled(), "LOG_SQL_QUERIES_ENABLE")
+    )
+
+    # Validate LOG_DIR_SIZE_LIMIT
+    errors.extend(
+        validate_integer_setting(get_log_dir_size_limit(), "LOG_DIR_SIZE_LIMIT")
     )
 
     # Validate LOG_EMAIL_NOTIFIER

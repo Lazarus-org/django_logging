@@ -8,9 +8,7 @@ from django.core.management import call_command
 from django.http import HttpRequest, HttpResponseBase
 from django.utils.timezone import now
 
-from django_logging.middleware.base import (  # pylint: disable=E0401, E0611
-    BaseMiddleware,
-)
+from django_logging.middleware.base import BaseMiddleware
 
 logger = logging.getLogger(__name__)
 
