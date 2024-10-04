@@ -22,6 +22,8 @@ class AnsiColors:
     BRIGHT_MAGENTA: str = "\033[0;95m"
     BRIGHT_CYAN: str = "\033[0;96m"
     BRIGHT_WHITE: str = "\033[0;97m"
+    PINK: str = "\033[38;5;213m"
+    LIGHT_PURPLE = "\033[38;5;129m"
     BLACK_BACKGROUND: str = "\033[40m"
     RED_BACKGROUND: str = "\033[41m"
     GREEN_BACKGROUND: str = "\033[42m"
@@ -30,6 +32,23 @@ class AnsiColors:
     MAGENTA_BACKGROUND: str = "\033[45m"
     CYAN_BACKGROUND: str = "\033[46m"
     WHITE_BACKGROUND: str = "\033[47m"
+    BRIGHT_BLACK_BACKGROUND: str = "\033[100m"
+    BRIGHT_RED_BACKGROUND: str = "\033[101m"
+    BRIGHT_GREEN_BACKGROUND: str = "\033[102m"
+    BRIGHT_YELLOW_BACKGROUND: str = "\033[103m"
+    BRIGHT_BLUE_BACKGROUND: str = "\033[104m"
+    BRIGHT_MAGENTA_BACKGROUND: str = "\033[105m"
+    BRIGHT_CYAN_BACKGROUND: str = "\033[106m"
+    BRIGHT_WHITE_BACKGROUND: str = "\033[107m"
+
+    BOLD: str = "\033[1m"
+    DIM: str = "\033[2m"
+    ITALIC: str = "\033[3m"
+    BOLD_ITALIC: str = "\033[1;3m"
+    UNDERLINE: str = "\033[4m"
+    BLINK: str = "\033[5m"
+    INVERT: str = "\033[7m"
+    STRIKETHROUGH: str = "\033[9m"
 
 
 # Mapping log levels to ANSI colors
