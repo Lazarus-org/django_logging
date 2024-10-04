@@ -3,12 +3,19 @@ import logging.config
 import os
 from typing import Dict, List, Optional
 
-from django_logging.constants import FORMAT_OPTIONS, DefaultLoggingSettings
+from django_logging.constants import (
+    ALLOWED_EXTRA_FILE_TYPES,
+    ALLOWED_FILE_FORMAT_TYPES,
+    FORMAT_OPTIONS,
+    DefaultLoggingSettings,
+)
 from django_logging.constants.config_types import (
+    ExtraLogFiles,
     FormatOption,
     LogDateFormat,
     LogDir,
-    LogFileFormatsType,
+    LogFileFormats,
+    LogFileFormatTypes,
     LogLevel,
     LogLevels,
     NotifierLogLevels,
@@ -30,7 +37,9 @@ class LogConfig:
         self,
         log_levels: LogLevels,
         log_dir: LogDir,
-        log_file_formats: LogFileFormatsType,
+        log_file_formats: LogFileFormats,
+        log_file_format_types: LogFileFormatTypes,
+        extra_log_files: ExtraLogFiles,
         console_level: LogLevel,
         console_format: FormatOption,
         colorize_console: bool,
@@ -53,8 +62,10 @@ class LogConfig:
         self.email_notifier_log_format = self.resolve_format(
             log_email_notifier_log_format
         )
+        self.log_file_format_types = log_file_format_types
+        self.extra_log_files = extra_log_files
 
-    def _resolve_file_formats(self, log_file_formats: LogFileFormatsType) -> Dict:
+    def _resolve_file_formats(self, log_file_formats: LogFileFormats) -> Dict:
         resolved_formats = {}
         for level in self.log_levels:
             format_option = log_file_formats.get(level, None)
@@ -116,9 +127,22 @@ class LogManager:
     def create_log_files(self) -> None:
         """Creates log files based on the log levels in the configuration."""
         for log_level in self.log_config.log_levels:
-            log_file_path = os.path.join(
-                self.log_config.log_dir, f"{log_level.lower()}.log"
-            )
+            fmt_type = self.log_config.log_file_format_types.get(log_level, "").lower()
+            extra_file = self.log_config.extra_log_files.get(log_level, False)
+
+            if extra_file and fmt_type.upper() in ALLOWED_EXTRA_FILE_TYPES:
+                # Use separate files for extra file format structure
+                log_file_path = os.path.join(
+                    self.log_config.log_dir,
+                    fmt_type,
+                    f"{log_level.lower()}.{fmt_type}",
+                )
+            else:
+                # Use regular log file for normal, JSON, or XML
+                log_file_path = os.path.join(
+                    self.log_config.log_dir, f"{log_level.lower()}.log"
+                )
+
             os.makedirs(os.path.dirname(log_file_path), exist_ok=True)
             if not os.path.exists(log_file_path):
                 with open(log_file_path, "w", encoding="utf-8"):
@@ -139,6 +163,7 @@ class LogManager:
 
     def set_conf(self) -> None:
         """Sets the logging configuration using the generated log files."""
+        formatters = {}
         default_settings = DefaultLoggingSettings()
         handlers = {
             level.lower(): {
@@ -146,7 +171,7 @@ class LogManager:
                 "filename": log_file,
                 "formatter": f"{level.lower()}",
                 "level": level,
-                "filters": [level.lower()],
+                "filters": [level.lower(), "context_var_filter"],
             }
             for level, log_file in self.log_files.items()
         }
@@ -154,13 +179,14 @@ class LogManager:
             "class": "logging.StreamHandler",
             "formatter": "console",
             "level": self.log_config.console_level,
+            "filters": ["context_var_filter"],
         }
         email_handler = {
             f"email_{level.lower()}": {
                 "class": "django_logging.handlers.EmailHandler",
                 "formatter": "email",
                 "level": level,
-                "filters": [level.lower()],
+                "filters": [level.lower(), "context_var_filter"],
             }
             for level in self.log_config.email_notifier_log_levels
             if level
@@ -176,13 +202,25 @@ class LogManager:
             for level in default_settings.log_levels
         }
 
-        formatters = {
-            level.lower(): {
-                "format": self.log_config.log_file_formats[level],
-                "datefmt": self.log_config.log_date_format,
-            }
-            for level in self.log_config.log_levels
+        # ContextVarFilter for context variables
+        filters["context_var_filter"] = {
+            "()": "django_logging.filters.ContextVarFilter",
         }
+
+        for level in self.log_config.log_levels:
+            formatter = {
+                level.lower(): {
+                    "format": self.log_config.log_file_formats[level],
+                    "datefmt": self.log_config.log_date_format,
+                }
+            }
+            fmt_type = self.log_config.log_file_format_types.get(level, "None").upper()
+            if fmt_type in ALLOWED_FILE_FORMAT_TYPES:
+                formatter[level.lower()].update(
+                    {"()": f"django_logging.formatters.{fmt_type}Formatter"}
+                )
+            formatters.update(formatter)
+
         formatters["console"] = {
             "format": self.log_config.console_format,
             "datefmt": self.log_config.log_date_format,

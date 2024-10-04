@@ -4,10 +4,12 @@ from django.core.exceptions import ImproperlyConfigured
 
 from django_logging.constants.ansi_colors import AnsiColors
 from django_logging.constants.config_types import (
+    ExtraLogFiles,
     FormatOption,
     LogDateFormat,
     LogDir,
-    LogFileFormatsType,
+    LogFileFormats,
+    LogFileFormatTypes,
     LogLevel,
     LogLevels,
     NotifierLogLevels,
@@ -23,7 +25,9 @@ from django_logging.utils.get_conf import (
 def set_config(
     log_levels: LogLevels,
     log_dir: LogDir,
-    log_file_formats: LogFileFormatsType,
+    log_file_formats: LogFileFormats,
+    log_file_format_types: LogFileFormatTypes,
+    extra_log_files: ExtraLogFiles,
     console_level: LogLevel,
     console_format: FormatOption,
     colorize_console: bool,
@@ -42,6 +46,8 @@ def set_config(
         log_levels (LogLevels): A list specifying the log levels for different handlers.
         log_dir (LogDir): The directory where log files will be stored.
         log_file_formats (LogFileFormatsType): The format of the log files.
+        log_file_format_types (LogFileFormatTypes): The type of the log format of the log files.
+        extra_log_files (ExtraLogFiles): Whether to create separate files for custom format types.
         console_level (LogLevel): The log level for console output.
         console_format (FormatOption): The format for console log messages.
         colorize_console (bool): Whether to colorize console output.
@@ -61,6 +67,8 @@ def set_config(
         ...     log_levels=['DEBUG', 'INFO'],
         ...     log_dir='/var/log/myapp/',
         ...     log_file_formats={'INFO': '%(levelname)s %(asctime)s %(message)s'},
+        ...     log_file_format_types={'INFO': 'JSON'},
+        ...     extra_log_files={'INFO': True},
         ...     console_level='DEBUG',
         ...     console_format='{message}',
         ...     colorize_console=True,
@@ -83,6 +91,8 @@ def set_config(
             log_levels,
             log_dir,
             log_file_formats,
+            log_file_format_types,
+            extra_log_files,
             console_level,
             console_format,
             colorize_console,
@@ -121,13 +131,13 @@ def set_config(
 
             logger = getLogger(__name__)
             logger.info(
-                "Logging initialized with the following configurations:\n"
-                "Log File levels: %s.\n"
-                "Log files are being written to: %s.\n"
-                "Console output level: %s.\n"
-                "Colorize console: %s.\n"
-                "Log date format: %s.\n"
-                "Email notifier enabled: %s.\n",
+                "Logging initialized with the following configurations:"
+                "\n\tLog File levels: %s."
+                "\n\tLog files are being written to: %s."
+                "\n\tConsole output level: %s."
+                "\n\tColorize console: %s."
+                "\n\tLog date format: %s."
+                "\n\tEmail notifier enabled: %s.",
                 log_levels,
                 log_dir,
                 console_level or "default (DEBUG)",

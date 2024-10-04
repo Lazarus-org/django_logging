@@ -18,12 +18,21 @@ def get_config(extra_info: bool = False) -> Dict:
     logging_defaults = DefaultLoggingSettings()
     console_defaults = DefaultConsoleSettings()
 
+    if not isinstance(log_settings, dict):
+        raise ValueError("DJANGO_LOGGING must be a dictionary with configs as keys")
+
     log_levels = log_settings.get("LOG_FILE_LEVELS", logging_defaults.log_levels)
     log_dir = log_settings.get(
         "LOG_DIR", os.path.join(os.getcwd(), logging_defaults.log_dir)
     )
     log_file_formats = log_settings.get(
         "LOG_FILE_FORMATS", logging_defaults.log_file_formats
+    )
+    log_file_format_types = log_settings.get(
+        "LOG_FILE_FORMAT_TYPES", logging_defaults.log_file_format_types
+    )
+    extra_log_files = log_settings.get(
+        "EXTRA_LOG_FILES", logging_defaults.extra_log_files
     )
     console_level = log_settings.get(
         "LOG_CONSOLE_LEVEL", console_defaults.log_console_level
@@ -52,6 +61,8 @@ def get_config(extra_info: bool = False) -> Dict:
         "log_levels": log_levels,
         "log_dir": log_dir,
         "log_file_formats": log_file_formats,
+        "log_file_format_types": log_file_format_types,
+        "extra_log_files": extra_log_files,
         "console_level": console_level,
         "console_format": console_format,
         "colorize_console": colorize_console,
@@ -61,7 +72,9 @@ def get_config(extra_info: bool = False) -> Dict:
         "log_email_notifier_log_format": log_email_notifier_log_format,
     }
     if extra_info:
-        config.update({"log_email_notifier": log_email_notifier})
+        config.update(
+            {"log_email_notifier": log_email_notifier, "log_settings": log_settings}
+        )
 
     return config
 
@@ -115,3 +128,32 @@ def is_initialization_message_enabled() -> bool:
     return log_settings.get(
         "INITIALIZATION_MESSAGE_ENABLE", defaults.initialization_message_enable
     )
+
+
+def is_log_sql_queries_enabled() -> bool:
+    """Check if the LOG_SQL_QUERIES_ENABLE for the logging system is set to
+    True in Django settings.
+
+    Returns:
+        bool: True if LOG_SQL_QUERIES_ENABLE, False otherwise.
+         Defaults to False if not specified.
+
+    """
+    log_settings = getattr(settings, "DJANGO_LOGGING", {})
+    defaults = DefaultLoggingSettings()
+
+    return log_settings.get("LOG_SQL_QUERIES_ENABLE", defaults.log_sql_queries_enable)
+
+
+def get_log_dir_size_limit() -> int:
+    """Check for the LOG_DIR_SIZE_LIMIT for managing the log dir size.
+
+    Returns:
+        int: the limit of log directory size.
+         Defaults to 1024 MB if not specified.
+
+    """
+    log_settings = getattr(settings, "DJANGO_LOGGING", {})
+    defaults = DefaultLoggingSettings()
+
+    return log_settings.get("LOG_DIR_SIZE_LIMIT", defaults.log_dir_size_limit)

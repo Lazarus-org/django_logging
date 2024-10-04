@@ -1,6 +1,6 @@
 import os
 import re
-from typing import List
+from typing import Dict, List
 
 from django.core.checks import Error
 
@@ -11,7 +11,7 @@ from django_logging.constants import (
 )
 from django_logging.constants.config_types import (
     FormatOption,
-    LogEmailNotifierType,
+    LogEmailNotifier,
     LogLevels,
 )
 
@@ -206,7 +206,7 @@ def validate_date_format(date_format: str, config_name: str) -> List[Error]:
     return errors
 
 
-def validate_email_notifier(notifier_config: LogEmailNotifierType) -> List[Error]:
+def validate_email_notifier(notifier_config: LogEmailNotifier) -> List[Error]:
     errors = []
     if not isinstance(notifier_config, dict):
         errors.append(
@@ -246,7 +246,7 @@ def validate_integer_setting(value: int, config_name: str) -> List[Error]:
             Error(
                 f"{config_name} is not a valid integer.",
                 hint=f"Ensure {config_name} is a valid positive integer",
-                id=f"django_logging.E019_{config_name}",
+                id=f"django_logging.E021_{config_name}",
             )
         )
     return errors
