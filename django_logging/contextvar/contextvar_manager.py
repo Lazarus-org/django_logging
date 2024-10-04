@@ -55,7 +55,7 @@ class ContextVarManager:
             var = self._get_or_create(key)
             var.set(value)
 
-    def batch_bind(self, **kwargs: Any) -> Dict[str, contextvars.Token[Any]]:
+    def batch_bind(self, **kwargs: Any) -> Dict[str, contextvars.Token]:
         """Bind multiple context variables and return tokens for resetting.
 
         Args:
@@ -82,7 +82,7 @@ class ContextVarManager:
         if full_key in self._context_vars:
             self._context_vars[full_key].set(Ellipsis)
 
-    def reset(self, tokens: Dict[str, contextvars.Token[Any]]) -> None:
+    def reset(self, tokens: Dict[str, contextvars.Token]) -> None:
         """Reset context variables to their previous state using tokens.
 
         Args:
