@@ -4,16 +4,18 @@ from unittest.mock import patch
 import pytest
 
 from django_logging.constants.config_types import LogLevels
+from django_logging.tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
 from django_logging.validators.config_validators import (
     validate_boolean_setting,
     validate_date_format,
     validate_directory,
     validate_email_notifier,
+    validate_extra_log_files,
     validate_format_option,
     validate_format_string,
+    validate_log_file_format_types,
     validate_log_levels,
 )
-from django_logging.tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
 
 pytestmark = [
     pytest.mark.validators,
@@ -240,7 +242,7 @@ class TestConfigValidator:
         -------
         - Appropriate errors are returned for invalid format options.
         """
-        format_option = 15
+        format_option = 25
         errors = validate_format_option(format_option, "log_format_option")
         assert len(errors) == 1
         assert errors[0].id == "django_logging.E012_log_format_option"
@@ -379,3 +381,95 @@ class TestConfigValidator:
         errors = validate_email_notifier(notifier_config)  # type: ignore
         assert len(errors) == 1
         assert errors[0].id == "django_logging.E018_LOG_EMAIL_NOTIFIER['ENABLE']"
+
+    def test_validate_log_file_format_types_invalid_type(self) -> None:
+        """
+        Test validation of log file format types with an invalid data type.
+
+        Args:
+        ----
+            format_types (Dict): The format types to validate.
+            config_name (str): The name of the configuration being validated.
+            valid_levels (List[str]): Valid logging levels.
+            valid_formats (List[str]): Valid format types.
+
+        Asserts:
+        -------
+            - Errors are returned when format types are not a dictionary.
+        """
+        errors = validate_log_file_format_types(
+            "INVALID_TYPE", "log_file_format_types",  # type: ignore
+            ["DEBUG", "INFO"], ["JSON", "XML"]
+        )
+        assert len(errors) == 1
+        assert errors[0].id == "django_logging.E022_log_file_format_types"
+
+    def test_validate_log_file_format_types_invalid_level_and_format(self) -> None:
+        """
+        Test validation of log file format types with invalid log levels and formats.
+
+        Args:
+        ----
+            format_types (Dict): The format types to validate.
+            config_name (str): The name of the configuration being validated.
+            valid_levels (List[str]): Valid logging levels.
+            valid_formats (List[str]): Valid format types.
+
+        Asserts:
+        -------
+            - Errors are returned for invalid log levels.
+            - Errors are returned for invalid format types.
+        """
+        errors = validate_log_file_format_types(
+            {"INVALID_LEVEL": "JSON", "DEBUG": "INVALID_FORMAT"},
+            "log_file_format_types",
+            ["DEBUG", "INFO", "WARNING"],
+            ["JSON", "XML"],
+        )
+        assert len(errors) == 2
+        assert errors[0].id == "django_logging.E023_log_file_format_types"
+        assert errors[1].id == "django_logging.E024_log_file_format_types"
+
+    def test_validate_extra_log_files_invalid_type(self) -> None:
+        """
+        Test validation of extra log files with an invalid data type.
+
+        Args:
+        ----
+            extra_log_files (Dict): The extra log files configuration to validate.
+            config_name (str): The name of the configuration being validated.
+            valid_levels (List[str]): Valid logging levels.
+
+        Asserts:
+        -------
+            - Errors are returned when extra log files are not a dictionary.
+        """
+        errors = validate_extra_log_files(
+            "INVALID_TYPE", "extra_log_files", ["DEBUG", "INFO"]  # type: ignore
+        )
+        assert len(errors) == 1
+        assert errors[0].id == "django_logging.E025_extra_log_files"
+
+    def test_validate_extra_log_files_invalid_level_and_value(self) -> None:
+        """
+        Test validation of extra log files with invalid log levels and values.
+
+        Args:
+        ----
+            extra_log_files (Dict): The extra log files configuration to validate.
+            config_name (str): The name of the configuration being validated.
+            valid_levels (List[str]): Valid logging levels.
+
+        Asserts:
+        -------
+            - Errors are returned for invalid log levels.
+            - Errors are returned for non-boolean values.
+        """
+        errors = validate_extra_log_files(
+            {"INVALID_LEVEL": True, "DEBUG": "INVALID_VALUE"},
+            "extra_log_files",
+            ["DEBUG", "INFO", "WARNING"],
+        )
+        assert len(errors) == 2
+        assert errors[0].id == "django_logging.E026_extra_log_files"
+        assert errors[1].id == "django_logging.E027_extra_log_files"

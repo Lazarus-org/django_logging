@@ -1,8 +1,8 @@
-from django.conf import settings
 import django
+from django.conf import settings
 
 
-def configure_django_settings():
+def configure_django_settings() -> None:
     if not settings.configured:
         settings.configure(
             DEBUG=True,
@@ -18,6 +18,21 @@ def configure_django_settings():
                 "django_logging",
             ],
             MIDDLEWARE=[],
+            TEMPLATES=[
+                {
+                    "BACKEND": "django.template.backends.django.DjangoTemplates",
+                    "DIRS": [],
+                    "APP_DIRS": True,
+                    "OPTIONS": {
+                        "context_processors": [
+                            "django.template.context_processors.debug",
+                            "django.template.context_processors.request",
+                            "django.contrib.auth.context_processors.auth",
+                            "django.contrib.messages.context_processors.messages",
+                        ],
+                    },
+                },
+            ],
             DJANGO_LOGGING={
                 "AUTO_INITIALIZATION_ENABLE": True,
                 "INITIALIZATION_MESSAGE_ENABLE": True,
@@ -26,6 +41,12 @@ def configure_django_settings():
                 "LOG_FILE_FORMATS": {
                     "DEBUG": 1,
                     "INFO": 1,
+                },
+                "LOG_FILE_FORMAT_TYPES": {
+                    "DEBUG": "JSON",
+                },
+                "EXTRA_LOG_FILES": {
+                    "DEBUG": True,
                 },
                 "LOG_CONSOLE_LEVEL": "DEBUG",
                 "LOG_CONSOLE_FORMAT": 1,

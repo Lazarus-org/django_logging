@@ -4,8 +4,8 @@ from unittest import mock
 
 import pytest
 
-from django_logging.utils.context_manager import _restore_logging_config, config_setup
 from django_logging.tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
+from django_logging.utils.context_manager import _restore_logging_config, config_setup
 
 pytestmark = [
     pytest.mark.utils,
@@ -74,6 +74,8 @@ class TestContextManager:
                     "log_levels": ["INFO"],
                     "log_dir": "/tmp/logs",
                     "log_file_formats": {"INFO": 1},
+                    "log_file_format_types": {"INFO": "normal"},
+                    "extra_log_files": {"INFO": False},
                     "console_level": "DEBUG",
                     "console_format": 2,
                     "colorize_console": False,
@@ -127,6 +129,8 @@ class TestContextManager:
                     "log_levels": ["INFO"],
                     "log_dir": "/tmp/logs",
                     "log_file_formats": {"INFO": 1},
+                    "log_file_format_types": {"INFO": "normal"},
+                    "extra_log_files": {"INFO": False},
                     "console_level": "DEBUG",
                     "console_format": 2,
                     "colorize_console": False,

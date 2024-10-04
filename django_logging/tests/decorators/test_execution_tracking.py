@@ -1,13 +1,14 @@
+import logging
 import sys
+import time
 
 import pytest
-import logging
-import time
 from django.conf import settings
 from django.db import connection
 
 from django_logging.decorators import execution_tracker
 from django_logging.tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
+from django_logging.utils.time import format_elapsed_time
 
 pytestmark = [
     pytest.mark.decorators,
@@ -79,6 +80,10 @@ class TestExecutionTracker:
         result = self.sample_function(0.2)
         elapsed_time = time.time() - start_time
 
+        # test return type of time utility
+        formatted_time = format_elapsed_time(120.0)
+        assert "2 minute(s)" in formatted_time
+
         assert (
             result == "Function executed"
         ), "The function did not return the expected message."
@@ -98,7 +103,7 @@ class TestExecutionTracker:
         caplog.clear()
 
         @execution_tracker(logging_level=logging.INFO, log_queries=True)
-        def sample_db_function():
+        def sample_db_function() -> str:
             with connection.cursor() as cursor:
                 cursor.execute("SELECT 1")
             return "DB function executed"
@@ -128,7 +133,7 @@ class TestExecutionTracker:
             query_threshold=1,
             query_exceed_warning=True,
         )
-        def sample_db_threshold_function():
+        def sample_db_threshold_function() -> str:
             with connection.cursor() as cursor:
                 cursor.execute("SELECT 1")
                 cursor.execute("SELECT 2")
@@ -156,7 +161,7 @@ class TestExecutionTracker:
         caplog.clear()
 
         @execution_tracker(logging_level=logging.INFO, log_queries=True)
-        def sample_db_function():
+        def sample_db_function() -> str:
             with connection.cursor() as cursor:
                 cursor.execute("SELECT 1")
             return "DB function executed"
@@ -181,7 +186,7 @@ class TestExecutionTracker:
         """
 
         @execution_tracker(logging_level=logging.ERROR)
-        def sample_error_function():
+        def sample_error_function() -> None:
             raise ValueError("Sample error")
 
         with pytest.raises(ValueError, match="Sample error"):

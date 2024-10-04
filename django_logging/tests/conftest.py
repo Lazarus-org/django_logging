@@ -5,7 +5,10 @@ from django_logging.tests.fixtures import (
     email_handler,
     email_mock_settings,
     error_log_record,
+    error_with_exc_log_record,
+    flat_formatter,
     get_response,
+    json_formatter,
     log_config,
     log_manager,
     magic_mock_logger,
@@ -17,6 +20,10 @@ from django_logging.tests.fixtures import (
     request_factory,
     request_middleware,
     reset_settings,
+    temp_json_log_directory,
+    temp_log_directory,
+    temp_xml_log_directory,
+    xml_formatter,
 )
 from django_logging.tests.setup import configure_django_settings
 

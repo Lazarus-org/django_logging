@@ -6,8 +6,8 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.conf import settings
 
-from django_logging.utils.log_email_notifier.log_and_notify import log_and_notify_admin
 from django_logging.tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
+from django_logging.utils.log_email_notifier.log_and_notify import log_and_notify_admin
 
 pytestmark = [
     pytest.mark.utils,
@@ -94,6 +94,8 @@ class TestLogAndNotify:
             args=None,
             exc_info=None,
         )
+        # assign the custom value 'context'
+        log_record.context = ""
 
         with patch(
             "django_logging.utils.log_email_notifier.log_and_notify.get_config",
@@ -209,6 +211,9 @@ class TestLogAndNotify:
             args=None,
             exc_info=None,
         )
+
+        # assign the custom value 'context'
+        log_record.context = ""
 
         with patch(
             "django_logging.utils.log_email_notifier.log_and_notify.get_config",

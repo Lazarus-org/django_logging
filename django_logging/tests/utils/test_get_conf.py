@@ -5,13 +5,13 @@ from unittest.mock import patch
 import pytest
 from django.conf import settings
 
+from django_logging.tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
 from django_logging.utils.get_conf import (
     get_config,
     is_auto_initialization_enabled,
     is_initialization_message_enabled,
     use_email_notifier_template,
 )
-from django_logging.tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
 
 pytestmark = [
     pytest.mark.utils,
@@ -44,6 +44,14 @@ class TestGetConf:
             "log_file_formats": {
                 "DEBUG": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
             },
+            "log_file_format_types": {
+                "DEBUG": "JSON",
+                "INFO": "XML",
+            },
+            "extra_log_files": {
+                "DEBUG": False,
+                "INFO": True,
+            },
             "console_level": "WARNING",
             "console_format": "%(levelname)s - %(message)s",
             "colorize_console": True,
@@ -52,32 +60,31 @@ class TestGetConf:
             "log_email_notifier_log_levels": ["ERROR", None],
             "log_email_notifier_log_format": "custom_format",
         }
-        print(expected)
         result = get_config()
         assert result == expected
 
         result = get_config(extra_info=True)
+        result.pop("log_settings")
 
-        expected_extra = {
-            "log_levels": ["DEBUG", "INFO"],
-            "log_dir": "/custom/log/dir",
-            "log_file_formats": {
-                "DEBUG": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-            },
-            "console_level": "WARNING",
-            "console_format": "%(levelname)s - %(message)s",
-            "colorize_console": True,
-            "log_date_format": "%Y-%m-%d",
-            "log_email_notifier_enable": True,
-            "log_email_notifier_log_levels": ["ERROR", None],
-            "log_email_notifier_log_format": "custom_format",
-            "log_email_notifier": {
-                "ENABLE": True,
-                "NOTIFY_ERROR": True,
-                "NOTIFY_CRITICAL": False,
-                "LOG_FORMAT": "custom_format",
-            },
-        }
+        expected_extra = expected.copy()
+        expected_extra.update(
+            {
+                "log_file_format_types": {
+                    "DEBUG": "JSON",
+                    "INFO": "XML",
+                },
+                "extra_log_files": {
+                    "DEBUG": False,
+                    "INFO": True,
+                },
+                "log_email_notifier": {
+                    "ENABLE": True,
+                    "NOTIFY_ERROR": True,
+                    "NOTIFY_CRITICAL": False,
+                    "LOG_FORMAT": "custom_format",
+                },
+            }
+        )
 
         assert result == expected_extra
 
@@ -152,3 +159,18 @@ class TestGetConf:
         mock_settings["DJANGO_LOGGING"]["INITIALIZATION_MESSAGE_ENABLE"] = False
         with patch.object(settings, "DJANGO_LOGGING", mock_settings["DJANGO_LOGGING"]):
             assert is_initialization_message_enabled() is False
+
+    def test_logging_settings_none(self) -> None:
+        """
+        Test that logging settings is None and raise `ValueError`.
+
+        This test verifies that when logging settings (DJANGO_LOGGING) is None,
+        the `get_config` function raises `ValueError`.
+
+        Asserts:
+        -------
+        - ValueError raised by `check_logging_settings`.
+        """
+        settings.DJANGO_LOGGING = None
+        with pytest.raises(ValueError, match="DJANGO_LOGGING must be a dictionary with configs as keys"):
+            get_config()
