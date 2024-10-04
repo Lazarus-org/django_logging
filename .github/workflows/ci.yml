@@ -30,16 +30,16 @@ jobs:
           pip install coverage codecov pytest poetry
           pip install -r packages/requirements-dev.txt
 
-#      - name: Run tests with coverage
-#        run: pytest --cov=django_logging --cov-report=xml
-#
-#      - name: Run Tox tests
-#        run: tox
+      - name: Run tests with coverage
+        run: pytest --cov=django_logging --cov-report=xml
+
+      - name: Run Tox tests
+        run: tox
 
       - name: Run pre-commit hooks
         run: pre-commit run --all-files --config=.pre-commit-config-ci.yaml
 
-#      - name: Upload coverage to Codecov
-#        run: codecov
-#        env:
-#          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      - name: Upload coverage to Codecov
+        run: codecov
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

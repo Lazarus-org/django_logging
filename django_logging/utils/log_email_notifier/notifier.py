@@ -32,10 +32,10 @@ def send_email_async(
                 settings.DEFAULT_FROM_EMAIL, recipient_list, msg.as_string()
             )
             server.quit()
-            logger.info("Log Record has been sent to ADMIN EMAIL successfully.")
+            logger.info("The Record has been sent to ADMIN EMAIL successfully.")
 
         except Exception as e:  # pylint: disable=broad-exception-caught
-            logger.warning("Email Notifier failed to send Log Record: %s", e)
+            logger.warning("Email Notifier failed to send the Record: %s", e)
 
         finally:
             if event:

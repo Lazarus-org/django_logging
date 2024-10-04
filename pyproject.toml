@@ -51,6 +51,7 @@ django = [
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.2"
+pytest-asyncio = "^0.24.0"
 pytest-django = "^4.8.0"
 pytest-cov = "^5.0.0"
 pylint = "^3.2.6"
@@ -168,14 +169,23 @@ addopts = "--cov --cov-report=term-missing --cov-report=html --cov-fail-under=90
 markers = [
   "commands: Tests for Django management commands in the logging package.",
   "commands_send_logs: Tests focused on the `send_logs` management command.",
+  "commands_generate_pretty_json: Tests for the command that generates pretty-formatted JSON logs.",
+  "commands_generate_pretty_xml: Tests for the command that generates pretty-formatted XML logs.",
+  "commands_logs_size_audit: Tests for the command that audits log sizes to ensure they don't exceed defined limits.",
   "filters: Tests that verify log filtering mechanisms.",
   "filters_level_filter: Tests for filtering logs based on their severity level.",
   "formatters: Tests for log formatters that structure log messages.",
+  "base_formatter: Tests for the base class of formatters.",
+  "flat_formatter: Tests for the formatter that creates flat log formats.",
+  "json_formatter: Tests for the formatter that structures logs as JSON objects.",
+  "xml_formatter: Tests for the formatter that structures logs as XML documents.",
   "colored_formatter: Tests for a formatter that adds color coding to log messages.",
   "handlers: Tests for components that dispatch log messages to their destinations.",
   "email_handler: Tests for the handler responsible for sending logs via email.",
   "middleware: Tests related to middleware components in logging.",
+  "base_middleware: Tests for the base class of middleware components.",
   "request_middleware: Tests for middleware handling incoming HTTP requests in logging.",
+  "monitor_log_size_middleware: Tests for middleware that monitors the size of log files.",
   "settings: Tests that ensure logging settings are correctly applied.",
   "settings_checks: Tests for validating the correctness of logging settings.",
   "settings_conf: Tests for verifying the configuration of logging settings.",
@@ -185,12 +195,16 @@ markers = [
   "utils_get_conf: Tests for utility functions that retrieve configuration settings.",
   "utils_log_and_notify: Tests for logging utilities that trigger notifications.",
   "utils_set_conf: Tests for utility functions that set configuration settings.",
+  "utils_process_file: Tests for utility functions that process files.",
   "validators: Tests for validating configurations and inputs in the logging package.",
   "config_validator: Tests focused on validators that check configuration settings.",
   "email_settings_validator: Tests for validators that ensure email settings are valid.",
   "decorators: Tests focused on custom decorators used throughout the package.",
   "decorators_execution_tracking: Tests specifically for the execution_tracking module.",
+  "contextvar: Tests for context variable handling in the logging package.",
+  "contextvar_manager: Tests for managing context variables across different log contexts.",
 ]
+asyncio_default_fixture_loop_scope = [ "function" ]
 
 [tool.coverage.run]
 source = [ "django_logging" ]
