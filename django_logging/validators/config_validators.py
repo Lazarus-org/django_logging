@@ -246,7 +246,76 @@ def validate_integer_setting(value: int, config_name: str) -> List[Error]:
             Error(
                 f"{config_name} is not a valid integer.",
                 hint=f"Ensure {config_name} is a valid positive integer",
-                id=f"django_logging.E021_{config_name}",
+                id=f"django_logging.E019_{config_name}",
             )
         )
+    return errors
+
+
+def validate_log_file_format_types(
+    format_types: Dict,
+    config_name: str,
+    valid_levels: LogLevels,
+    valid_formats: List[str],
+) -> List[Error]:
+    errors = []
+    if not isinstance(format_types, dict):
+        errors.append(
+            Error(
+                f"{config_name} is not a dictionary.",
+                hint=f"Ensure {config_name} is a dictionary with log levels as keys.",
+                id=f"django_logging.E022_{config_name}",
+            )
+        )
+    else:
+        for level, format_type in format_types.items():
+            if level not in valid_levels:
+                errors.append(
+                    Error(
+                        f"Invalid log level '{level}' in {config_name}.",
+                        hint=f"Valid log levels are: {valid_levels}.",
+                        id=f"django_logging.E023_{config_name}",
+                    )
+                )
+            elif format_type.upper() not in valid_formats:
+                errors.append(
+                    Error(
+                        f"Invalid log format type '{format_type}' for level '{level}' in {config_name}.",
+                        hint=f"Valid format types are: {valid_formats}.",
+                        id=f"django_logging.E024_{config_name}",
+                    )
+                )
+    return errors
+
+
+def validate_extra_log_files(
+    extra_log_files: Dict, config_name: str, valid_levels: LogLevels
+) -> List[Error]:
+    errors = []
+    if not isinstance(extra_log_files, dict):
+        errors.append(
+            Error(
+                f"{config_name} is not a dictionary.",
+                hint=f"Ensure {config_name} is a dictionary with log levels as keys.",
+                id=f"django_logging.E025_{config_name}",
+            )
+        )
+    else:
+        for level, value in extra_log_files.items():
+            if level not in valid_levels:
+                errors.append(
+                    Error(
+                        f"Invalid log level '{level}' in {config_name}.",
+                        hint=f"Valid log levels are: {valid_levels}.",
+                        id=f"django_logging.E026_{config_name}",
+                    )
+                )
+            elif not isinstance(value, bool):
+                errors.append(
+                    Error(
+                        f"Invalid value '{value}' for level '{level}' in {config_name}.",
+                        hint="Value must be either True or False.",
+                        id=f"django_logging.E027_{config_name}",
+                    )
+                )
     return errors
