@@ -26,6 +26,14 @@ def mock_settings() -> Generator[Dict, None, None]:
             "LOG_FILE_FORMATS": {
                 "DEBUG": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
             },
+            "LOG_FILE_FORMAT_TYPES": {
+                "DEBUG": "JSON",
+                "INFO": "XML",
+            },
+            "EXTRA_LOG_FILES": {
+                "DEBUG": False,
+                "INFO": True,
+            },
             "LOG_CONSOLE_LEVEL": "WARNING",
             "LOG_CONSOLE_FORMAT": "%(levelname)s - %(message)s",
             "LOG_CONSOLE_COLORIZE": True,

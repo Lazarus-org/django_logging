@@ -38,18 +38,16 @@ def get_response() -> Callable:
 
 
 @pytest.fixture
-def request_middleware(get_response: Callable) -> RequestLogMiddleware:
+def request_middleware() -> RequestLogMiddleware:
     """
     Fixture to create an instance of RequestLogMiddleware.
-
-    Args:
-    ----
-    get_response : function
-        A function that returns an HttpResponse for a given request.
 
     Returns:
     -------
     RequestLogMiddleware
-        An instance of RequestLogMiddleware with the provided get_response function.
+        An instance of RequestLogMiddleware with the sample HttpResponse.
     """
-    return RequestLogMiddleware(get_response)
+    middleware = RequestLogMiddleware(lambda request: HttpResponse("OK"))
+    middleware.log_sql = True
+
+    return middleware

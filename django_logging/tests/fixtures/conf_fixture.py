@@ -20,6 +20,8 @@ def log_config() -> LogConfig:
         log_levels=["INFO", "WARNING", "ERROR"],
         log_dir="/tmp/logs",
         log_file_formats={"INFO": 1, "WARNING": None, "ERROR": "%(message)s"},  # type: ignore
+        log_file_format_types={"INFO": "NORMAL"},
+        extra_log_files={"INFO": False},
         console_level="INFO",
         console_format=1,
         colorize_console=False,
