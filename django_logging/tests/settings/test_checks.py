@@ -1,5 +1,5 @@
 import sys
-from typing import Generator, List
+from typing import List
 from unittest.mock import patch
 
 import pytest
