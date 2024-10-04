@@ -1,1 +1,2 @@
+from .monitor_log_size import MonitorLogSizeMiddleware
 from .request_middleware import RequestLogMiddleware
