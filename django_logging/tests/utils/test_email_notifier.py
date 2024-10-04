@@ -6,8 +6,8 @@ from unittest.mock import ANY, MagicMock
 
 import pytest
 
-from django_logging.utils.log_email_notifier.notifier import send_email_async
 from django_logging.tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
+from django_logging.utils.log_email_notifier.notifier import send_email_async
 
 pytestmark = [
     pytest.mark.utils,
@@ -84,7 +84,7 @@ class TestEmailNotifier:
         mock_smtp_instance.quit.assert_called_once()
 
         mock_info.assert_called_once_with(
-            "Log Record has been sent to ADMIN EMAIL successfully."
+            "The Record has been sent to ADMIN EMAIL successfully."
         )
         mock_warning.assert_not_called()
 
@@ -122,6 +122,6 @@ class TestEmailNotifier:
         email_sent_event.wait()
 
         mock_warning.assert_called_once_with(
-            "Email Notifier failed to send Log Record: %s", ANY
+            "Email Notifier failed to send the Record: %s", ANY
         )
         mock_info.assert_not_called()

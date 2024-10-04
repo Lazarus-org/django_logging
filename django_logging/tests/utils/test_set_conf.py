@@ -5,8 +5,8 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from django_logging.constants.ansi_colors import AnsiColors
-from django_logging.utils.set_conf import set_config
 from django_logging.tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
+from django_logging.utils.set_conf import set_config
 
 pytestmark = [
     pytest.mark.utils,
@@ -61,6 +61,8 @@ class TestSetConf:
             ["DEBUG", "INFO"],
             "/path/to/logs",
             {"DEBUG": 1, "INFO": 2},
+            {"DEBUG": "XML", "INFO": "JSON"},
+            {"DEBUG": False, "INFO": True},
             "DEBUG",
             1,
             True,
@@ -79,6 +81,8 @@ class TestSetConf:
             ["DEBUG", "INFO"],
             "/path/to/logs",
             {"DEBUG": 1, "INFO": 2},
+            {"DEBUG": "XML", "INFO": "JSON"},
+            {"DEBUG": False, "INFO": True},
             "DEBUG",
             1,
             True,
@@ -93,6 +97,8 @@ class TestSetConf:
             ["DEBUG", "INFO"],
             "/path/to/logs",
             {"DEBUG": 1, "INFO": 2},
+            {"DEBUG": "XML", "INFO": "JSON"},
+            {"DEBUG": False, "INFO": True},
             "DEBUG",
             1,
             True,
@@ -114,6 +120,8 @@ class TestSetConf:
             ["DEBUG", "INFO"],
             "/path/to/logs",
             {"DEBUG": 1, "INFO": 2},
+            {"DEBUG": "XML", "INFO": "JSON"},
+            {"DEBUG": False, "INFO": True},
             "DEBUG",
             1,
             True,
@@ -156,6 +164,8 @@ class TestSetConf:
             ["DEBUG", "INFO"],
             "/path/to/logs",
             {"DEBUG": 1, "INFO": 2},
+            {"DEBUG": "XML", "INFO": "JSON"},
+            {"DEBUG": False, "INFO": True},
             "DEBUG",
             1,
             True,
@@ -203,6 +213,8 @@ class TestSetConf:
                 ["DEBUG", "INFO"],
                 "/path/to/logs",
                 {"DEBUG": 1, "INFO": 2},
+                {"DEBUG": "XML", "INFO": "JSON"},
+                {"DEBUG": False, "INFO": True},
                 "DEBUG",
                 1,
                 True,
