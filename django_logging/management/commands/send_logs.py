@@ -48,11 +48,12 @@ class Command(BaseCommand):
             kwargs (dict): Keyword arguments.
 
         """
-        email = kwargs["email"]
+        email: str = kwargs["email"]  # type: ignore
 
         default_settings = DefaultLoggingSettings()
+        log_settings = getattr(settings, "DJANGO_LOGGING", {})
 
-        log_dir: LogDir = settings.DJANGO_LOGGING.get(
+        log_dir: LogDir = log_settings.get(
             "LOG_DIR", os.path.join(os.getcwd(), default_settings.log_dir)
         )
 
@@ -97,7 +98,8 @@ class Command(BaseCommand):
                 os.remove(zip_path)
                 logger.info("Temporary zip file cleaned up successfully.")
 
-    def validate_email_settings(self) -> None:
+    @staticmethod
+    def validate_email_settings(require_admin_email: bool = False) -> None:
         """Check if all required email settings are present in the settings
         file.
 
@@ -105,7 +107,7 @@ class Command(BaseCommand):
         settings are missing.
 
         """
-        errors = check_email_settings(require_admin_email=False)
+        errors = check_email_settings(require_admin_email=require_admin_email)
         if errors:
             logger.error(errors)
             raise ImproperlyConfigured(errors)
