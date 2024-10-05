@@ -6,7 +6,7 @@ we’re thrilled that you want to contribute to `django_logging`! to ensure a po
 
 1. **Fork and Clone**: Start by forking the `django_logging` repository on Github and cloning it to your local machine:
     ```bash
-    git clone https://github.com/ARYAN-NIKNEZHAD/django_logging.git
+    git clone https://github.com/lazarus-org/django_logging.git
     cd django_logging
     ```
 
