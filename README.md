@@ -24,8 +24,8 @@ imagine you have a Django package that was developed a few years ago and already
 
 ## Project Detail
 
-- Language: Python > 3.8
-- Framework: Django > 4.2
+- Language: Python >= 3.9
+- Framework: Django >= 4.2
 
 
 ## Documentation
