@@ -27,6 +27,7 @@ class DefaultLoggingSettings:
     auto_initialization_enable: bool = True
     initialization_message_enable: bool = True
     log_sql_queries_enable: bool = False
+    include_log_iboard: bool = False
     log_file_formats: LogFileFormats = field(
         default_factory=lambda: cast(
             LogFileFormats,

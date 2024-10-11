@@ -6,6 +6,7 @@ from django_logging.constants import ALLOWED_FILE_FORMAT_TYPES, DefaultLoggingSe
 from django_logging.utils.get_conf import (
     get_config,
     get_log_dir_size_limit,
+    include_log_iboard,
     is_auto_initialization_enabled,
     is_initialization_message_enabled,
     is_log_sql_queries_enabled,
@@ -155,6 +156,9 @@ def check_logging_settings(app_configs: Dict[str, Any], **kwargs: Any) -> List[E
     # Validate LOG_DATE_FORMAT
     log_date_format = log_settings.get("log_date_format")
     errors.extend(validate_date_format(log_date_format, "LOG_DATE_FORMAT"))  # type: ignore
+
+    # Validate INCLUDE_LOG_iBOARD
+    errors.extend(validate_boolean_setting(include_log_iboard(), "INCLUDE_LOG_iBOARD"))
 
     # Validate AUTO_INITIALIZATION_ENABLE
     errors.extend(
