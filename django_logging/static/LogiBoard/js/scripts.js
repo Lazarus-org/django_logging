@@ -4,6 +4,7 @@ let folderTree = {};
 let interval;
 let progress = 0;
 let isStopped = false;
+let currentFile = null;
 
 const validFileTypes = ['application/zip', 'application/x-zip-compressed', 'multipart/x-zip'];
 
@@ -31,6 +32,7 @@ function uploadFile(file) {
     folderTree = {};
     document.getElementById('file-structure').innerHTML = '';
     document.getElementById('file-display').innerHTML = '';
+    currentFile = file;
     startUploadProgress(file);
 }
 
@@ -166,7 +168,7 @@ function toggleUploadState() {
     isStopped = !isStopped;
     clearInterval(interval);
     document.getElementById('stop-icon').src = icons[isStopped ? 'pause' : 'stop'];
-    if (!isStopped) startUploadProgress();
+    if (!isStopped && currentFile) startUploadProgress(currentFile);
 }
 
 document.getElementById('close-icon').addEventListener('click', resetAll);
