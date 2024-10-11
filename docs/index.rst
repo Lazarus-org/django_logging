@@ -82,6 +82,7 @@ The documentation is organized into the following sections:
 
    quick_start
    usage
+   log_iboard
    settings
    contributing
    rules

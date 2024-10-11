@@ -11,6 +11,7 @@ Default configuration
     DJANGO_LOGGING = {
         "AUTO_INITIALIZATION_ENABLE": True,
         "INITIALIZATION_MESSAGE_ENABLE": True,
+        "INCLUDE_LOG_iBOARD": True,
         "LOG_SQL_QUERIES_ENABLE": True,
         "LOG_FILE_LEVELS": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
         "LOG_DIR": "logs",
@@ -64,6 +65,13 @@ Here's a breakdown of the available configuration options:
 
 - **Type**: ``bool``
 - **Description**: Enables logging of the initialization message when logging starts. Defaults to ``True``.
+
+``INCLUDE_LOG_iBOARD``
+----------------------
+
+- **Type**: ``bool``
+- **Description**: Makes LogiBoard url accessible in the project. Defaults to ``False``. for setting up the LogiBoard, please refer to the :doc:`LogiBoard Integration <log_iboard>`.
+
 
 ``LOG_SQL_QUERIES_ENABLE``
 --------------------------

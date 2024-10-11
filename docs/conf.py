@@ -13,8 +13,8 @@ sys.path.insert(0, os.path.abspath('.'))
 # -- Project information -----------------------------------------------------
 
 project = 'django_logging'
-copyright = '2024, django_logging'
-author = 'ARYAN NIKNEZHAD, MEHRSHAD-MIRSHEKARY'
+copyright = '2024, Lazarus'
+author = 'ARYAN-NIKNEZHAD, MEHRSHAD-MIRSHEKARY'
 
 # The full version, including alpha/beta/rc tags
 release = '2.0.0'
