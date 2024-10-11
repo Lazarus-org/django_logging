@@ -203,6 +203,8 @@ markers = [
   "decorators_execution_tracking: Tests specifically for the execution_tracking module.",
   "contextvar: Tests for context variable handling in the logging package.",
   "contextvar_manager: Tests for managing context variables across different log contexts.",
+  "views: Tests for MVT views in the django logging package.",
+  "views_log_iboard: Tests specially for the log_iboard view.",
 ]
 asyncio_default_fixture_loop_scope = [ "function" ]
 
