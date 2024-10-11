@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LogiBoard</title>
+    <!-- Load the static tag -->
+    {% load static %}
+
+    <!-- Load Tailwind CSS -->
+    <link rel="stylesheet" href="{% static 'LogiBoard/css/app.css' %}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Italiana&display=swap" rel="stylesheet">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Spicy+Rice&display=swap" rel="stylesheet">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400&display=swap" rel="stylesheet">
+
+
+    <style>
+        main{
+            background: rgb(1,0,4);
+            background: radial-gradient(circle, rgba(1,0,4,1) 40%, rgb(6, 4, 25) 60%);
+        }
+        #main-h4{
+            margin-bottom: 15%;
+        }
+        @keyframes uploadIcon {
+            0% {
+                transform:  scale(1);
+            }
+            50% {
+                transform:  scale(1.1);
+            }
+            100% {
+                transform:  scale(1);
+            }
+        }
+        #upload-icon {
+            transition: transform 0.4s ease;
+            animation: uploadIcon 2.5s infinite;
+        }
+        @keyframes blinkBorder {
+            0% {
+                border-color: #d8daf6;
+            }
+            50% {
+                border-color: #e220cb;
+            }
+            100% {
+                border-color: #d8daf6;
+            }
+        }
+        #drop-zone {
+            border-width: 2px;
+            border-style: dashed;
+            border-color: transparent;
+            animation: blinkBorder 1.5s infinite;
+        }
+        .circle {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            mask: radial-gradient(closest-side, transparent 85%, white 60%);
+            background: conic-gradient(#E39E22 var(--progress), #ddd var(--progress));
+        }
+        #stop-icon,#close-icon{
+            box-shadow: rgba(50, 50, 93, 0.25) 0 50px 100px -20px, rgba(0, 0, 0, 0.3) 0 30px 60px -30px, rgba(10, 37, 64, 0.35) 0 -2px 6px 0 inset;
+            transition: 0.4s ease;
+        }
+        #stop-icon:hover,#close-icon:hover{
+            box-shadow: rgba(50, 50, 93, 0.653) 0 50px 100px -20px, rgba(0, 0, 0, 0.693) 0 30px 60px -30px, rgba(10, 37, 64, 0.673) 0 -2px 6px 0 inset;
+        }
+        @keyframes uploadText {
+            0% {
+                color: #D5F4FF;
+            }
+            50% {
+                color: #2C333B;
+            }
+            100% {
+                color: #D5F4FF;
+            }
+        }
+        #upload-text{
+            animation: uploadText 1.5s infinite;
+        }
+        #done{
+            display: grid;
+            grid-template-columns: 5fr 0.2fr 3fr;
+        }
+        #send-another:hover{
+            color:rgb(141, 18, 18)
+        }
+        #back-link{
+            height: 85vh;
+            box-shadow: rgba(50, 50, 93, 0.542) 0 50px 100px -20px, rgba(0, 0, 0, 0.647) 0 30px 60px -30px, rgba(10, 37, 64, 0.568) 0 -2px 6px 0 inset;
+            background: rgb(1,0,4);
+            background: radial-gradient(circle, rgba(1,0,4,1) 40%, rgb(4, 3, 19) 60%);
+        }
+        #file-link{
+            display: grid;
+            grid-template-columns: 0.5fr 2fr;
+        }
+        #file-structure{
+            overflow-y: auto;
+        }
+    </style>
+
+</head>
+<body class="m-0 p-0 box-border w-full h-full bg-back-0 font-body flex flex-col justify-center"  style="font-family: Caveat,serif;">
+
+    <nav class="w-11/12 mt-3.5 flex m-auto">
+        <div class="flex justify-start w-3/4">
+            <img src="{%static 'LogiBoard/imgs/Lazarus.jpeg' %}" alt="Lazarus-icon" class="w-12 h-12 rounded-full shadow-2xl z-10">
+            <h3 class="font-title flex items-center text-2xl pl-2" style=" font-family:Italiana,serif;">Lazarus</h3>
+        </div>
+
+    </nav>
+
+    <main id="main-upload" class="w-11/12 bg-gray-0 flex flex-col justify-center mt-3 m-auto rounded-md relative z-0 shadow-2xl">
+        <div class="text-center">
+            <h1 class="text-white text-7xl mt-10 mb-2 leading-tight" style="font-family: Spicy Rice,serif;">Simple and safe to<br> upload</h1>
+            <h4 id="main-h4" class="text-zinc-400 text-xl">Easily upload your zipped log files to extract and explore them in seconds!</h4>
+        </div>
+                                                                 <!-- Upload the zip file -->
+        <div id="drag-drop-area" class="absolute z-10 w-2/5 h-2/4 p-2 top-80 left-1/2 transform -translate-x-1/2 bg-back-0 rounded-md flex justify-center items-center shadow-2xl">
+            <div id="drop-zone" class="border-dashed border-2 border-gray-0 rounded-md h-full w-full flex flex-col justify-center items-center shadow-lg">
+                <h3 class="text-center text-lg text-gray-0">Please select the <span class="text-rose-800">zip file</span> you want<br>to upload</h3>
+                <input type="file" id="file-input" class="hidden" accept=".zip" multiple>
+                <img id="upload-icon" src="{%static 'LogiBoard/imgs/upload-to-cloud-50.png' %}" alt="upload-icon" class="mt-5 cursor-pointer">
+            </div>
+        </div>
+                                                                 <!-- Pass the extract and display the percentage -->
+        <div id="upload-area" class="absolute z-10 w-2/5 h-2/4 p-2 top-80 left-1/2 transform -translate-x-1/2 bg-back-0 rounded-md flex flex-col items-center justify-center shadow-2xl hidden bg-gray-700">
+            <div class="flex flex-row items-center justify-center gap-10">
+                <img id="stop-icon" src="{%static 'LogiBoard/imgs/stop-50.png' %}" alt="stop" class="w-8 h-8 cursor-pointer rounded-full">
+                <div class="circle">
+                    <div class="progress"></div>
+                    <span class="progress-text absolute text-gray-0 bg-back-0 text-lg" style="font-family: 'Roboto',serif; font-feature-settings: 'tnum';" id="progress-text">0%</span>
+                </div>
+                <img id="close-icon" src="{%static 'LogiBoard/imgs/close-50.png' %}" alt="close" class="w-8 h-8 cursor-pointer rounded-full">
+            </div>
+            <h3 id="upload-text" class="text-center text-sm text-gray-0 mt-5">Uploading...</h3>
+        </div>
+                                                                 <!-- End of extract -->
+        <div id="done" class="absolute z-10 w-2/5 h-2/4 p-2 top-80 left-1/2 transform -translate-x-1/2 bg-back-0 rounded-md shadow-2xl" style="display: none;">
+
+            <div class="w-full h-full flex flex-col justify-center items-center">
+                <img src="{%static 'LogiBoard/imgs/done-50.png' %}" alt="Done-icon" class="w-20 h-20 mb-2">
+                <h4 class="text-xl">You're done!</h4>
+                <p class="text-center mt-1" style="color: rgba(0, 0, 0, 0.68); font-size: 14px; line-height: 18px;">Your zip file extracted successfully . </p>
+                <h3  id="send-another" class="mt-4 cursor-pointer" style="transition: 0.3s ease;">Send Another?</h3>
+            </div>
+
+            <div class="flex items-center justify-start">
+                <hr class="h-full w-px" style="background-color: #B0D0DB;">
+            </div>
+
+            <div class="flex flex-col items-center justify-evenly">
+
+                    <button id="open" class="flex flex-row items-center justify-center bg-gray-0 rounded-xl shadow-2xl cursor-pointer" style="transition: 0.4s ease; padding: 5px 20px ">
+                        <img src="{%static 'LogiBoard/imgs/open-50.png' %}" alt="open-icon" class="w-4 h-4">
+                        Open Link
+                    </button>
+
+            </div>
+
+        </div>
+
+    </main>
+                                                                 <!-- Display the content of the extracted file -->
+    <div id="back-link" class="w-11/12 mt-3 m-auto rounded-md shadow-2xl flex flex-col" style="display: none;">
+        <span class="flex flex-row items-center justify-end m-auto mt-2" style="width: 99%;">
+            <img src="{%static 'LogiBoard/imgs/multiply-50.png' %}" alt="Close-icon" class="w-6 h-6 cursor-pointer" id="close-back-link">
+        </span>
+        <span id="file-link" class="flex-row items-center justify-start m-auto mt-4 text-white" style="width: 95%; height: 83%">
+            <div id="file-structure" class="p-2" style="background-color: #32373df2; height: 100%; border-radius: 10px 0 0 10px;"></div>
+            <div id="file-display" class="p-4 bg-black" style="overflow-y: auto; height: 100%; font-size: 12px;"></div>
+        </span>
+    </div>
+
+
+    <!-- All image paths that used in scripts -->
+    <div id="image-paths"
+         data-stop-icon="{% static 'LOGiBoard/imgs/stop-50.png' %}"
+         data-pause-icon="{% static 'LOGiBoard/imgs/pause-50.png' %}"
+         data-txt-icon="{% static 'LOGiBoard/imgs/txt-icon.png' %}"
+         data-json-icon="{% static 'LOGiBoard/imgs/json-icon.png' %}"
+         data-xml-icon="{% static 'LOGiBoard/imgs/xml-icon.png' %}"
+         data-file-icon="{% static 'LOGiBoard/imgs/file-icon.png' %}"
+         data-folder-icon="{% static 'LOGiBoard/imgs/folder-icon.png' %}">
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="{%static 'LogiBoard/js/scripts.js' %}"></script>
+
+</body>
+</html>
