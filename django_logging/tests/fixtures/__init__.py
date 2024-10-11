@@ -21,3 +21,4 @@ from .request_middleware_fixture import (
     request_middleware,
 )
 from .settings_fixture import mock_settings, reset_settings
+from .views_fixture import setup_users, client

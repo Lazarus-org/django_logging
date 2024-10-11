@@ -1,11 +1,28 @@
 import django
 from django.conf import settings
+import string
+import random
+
+
+def generate_secret_key(length: int = 50) -> str:
+    """
+    Generates a random secret key for Django settings.
+
+    Args:
+        length (int): The length of the secret key. Default is 50 characters.
+
+    Returns:
+        str: A randomly generated secret key.
+    """
+    characters = string.ascii_letters + string.digits + string.punctuation
+    return "".join(random.choice(characters) for _ in range(length))
 
 
 def configure_django_settings() -> None:
     if not settings.configured:
         settings.configure(
             DEBUG=True,
+            SECRET_KEY=generate_secret_key(),  # Add a secret key for testing
             DATABASES={
                 "default": {
                     "ENGINE": "django.db.backends.sqlite3",
@@ -13,11 +30,22 @@ def configure_django_settings() -> None:
                 }
             },
             INSTALLED_APPS=[
-                "django.contrib.contenttypes",
                 "django.contrib.auth",
+                "django.contrib.contenttypes",
+                "django.contrib.sessions",
+                "django.contrib.messages",
+                "django.contrib.staticfiles",
                 "django_logging",
             ],
-            MIDDLEWARE=[],
+            MIDDLEWARE=[
+                "django.middleware.security.SecurityMiddleware",
+                "django.contrib.sessions.middleware.SessionMiddleware",
+                "django.middleware.common.CommonMiddleware",
+                "django.middleware.csrf.CsrfViewMiddleware",
+                "django.contrib.auth.middleware.AuthenticationMiddleware",
+                "django.contrib.messages.middleware.MessageMiddleware",
+                "django.middleware.clickjacking.XFrameOptionsMiddleware",
+            ],
             TEMPLATES=[
                 {
                     "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -34,6 +62,7 @@ def configure_django_settings() -> None:
                 },
             ],
             DJANGO_LOGGING={
+                "INCLUDE_LOG_iBOARD": True,
                 "AUTO_INITIALIZATION_ENABLE": True,
                 "INITIALIZATION_MESSAGE_ENABLE": True,
                 "LOG_FILE_LEVELS": ["DEBUG", "INFO"],
@@ -72,5 +101,9 @@ def configure_django_settings() -> None:
             TIME_ZONE="UTC",
             USE_I18N=True,
             USE_TZ=True,
+            ROOT_URLCONF="django_logging.urls",
+            STATIC_URL="static/"
         )
         django.setup()
+
+configure_django_settings()
