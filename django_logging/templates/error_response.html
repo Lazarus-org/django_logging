@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <!-- Load the static tag -->
+    {% load static %}
+
+    <link rel="stylesheet" href="{% static 'LogiBoard/css/error_response.css' %}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+
+</head>
+<body>
+
+    <main>
+
+        <div class="error-img">
+            <img src="{%static 'LogiBoard/imgs/exclamation-mark.png' %}" alt="exclamation-mark">
+        </div>
+
+        <div class="error-para">
+            <h3>{{ message }}</h3>
+        </div>
+
+        <div class="made">
+            <div></div>
+            <p>Made by Lazarus</p>
+        </div>
+
+    </main>
+
+</body>
+</html>

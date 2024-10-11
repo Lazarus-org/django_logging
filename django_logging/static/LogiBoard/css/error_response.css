@@ -1,0 +1,65 @@
+*{
+    padding: 0px;
+    margin: 0px;
+    box-sizing: border-box;
+    font-family: Lora;
+}
+body{
+    width: 100%;
+    height: 100vh;
+    background-color: #D5F4FF;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+main{
+    width: 30%;
+    height: 45%;
+    border-radius: 20px;
+    background-color: rgba(1,0,4);
+    background: radial-gradient(circle, rgba(1,0,4,1) 40% , rgb(4, 3, 22) 60%);
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
+    display: grid;
+    grid-template-rows: 1fr 1.5fr 1fr;
+    padding: 20px 10px;
+}
+.error-img{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.error-img img{
+    margin: auto;
+    width: 70px;
+    height: 70px;
+}
+.error-para{
+    color: aliceblue;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.error-para h3{
+    color: antiquewhite;
+    font-size: 0.9em;
+}
+.made{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+.made div{
+    width: 7px;
+    height: 7px;
+    background-color: rgb(130, 8, 8);border-radius: 50%;
+    margin-right: 8px;
+}
+.made p{
+    text-align: center;
+    color: rgb(150, 149, 150);
+    font-size: 0.7em;
+}
