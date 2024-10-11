@@ -1,3 +1,4 @@
+from django_logging.tests.setup import configure_django_settings
 from django_logging.tests.fixtures import (
     admin_email_mock_settings,
     colored_formatter,
@@ -24,7 +25,6 @@ from django_logging.tests.fixtures import (
     temp_log_directory,
     temp_xml_log_directory,
     xml_formatter,
+    setup_users,
+    client
 )
-from django_logging.tests.setup import configure_django_settings
-
-configure_django_settings()

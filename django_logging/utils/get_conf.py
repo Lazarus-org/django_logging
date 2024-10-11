@@ -157,3 +157,18 @@ def get_log_dir_size_limit() -> int:
     defaults = DefaultLoggingSettings()
 
     return log_settings.get("LOG_DIR_SIZE_LIMIT", defaults.log_dir_size_limit)
+
+
+def include_log_iboard() -> bool:
+    """Check if the INCLUDE_LOG_iBOARD for the logging system is set to True in
+    Django settings.
+
+    Returns:
+        bool: True if INCLUDE_LOG_iBOARD, False otherwise.
+         Defaults to False if not specified.
+
+    """
+    log_settings = getattr(settings, "DJANGO_LOGGING", {})
+    defaults = DefaultLoggingSettings()
+
+    return log_settings.get("INCLUDE_LOG_iBOARD", defaults.include_log_iboard)
