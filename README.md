@@ -17,7 +17,7 @@ Welcome to django_logging Documentation!
 
 The [`django_logging`](https://github.com/lazarus-org/django_logging) is a powerful yet simple Django package that extends and enhances Python's built-in ``logging`` without relying on any **third-party** libraries. Our goal is to keep things straightforward while providing flexible and customizable logging solutions that are specifically designed for Django applications.
 
-One of the key advantages of ``django_logging`` is its seamless integration. Get started with django_logging in your existing projects without refactoring any code. Even if you're already using the **default logging setup**, you can instantly upgrade to advanced features with just a simple installation. No extra changes or complicated setup required!
+One of the key advantages of ``django_logging`` is its seamless integration. Get started with django_logging in your existing projects without refactoring any code. Even if you're already using the **built-in logging module**, you can instantly upgrade to advanced features with just a simple installation. No extra changes or complicated setup required!
 
 imagine you have a Django package that was developed a few years ago and already uses Python's built-in ``logging``. Refactoring the entire codebase to use another logging package would be a daunting task. But with ``django_logging``, you don't have to worry about that. Simply install django_logging and enjoy all its advanced features with logging each ``LEVEL`` in separate files with three extra formats (``json``, ``xml``, ``flat``)  **without having to make any changes** to your existing code.
 
@@ -34,6 +34,7 @@ The documentation is organized into the following sections:
 
 - [Quick Start](#quick-start)
 - [Usage](#usage)
+- [LogiBoard Integration](#LogiBoard-Integration)
 - [Settings](#settings)
 - [Available Format Options](#available-format-options)
 - [Required Email Settings](#required-email-settings)
