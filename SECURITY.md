@@ -6,7 +6,8 @@ We actively support the following versions of `django_logging` with security upd
 
 | Version   | Supported          |
 | --------- | ------------------ |
-| 1.2.x     | ✅ Fully supported  |
+| 2.0.x     | ✅ Fully supported |
+| 1.2.x     | ✅ Supported  |
 | 1.1.x     | ✅ Supported        |
 | 1.0.x     | ⚠️ Limited support |
 
