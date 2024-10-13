@@ -102,6 +102,14 @@ function displayFolderContents(folder, container, zip, path) {
             fileElement.innerHTML = `<img src="${icons[isFile ? getIcon(item) : 'folder']}" class="inline-block w-5 h-5 mr-2" alt="">${item}`;
 
             fileElement.addEventListener('click', async () => {
+
+                const previouslySelected = document.querySelector('.selected-file');
+                if (previouslySelected) {
+                    previouslySelected.classList.remove('selected-file');
+                }
+
+                fileElement.classList.add('selected-file');
+
                 if (isFile) {
                     const fileData = await zip.file(itemPath).async('blob');
                     renderFile(fileData, item);
