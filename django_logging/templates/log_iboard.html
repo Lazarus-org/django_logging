@@ -48,6 +48,9 @@
             transition: transform 0.4s ease;
             animation: uploadIcon 2.5s infinite;
         }
+        .highlight {
+            background-color: #edeaf7;
+        }
         @keyframes blinkBorder {
             0% {
                 border-color: #d8daf6;
@@ -110,7 +113,10 @@
             grid-template-columns: 5fr 0.2fr 3fr;
         }
         #send-another:hover{
-            color:rgb(141, 18, 18)
+            color:rgb(141, 18, 18);
+        }
+        #open:hover{
+            background-color: rgb(141, 18, 18);
         }
         #back-link{
             height: 85vh;
@@ -124,6 +130,16 @@
         }
         #file-structure{
             overflow-y: auto;
+        }
+        .selected-file {
+            background-color: #2c2f33;
+            color: #ffffff;
+            border-radius: 5px;
+            padding-left: 5px;
+            display: flex;
+            align-items: center;
+            flex-direction: row;
+            box-shadow: rgba(50, 50, 93, 0.296) 0 50px 100px -20px, rgba(0, 0, 0, 0.29) 0 30px 60px -30px, rgba(10, 37, 64, 0.257) 0 -2px 6px 0 inset;
         }
     </style>
 
@@ -179,10 +195,10 @@
 
             <div class="flex flex-col items-center justify-evenly">
 
-                    <button id="open" class="flex flex-row items-center justify-center bg-gray-0 rounded-xl shadow-2xl cursor-pointer" style="transition: 0.4s ease; padding: 5px 20px ">
-                        <img src="{%static 'LogiBoard/imgs/open-50.png' %}" alt="open-icon" class="w-4 h-4">
-                        Open Link
-                    </button>
+                <button id="open" class="flex flex-row items-center justify-center bg-[rgb(1,0,4)] rounded-xl shadow-2xl cursor-pointer"style="transition: 0.4s ease; padding: 5px 20px ;">
+                    <img src="{%static 'LogiBoard/imgs/open-50.png' %}" alt="open-icon" class="w-4 h-4">
+                    <p class="text-sm text-white ml-2">Open Link</p>
+                </button>
 
             </div>
 
@@ -199,9 +215,7 @@
             <div id="file-display" class="p-4 bg-black" style="overflow-y: auto; height: 100%; font-size: 12px;"></div>
         </span>
     </div>
-
-
-    <!-- All image paths that used in scripts -->
+                                                                 <!-- All image paths that used in scripts -->
     <div id="image-paths"
          data-stop-icon="{% static 'LOGiBoard/imgs/stop-50.png' %}"
          data-pause-icon="{% static 'LOGiBoard/imgs/pause-50.png' %}"

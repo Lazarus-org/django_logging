@@ -1,4 +1,5 @@
 const mainupload = document.getElementById("main-upload");
+const dropZone = document.getElementById('drop-zone');
 
 let folderTree = {};
 let interval;
@@ -25,6 +26,33 @@ document.getElementById('file-input').addEventListener('change', (event) => {
 
 document.getElementById('drag-drop-area').style.display = "block";
 document.getElementById('upload-area').style.display = "none";
+
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    dropZone.addEventListener(eventName, preventDefaults, false);
+});
+
+function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+['dragenter', 'dragover'].forEach(eventName => {
+    dropZone.addEventListener(eventName, () => dropZone.classList.add('highlight'), false);
+});
+
+['dragleave', 'drop'].forEach(eventName => {
+    dropZone.addEventListener(eventName, () => dropZone.classList.remove('highlight'), false);
+});
+
+dropZone.addEventListener('drop', (e) => {
+    const file = e.dataTransfer.files[0];
+    if (file && validFileTypes.includes(file.type)) {
+        resetProgress();
+        uploadFile(file);
+    } else {
+        alert("Only ZIP files are allowed!");
+    }
+});
 
 function uploadFile(file) {
     document.getElementById('drag-drop-area').style.display = "none";
@@ -102,6 +130,14 @@ function displayFolderContents(folder, container, zip, path) {
             fileElement.innerHTML = `<img src="${icons[isFile ? getIcon(item) : 'folder']}" class="inline-block w-5 h-5 mr-2" alt="">${item}`;
 
             fileElement.addEventListener('click', async () => {
+
+                const previouslySelected = document.querySelector('.selected-file');
+                if (previouslySelected) {
+                    previouslySelected.classList.remove('selected-file');
+                }
+
+                fileElement.classList.add('selected-file');
+
                 if (isFile) {
                     const fileData = await zip.file(itemPath).async('blob');
                     renderFile(fileData, item);
