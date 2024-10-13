@@ -1,3 +1,52 @@
+## v2.0.0 (2024-10-13)
+
+### ✨ Features
+- **feat(LogiBoard)**: Add drag-and-drop support for ZIP file uploads. ([e86dd14](https://github.com/FATEMEH-Z-HASHEMI/django_logging/commit/e86dd14))
+  - Added drag-and-drop functionality for file uploads in the #drop-zone area.
+  - Implemented ZIP file validation with interactive UI.
+
+- **feat(formatters)**: Add JSON, XML, and FLAT formatters. ([509e67e](https://github.com/MEHRSHAD-MIRSHEKARY/django_logging/commit/509e67e), [1cb6639](https://github.com/MEHRSHAD-MIRSHEKARY/django_logging/commit/1cb6639), [bf017c1](https://github.com/MEHRSHAD-MIRSHEKARY/django_logging/commit/bf017c1))
+  - **JSONFormatter**: Converts log records into structured JSON format.
+  - **XMLFormatter**: Provides XML formatted log records with nested data.
+  - **FLATFormatter**: Formats log fields as flat key-value pairs.
+
+- **feat(contextvar)**: Add ContextVarManager class for structured context management. ([bae37d0](https://github.com/MEHRSHAD-MIRSHEKARY/django_logging/commit/bae37d0))
+  - Introduced methods for binding, unbinding, and managing context variables for structured logging.
+
+- **feat(middleware)**: Add MonitorLogSizeMiddleware and RequestLogMiddleware. ([4044a39](https://github.com/MEHRSHAD-MIRSHEKARY/django_logging/commit/4044a39), [2c004df](https://github.com/MEHRSHAD-MIRSHEKARY/django_logging/commit/2c004df))
+  - **MonitorLogSizeMiddleware**: Periodically checks log directory size and sends alerts if limits are exceeded.
+  - **RequestLogMiddleware**: Logs details about each HTTP request, including SQL queries executed during the request.
+
+- **feat(commands)**: Add Django management commands for monitoring logs. ([980f28d](https://github.com/MEHRSHAD-MIRSHEKARY/django_logging/commit/980f28d), [d38d3e4](https://github.com/MEHRSHAD-MIRSHEKARY/django_logging/commit/d38d3e4))
+  - **MonitorLogSizeCommand**: Checks log directory size and sends admin email alerts.
+  - **Pretty JSON/XML Commands**: Reformat log files into prettier formats for better readability.
+
+- **feat(Static)**: Add JavaScript functionality for handling ZIP uploads in LogiBoard. ([3c1bcf9](https://github.com/FATEMEH-Z-HASHEMI/django_logging/commit/3c1bcf9))
+  - Enhanced log management through a user-friendly drag-and-drop UI.
+
+### 🐛 Bug Fixes
+- **fix(validators)**: Add validation for log file formats and extra log files configuration. ([47ebea4](https://github.com/MEHRSHAD-MIRSHEKARY/django_logging/commit/47ebea4))
+  - Ensured correct configuration of log file formats and extra log settings.
+
+- **fix(checks)**: Correct import typos in middleware and formatters. ([3732fc7](https://github.com/MEHRSHAD-MIRSHEKARY/django_logging/commit/3732fc7))
+
+### ⚡️ Refactor
+- **refactor(middleware)**: Refactor RequestLogMiddleware for asynchronous support and SQL query logging. ([2c004df](https://github.com/MEHRSHAD-MIRSHEKARY/django_logging/commit/2c004df))
+
+### ✅ Tests
+- **tests(contextvar)**: Add tests for ContextVariableManager. ([8cb8b43](https://github.com/MEHRSHAD-MIRSHEKARY/django_logging/commit/8cb8b43))
+  - Verified correct binding, unbinding, and merging of context variables.
+
+- **tests(middleware)**: Add comprehensive tests for middleware and formatters. ([4754cd9](https://github.com/MEHRSHAD-MIRSHEKARY/django_logging/commit/4754cd9))
+
+### 📚 Documentation
+- **docs**: Update README and RST documentation to cover new features. ([17880ad](https://github.com/MEHRSHAD-MIRSHEKARY/django_logging/commit/17880ad), [01d3fe2](https://github.com/MEHRSHAD-MIRSHEKARY/django_logging/commit/01d3fe2))
+  - Included new features such as context management, formatters, and middleware in the docs.
+
+### 🔀 Merged
+- **Merge PR #122**: Improve LogiBoard UI and styles. ([0cb7f51](https://github.com/FATEMEH-Z-HASHEMI/django_logging/commit/0cb7f51))
+- **Merge PR #101**: Add FLATFormatter for key-value formatted logs. ([aa38f42](https://github.com/MEHRSHAD-MIRSHEKARY/django_logging/commit/aa38f42))
+
 ## v1.2.1 (2024-09-19)
 
 ### 🐛 Bug Fixes
