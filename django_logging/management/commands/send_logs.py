@@ -10,8 +10,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.core.mail import EmailMessage
 from django.core.management.base import BaseCommand
 
-from django_logging.constants import DefaultLoggingSettings
-from django_logging.constants.config_types import LogDir
+from django_logging.settings import settings_manager
 from django_logging.validators.email_settings_validator import check_email_settings
 
 logger = logging.getLogger(__name__)
@@ -50,12 +49,7 @@ class Command(BaseCommand):
         """
         email: str = kwargs["email"]  # type: ignore
 
-        default_settings = DefaultLoggingSettings()
-        log_settings = getattr(settings, "DJANGO_LOGGING", {})
-
-        log_dir: LogDir = log_settings.get(
-            "LOG_DIR", os.path.join(os.getcwd(), default_settings.log_dir)
-        )
+        log_dir = settings_manager.log_dir
 
         if not os.path.exists(log_dir):
             self.stdout.write(

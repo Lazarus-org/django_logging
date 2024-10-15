@@ -2,10 +2,10 @@ import os
 import sys
 from io import StringIO
 from typing import Any
+from unittest.mock import patch
 
 import pytest
 from django.core.management import call_command
-from django.test import override_settings
 
 from django_logging.tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
 
@@ -24,9 +24,11 @@ class TestGeneratePrettyXMLCommand:
     reformats them by wrapping their content in a <logs> element, and saves them in a 'pretty' subdirectory.
     """
 
-    @override_settings(DJANGO_LOGGING={"LOG_DIR": "/tmp/test_logs"})
+    @patch(
+        "django_logging.management.commands.generate_pretty_xml.settings_manager"
+    )
     def test_command_successful_processing(
-            self, temp_xml_log_directory: str, settings: Any
+            self, settings: Any, temp_xml_log_directory: str
     ) -> None:
         """
         Test the successful processing and reformatting of XML files.
@@ -42,7 +44,7 @@ class TestGeneratePrettyXMLCommand:
             settings (django.conf.Settings): Django settings.
         """
         # Update the settings to point to the temp log directory
-        settings.DJANGO_LOGGING["LOG_DIR"] = temp_xml_log_directory
+        settings.log_dir = temp_xml_log_directory
 
         out = StringIO()
         call_command("generate_pretty_xml", stdout=out)
@@ -53,7 +55,7 @@ class TestGeneratePrettyXMLCommand:
 
         # Verify that the reformatted XML file exists in the pretty directory
         pretty_dir = os.path.join(
-            settings.DJANGO_LOGGING["LOG_DIR"], "xml", "pretty"
+            settings.log_dir, "xml", "pretty"
         )
         formatted_file = os.path.join(pretty_dir, "formatted_test.xml")
         assert os.path.exists(formatted_file), "Reformatted file was not created."
@@ -65,7 +67,9 @@ class TestGeneratePrettyXMLCommand:
             assert "<entry>Test Entry</entry>" in content
             assert "</logs>" in content
 
-    @override_settings(DJANGO_LOGGING={"LOG_DIR": "/non_existent_dir"})
+    @patch(
+        "django_logging.management.commands.generate_pretty_xml.settings_manager"
+    )
     def test_command_directory_not_found(self, settings: Any) -> None:
         """
         Test that the command handles the case when the XML directory is missing.
@@ -76,6 +80,7 @@ class TestGeneratePrettyXMLCommand:
         ----
             settings (django.conf.Settings): Django settings.
         """
+        settings.log_dir = "/non_existent_dir"
         out = StringIO()
         call_command("generate_pretty_xml", stdout=out)
 
