@@ -6,7 +6,7 @@ from django.test import Client
 
 
 @pytest.fixture
-def setup_users(db) -> Dict[str, User]:
+def setup_users() -> Dict[str, User]:
     """
     Fixture to create a superuser and a normal user for testing purposes.
     Returns a dictionary with `superuser` and `non_superuser` keys.

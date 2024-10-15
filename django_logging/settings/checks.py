@@ -3,14 +3,7 @@ from typing import Any, Dict, List
 from django.core.checks import Error, register
 
 from django_logging.constants import ALLOWED_FILE_FORMAT_TYPES, DefaultLoggingSettings
-from django_logging.utils.get_conf import (
-    get_config,
-    get_log_dir_size_limit,
-    include_log_iboard,
-    is_auto_initialization_enabled,
-    is_initialization_message_enabled,
-    is_log_sql_queries_enabled,
-)
+from django_logging.settings import settings_manager
 from django_logging.validators.config_validators import (
     validate_boolean_setting,
     validate_date_format,
@@ -75,15 +68,13 @@ def check_logging_settings(app_configs: Dict[str, Any], **kwargs: Any) -> List[E
 
     """
     errors: List[Error] = []
-
-    log_settings = get_config(extra_info=True)
     logging_defaults = DefaultLoggingSettings()
 
     # Validate LOG_DIR
-    errors.extend(validate_directory(log_settings.get("log_dir"), "LOG_DIR"))  # type: ignore
+    errors.extend(validate_directory(settings_manager.log_dir, "LOG_DIR"))
 
     # Validate LOG_FILE_LEVELS
-    log_file_levels = log_settings.get("log_levels")
+    log_file_levels = settings_manager.log_levels
     errors.extend(
         validate_log_levels(
             log_file_levels, "LOG_FILE_LEVELS", logging_defaults.log_levels  # type: ignore
@@ -91,9 +82,7 @@ def check_logging_settings(app_configs: Dict[str, Any], **kwargs: Any) -> List[E
     )
 
     # Validate LOG_FILE_FORMATS
-    log_file_formats = log_settings.get(
-        "log_file_formats", logging_defaults.log_file_formats
-    )
+    log_file_formats = settings_manager.log_file_formats
     if isinstance(log_file_formats, dict):
         for level, format_option in log_file_formats.items():
             if level not in logging_defaults.log_levels:
@@ -117,10 +106,9 @@ def check_logging_settings(app_configs: Dict[str, Any], **kwargs: Any) -> List[E
         )
 
     # Validate LOG_FILE_FORMAT_TYPES
-    log_file_format_types = log_settings.get("log_file_format_types", {})
     errors.extend(
         validate_log_file_format_types(
-            log_file_format_types,
+            settings_manager.log_file_format_types,
             "LOG_FILE_FORMAT_TYPES",
             logging_defaults.log_levels,
             ALLOWED_FILE_FORMAT_TYPES + ["NORMAL"],
@@ -128,64 +116,70 @@ def check_logging_settings(app_configs: Dict[str, Any], **kwargs: Any) -> List[E
     )
 
     # Validate EXTRA_LOG_FILES
-    extra_log_files = log_settings.get("extra_log_files", {})
     errors.extend(
         validate_extra_log_files(
-            extra_log_files, "EXTRA_LOG_FILES", logging_defaults.log_levels
+            settings_manager.extra_log_files,
+            "EXTRA_LOG_FILES",
+            logging_defaults.log_levels,
         )
     )
 
     # Validate LOG_CONSOLE_FORMAT
-    log_console_format = log_settings.get("console_format")
-    errors.extend(validate_format_option(log_console_format, "LOG_CONSOLE_FORMAT"))  # type: ignore
+    errors.extend(validate_format_option(settings_manager.console_format, "LOG_CONSOLE_FORMAT"))  # type: ignore
 
     # Validate LOG_CONSOLE_LEVEL
-    log_console_level = log_settings.get("console_level")
     errors.extend(
         validate_log_levels(
-            [log_console_level], "LOG_CONSOLE_LEVEL", logging_defaults.log_levels  # type: ignore
+            [settings_manager.console_level], "LOG_CONSOLE_LEVEL", logging_defaults.log_levels  # type: ignore
         )
     )
 
     # Validate LOG_CONSOLE_COLORIZE
-    log_console_colorize = log_settings.get("colorize_console")
     errors.extend(
-        validate_boolean_setting(log_console_colorize, "LOG_CONSOLE_COLORIZE")  # type: ignore
+        validate_boolean_setting(settings_manager.colorize_console, "LOG_CONSOLE_COLORIZE")  # type: ignore
     )
 
     # Validate LOG_DATE_FORMAT
-    log_date_format = log_settings.get("log_date_format")
-    errors.extend(validate_date_format(log_date_format, "LOG_DATE_FORMAT"))  # type: ignore
+    errors.extend(validate_date_format(settings_manager.log_date_format, "LOG_DATE_FORMAT"))  # type: ignore
 
     # Validate INCLUDE_LOG_iBOARD
-    errors.extend(validate_boolean_setting(include_log_iboard(), "INCLUDE_LOG_iBOARD"))
+    errors.extend(
+        validate_boolean_setting(
+            settings_manager.include_log_iboard, "INCLUDE_LOG_iBOARD"
+        )
+    )
 
     # Validate AUTO_INITIALIZATION_ENABLE
     errors.extend(
         validate_boolean_setting(
-            is_auto_initialization_enabled(), "AUTO_INITIALIZATION_ENABLE"
+            settings_manager.auto_initialization_enabled, "AUTO_INITIALIZATION_ENABLE"
         )
     )
 
     # Validate INITIALIZATION_MESSAGE_ENABLE
     errors.extend(
         validate_boolean_setting(
-            is_initialization_message_enabled(), "INITIALIZATION_MESSAGE_ENABLE"
+            settings_manager.initialization_message_enabled,
+            "INITIALIZATION_MESSAGE_ENABLE",
         )
     )
 
     # Validate LOG_SQL_QUERIES_ENABLE
     errors.extend(
-        validate_boolean_setting(is_log_sql_queries_enabled(), "LOG_SQL_QUERIES_ENABLE")
+        validate_boolean_setting(
+            settings_manager.log_sql_queries_enabled, "LOG_SQL_QUERIES_ENABLE"
+        )
     )
 
     # Validate LOG_DIR_SIZE_LIMIT
     errors.extend(
-        validate_integer_setting(get_log_dir_size_limit(), "LOG_DIR_SIZE_LIMIT")
+        validate_integer_setting(
+            settings_manager.log_dir_size_limit, "LOG_DIR_SIZE_LIMIT"
+        )
     )
 
     # Validate LOG_EMAIL_NOTIFIER
-    log_email_notifier = log_settings.get("log_email_notifier")
+    log_email_notifier = settings_manager.email_notifier
     errors.extend(validate_email_notifier(log_email_notifier))  # type: ignore
 
     if log_email_notifier.get("ENABLE", False):  # type: ignore

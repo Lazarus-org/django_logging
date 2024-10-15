@@ -6,6 +6,7 @@ import pytest
 from django.conf import settings
 from django.core.checks import Error
 
+from django_logging.settings import settings_manager
 from django_logging.settings.checks import check_logging_settings
 from django_logging.tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
 
@@ -61,9 +62,8 @@ class TestChecks:
         -------
         - An error with the ID `django_logging.E001_LOG_DIR` is returned.
         """
-        settings.DJANGO_LOGGING = {
-            "LOG_DIR": 1,
-        }
+        settings_manager.log_dir = 1
+
         errors: List[Error] = check_logging_settings(None)  # type: ignore
         assert any(error.id == "django_logging.E001_LOG_DIR" for error in errors)
 
@@ -78,9 +78,7 @@ class TestChecks:
         -------
         - An error with the ID `django_logging.E007_LOG_FILE_LEVELS` is returned.
         """
-        settings.DJANGO_LOGGING = {
-            "LOG_FILE_LEVELS": ["invalid"],
-        }
+        settings_manager.log_levels = ["invalid"]
         errors = check_logging_settings(None)  # type: ignore
         assert any(
             error.id == "django_logging.E007_LOG_FILE_LEVELS" for error in errors
@@ -98,12 +96,11 @@ class TestChecks:
         - Errors with the IDs `django_logging.E011_LOG_FILE_FORMATS['DEBUG']` and `django_logging.E019_LOG_FILE_FORMATS` are returned for invalid formats.
         - An error with the ID `django_logging.E020_LOG_FILE_FORMATS` is returned for invalid type.
         """
-        settings.DJANGO_LOGGING = {
-            "LOG_FILE_FORMATS": {
+        settings_manager.log_file_formats = {
                 "DEBUG": "%(levelname)s: %(invalid)s",
                 "invalid": "%(message)s",
-            },
-        }
+            }
+
         errors: List[Error] = check_logging_settings(None)  # type: ignore
         assert any(
             error.id == "django_logging.E011_LOG_FILE_FORMATS['DEBUG']"
@@ -113,7 +110,7 @@ class TestChecks:
             error.id == "django_logging.E019_LOG_FILE_FORMATS" for error in errors
         )
 
-        settings.DJANGO_LOGGING = {"LOG_FILE_FORMATS": ["invalid type"]}
+        settings_manager.log_file_formats = ["invalid type"]
         errors = check_logging_settings(None)  # type: ignore
         assert any(
             error.id == "django_logging.E020_LOG_FILE_FORMATS" for error in errors
@@ -130,9 +127,8 @@ class TestChecks:
         -------
         - An error with the ID `django_logging.E010_LOG_CONSOLE_FORMAT` is returned.
         """
-        settings.DJANGO_LOGGING = {
-            "LOG_CONSOLE_FORMAT": "invalid",
-        }
+        settings_manager.console_format = "invalid"
+
         errors = check_logging_settings(None)  # type: ignore
         assert any(
             error.id == "django_logging.E010_LOG_CONSOLE_FORMAT" for error in errors
@@ -149,9 +145,8 @@ class TestChecks:
         -------
         - An error with the ID `django_logging.E006_LOG_CONSOLE_LEVEL` is returned.
         """
-        settings.DJANGO_LOGGING = {
-            "LOG_CONSOLE_LEVEL": 10,
-        }
+        settings_manager.console_level = 10
+
         errors: List[Error] = check_logging_settings(None)  # type: ignore
         assert any(
             error.id == "django_logging.E006_LOG_CONSOLE_LEVEL" for error in errors
@@ -168,9 +163,8 @@ class TestChecks:
         -------
         - An error with the ID `django_logging.E014_LOG_CONSOLE_COLORIZE` is returned.
         """
-        settings.DJANGO_LOGGING = {
-            "LOG_CONSOLE_COLORIZE": "not_a_boolean",
-        }
+        settings_manager.colorize_console = "not_a_boolean",
+
         errors: List[Error] = check_logging_settings(None)  # type: ignore
         assert any(
             error.id == "django_logging.E014_LOG_CONSOLE_COLORIZE" for error in errors
@@ -187,9 +181,8 @@ class TestChecks:
         -------
         - An error with the ID `django_logging.E016_LOG_DATE_FORMAT` is returned.
         """
-        settings.DJANGO_LOGGING = {
-            "LOG_DATE_FORMAT": "%invalid_format",
-        }
+        settings_manager.log_date_format = "%invalid_format"
+
         errors: List[Error] = check_logging_settings(None)  # type: ignore
         assert any(
             error.id == "django_logging.E016_LOG_DATE_FORMAT" for error in errors
@@ -206,9 +199,8 @@ class TestChecks:
         -------
         - An error with the ID `django_logging.E014_AUTO_INITIALIZATION_ENABLE` is returned.
         """
-        settings.DJANGO_LOGGING = {
-            "AUTO_INITIALIZATION_ENABLE": "not_a_boolean",
-        }
+        settings_manager.auto_initialization_enabled = "not_a_boolean",
+
         errors: List[Error] = check_logging_settings(None)  # type: ignore
         assert any(
             error.id == "django_logging.E014_AUTO_INITIALIZATION_ENABLE"
@@ -226,9 +218,8 @@ class TestChecks:
         -------
         - An error with the ID `django_logging.E014_INITIALIZATION_MESSAGE_ENABLE` is returned.
         """
-        settings.DJANGO_LOGGING = {
-            "INITIALIZATION_MESSAGE_ENABLE": "not_a_boolean",
-        }
+        settings_manager.initialization_message_enabled = "not_a_boolean",
+
         errors: List[Error] = check_logging_settings(None)  # type: ignore
         assert any(
             error.id == "django_logging.E014_INITIALIZATION_MESSAGE_ENABLE"
@@ -246,10 +237,8 @@ class TestChecks:
         -------
         - An error with the ID `django_logging.E018_LOG_EMAIL_NOTIFIER['ENABLE']` is returned.
         """
-        settings.DJANGO_LOGGING = {
-            "LOG_EMAIL_NOTIFIER": {
+        settings_manager.email_notifier = {
                 "ENABLE": "not_a_boolean",
-            },
         }
         errors: List[Error] = check_logging_settings(None)  # type: ignore
         assert any(
@@ -272,10 +261,8 @@ class TestChecks:
         -------
         - An error with the ID `django_logging.E010_EMAIL_SETTINGS` is returned.
         """
-        settings.DJANGO_LOGGING = {
-            "LOG_EMAIL_NOTIFIER": {
+        settings_manager.email_notifier = {
                 "ENABLE": True,
-            },
         }
         with patch("django_logging.settings.checks.check_email_settings") as mock_check:
             mock_check.return_value = [

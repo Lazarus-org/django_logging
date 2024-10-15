@@ -1,12 +1,13 @@
-from typing import Dict, Generator
+from typing import Generator
 from unittest.mock import patch
-
 import pytest
 from django.conf import settings
 
+from django_logging.settings.manager import SettingsManager
+
 
 @pytest.fixture
-def mock_settings() -> Generator[Dict, None, None]:
+def mock_settings() -> SettingsManager:
     """
     Fixture to mock Django settings.
 
@@ -46,8 +47,10 @@ def mock_settings() -> Generator[Dict, None, None]:
             },
         }
     }
+
     with patch.object(settings, "DJANGO_LOGGING", mock_settings["DJANGO_LOGGING"]):
-        yield mock_settings
+        # Initialize SettingsManager after patching the settings
+        return SettingsManager()
 
 
 @pytest.fixture

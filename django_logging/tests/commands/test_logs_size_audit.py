@@ -73,7 +73,7 @@ class TestCheckLogSizeCommand:
         with patch("os.path.getsize", side_effect=[60 * 1024 * 1024, 50 * 1024 * 1024]):
             out = StringIO()
             with patch("django.conf.settings.ADMIN_EMAIL", "admin@example.com"):
-                with patch("django.conf.settings.DJANGO_LOGGING", {"LOG_DIR_SIZE_LIMIT": 100}):
+                with patch("django_logging.management.commands.logs_size_audit.settings_manager.log_dir_size_limit", 100):
                     call_command("logs_size_audit", stdout=out)
 
         # Verify that the warning email was sent
