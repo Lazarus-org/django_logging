@@ -3,11 +3,11 @@ from typing import List, Literal, TypedDict, Union
 FormatOption = Union[int, str]
 
 # Type Aliases for configurations
-LogFileFormatType = Literal["JSON", "XML", "FLAT", "LOG"]
+LogFileFormatType = Literal["JSON", "XML", "FLAT", "NORMAL"]
 LogLevel = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 LogDir = str
 LogLevels = List[LogLevel]
-NotifierLogLevels = List[Literal["ERROR", "CRITICAL"]]
+NotifierLogLevels = List[Union[Literal["ERROR", "CRITICAL"], None]]
 LogDateFormat = str
 
 

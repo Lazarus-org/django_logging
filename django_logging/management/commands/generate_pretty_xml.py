@@ -1,11 +1,9 @@
 import os
 from typing import Any, Dict, Tuple
 
-from django.conf import settings
 from django.core.management.base import BaseCommand
 
-from django_logging.constants import DefaultLoggingSettings
-from django_logging.constants.config_types import LogDir
+from django_logging.settings import settings_manager
 from django_logging.utils.command.process_file import process_files, setup_directories
 
 
@@ -31,10 +29,7 @@ class Command(BaseCommand):
             **kwargs: Keyword arguments passed to the command.
 
         """
-        default_settings = DefaultLoggingSettings()
-        log_dir: LogDir = settings.DJANGO_LOGGING.get(
-            "LOG_DIR", os.path.join(os.getcwd(), default_settings.log_dir)
-        )
+        log_dir = settings_manager.log_dir
 
         try:
             xml_dir, pretty_dir = setup_directories(log_dir, "xml")

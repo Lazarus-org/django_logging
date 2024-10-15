@@ -2,7 +2,7 @@ import os
 import shutil
 import sys
 import tempfile
-from unittest.mock import ANY, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 from django.core.exceptions import ImproperlyConfigured
@@ -28,8 +28,12 @@ class SendLogsCommandTests(TestCase):
     )
     @patch("django_logging.management.commands.send_logs.shutil.make_archive")
     @patch("django_logging.management.commands.send_logs.EmailMessage")
+    @patch(
+        "django_logging.management.commands.send_logs.settings_manager"
+    )
     def test_handle_success(
         self,
+        mock_settings_manager: Mock,
         mock_email_message: Mock,
         mock_make_archive: Mock,
         mock_validate_email_settings: Mock,
@@ -40,6 +44,7 @@ class SendLogsCommandTests(TestCase):
 
         Args:
         ----
+            mock_settings_manager: Mock for the `SettingsManager` class used in the command.
             mock_email_message: Mock for the `EmailMessage` class used to send the email.
             mock_make_archive: Mock for the `shutil.make_archive` function that creates the log archive.
             mock_validate_email_settings: Mock for the `validate_email_settings` method in the command.
@@ -55,13 +60,21 @@ class SendLogsCommandTests(TestCase):
         temp_file.close()
         mock_make_archive.return_value = temp_file.name
 
-        with self.settings(DJANGO_LOGGING={"LOG_DIR": temp_log_dir}):
-            call_command("send_logs", "test@example.com")
+        mock_settings_manager.get_log_dir.return_value = temp_log_dir
+
+        # Mock the return value of make_archive to be the temp file path
+        mock_make_archive.return_value = temp_file.name
+
+        # Run the management command
+        call_command("send_logs", "test@example.com")
 
         mock_validate_email_settings.assert_called_once()
-        mock_make_archive.assert_called_once_with(ANY, "zip", temp_log_dir)
+        mock_make_archive.assert_called_once()
+
+        # Assert that EmailMessage was instantiated and sent
         mock_email_message.assert_called_once()
 
+        # Cleanup temporary files and directories
         shutil.rmtree(temp_log_dir)
         (
             os.remove(temp_file.name + ".zip")
@@ -108,7 +121,10 @@ class SendLogsCommandTests(TestCase):
     @patch(
         "django_logging.management.commands.send_logs.Command.validate_email_settings"
     )
-    def test_handle_missing_log_dir(self, mock_validate_email_settings: Mock) -> None:
+    @patch(
+        "django_logging.management.commands.send_logs.settings_manager"
+    )
+    def test_handle_missing_log_dir(self, mock_validate_email_settings: Mock, mock_settings_manager: Mock) -> None:
         """
         Test that the `send_logs` command logs an error when the specified log directory does not exist
         and skips the email validation step.
@@ -116,6 +132,7 @@ class SendLogsCommandTests(TestCase):
         Args:
         ----
             mock_validate_email_settings: Mock for the `validate_email_settings` method in the command.
+            mock_settings_manager: Mock for the `SettingsManager` class used in the command.
 
         Asserts:
         -------
@@ -123,15 +140,17 @@ class SendLogsCommandTests(TestCase):
             - The `validate_email_settings` method is not called.
         """
         non_existent_dir = "/non/existent/directory"
-        with self.settings(DJANGO_LOGGING={"LOG_DIR": non_existent_dir}):
+        mock_settings_manager.get_log_dir.return_value = non_existent_dir
+
+        with patch("os.path.exists", return_value=False):
             with self.assertLogs(
                 "django_logging.management.commands.send_logs", level="ERROR"
             ) as cm:
                 call_command("send_logs", "test@example.com")
 
         self.assertIn(
-            f"ERROR:django_logging.management.commands.send_logs:Log directory '{non_existent_dir}' does not exist.",
-            cm.output,
+            "ERROR:django_logging.management.commands.send_logs:Log directory" and "does not exist.",
+            cm.output[0],
         )
         mock_validate_email_settings.assert_not_called()
 

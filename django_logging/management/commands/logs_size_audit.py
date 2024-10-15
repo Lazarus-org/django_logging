@@ -5,10 +5,9 @@ from typing import Any, Dict, Tuple
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
-from django_logging.constants import DefaultLoggingSettings
-from django_logging.constants.config_types import LogDir
 from django_logging.handlers import EmailHandler
 from django_logging.management.commands.send_logs import Command as cmd
+from django_logging.settings import settings_manager
 from django_logging.utils.get_conf import (
     get_log_dir_size_limit,
     use_email_notifier_template,
@@ -40,10 +39,7 @@ class Command(BaseCommand):
             **kwargs: Keyword arguments passed to the command.
 
         """
-        default_settings = DefaultLoggingSettings()
-        log_dir: LogDir = settings.DJANGO_LOGGING.get(
-            "LOG_DIR", os.path.join(os.getcwd(), default_settings.log_dir)
-        )
+        log_dir = settings_manager.log_dir
 
         # Check if log directory exists
         if not os.path.exists(log_dir):

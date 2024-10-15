@@ -23,7 +23,7 @@ from django_logging.constants.config_types import (
 from django_logging.filters.log_level_filter import LoggingLevelFilter
 
 
-# pylint: disable=too-many-instance-attributes, too-many-arguments
+# pylint: disable=too-many-instance-attributes, too-many-arguments, too-many-positional-arguments
 class LogConfig:
     """Configuration class for django_logging.
 
