@@ -21,7 +21,7 @@ from django_logging.utils.get_conf import (
 )
 
 
-# pylint: disable=too-many-arguments, too-many-locals
+# pylint: disable=too-many-arguments, too-many-positional-arguments, too-many-locals
 def set_config(
     log_levels: LogLevels,
     log_dir: LogDir,

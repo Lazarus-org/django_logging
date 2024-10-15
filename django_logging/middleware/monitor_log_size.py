@@ -1,6 +1,5 @@
 import logging
 from datetime import timedelta
-from typing import Awaitable, Callable, Union
 
 from asgiref.sync import sync_to_async
 from django.core.cache import cache
@@ -27,22 +26,6 @@ class MonitorLogSizeMiddleware(BaseMiddleware):
             The next middleware or view to be called.
 
     """
-
-    # pylint: disable=useless-parent-delegation
-    def __init__(
-        self,
-        get_response: Callable[
-            [HttpRequest], Union[HttpResponseBase, Awaitable[HttpResponseBase]]
-        ],
-    ) -> None:
-        """Initializes the middleware with the provided get_response callable.
-
-        Args:
-        ----
-            get_response (callable): The next middleware or view to be called in the chain.
-
-        """
-        super().__init__(get_response)
 
     def __sync_call__(self, request: HttpRequest) -> HttpResponseBase:
         """Synchronous request processing.
