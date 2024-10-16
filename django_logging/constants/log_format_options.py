@@ -1,10 +1,10 @@
 FORMAT_OPTIONS = {
     1: "%(levelname)s | %(asctime)s | %(module)s | %(message)s | %(context)s",
-    2: "%(levelname)s | %(asctime)s | %(context)s | %(message)s",
-    3: "%(levelname)s | %(context)s | %(message)s",
+    2: "%(levelname)s | %(asctime)s | %(context)s | %(message)s | %(exc_text)s",
+    3: "%(levelname)s | %(context)s | %(message)s | %(stack_info)s",
     4: "%(context)s | %(asctime)s - %(name)s - %(levelname)s - %(message)s",
     5: "%(levelname)s | %(message)s | %(context)s | [in %(pathname)s:%(lineno)d]",
-    6: "%(asctime)s | %(context)s | %(levelname)s | %(message)s",
+    6: "%(asctime)s | %(context)s | %(levelname)s | %(message)s | %(exc_info)s",
     7: "%(levelname)s | %(asctime)s | %(context)s | in %(module)s: %(message)s",
     8: "%(levelname)s | %(context)s | %(message)s | [%(filename)s:%(lineno)d]",
     9: "[%(asctime)s] | %(levelname)s | %(context)s | in %(module)s: %(message)s",
