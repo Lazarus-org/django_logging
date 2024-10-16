@@ -1,6 +1,8 @@
 LOG_FORMAT_SPECIFIERS = [
     "asctime",
     "created",
+    "exc_info",
+    "exc_text",
     "relativeCreated",
     "msecs",
     "levelname",
@@ -12,8 +14,10 @@ LOG_FORMAT_SPECIFIERS = [
     "lineno",
     "funcName",
     "process",
+    "processName",
     "thread",
     "threadName",
     "message",
+    "stack_info",
     "context",
 ]
