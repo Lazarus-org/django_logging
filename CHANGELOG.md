@@ -1,3 +1,27 @@
+## v2.0.1 (2024-10-17)
+
+### ✨ Features
+- **feat(settings)**: Add `SettingsManager` class to manage Django logging configurations. ([3c9e9a5](https://github.com/MEHRSHAD-MIRSHEKARY/django_logging/commit/3c9e9a5))
+  - Introduced a `SettingsManager` class to handle and organize all logging configurations.
+  - Improved `get_config` method to fetch logging settings from `SettingsManager` for better readability and performance.
+
+- **feat(commands)**: Update commands to fetch `log_dir` from `SettingsManager`. ([4c4e9f5](https://github.com/MEHRSHAD-MIRSHEKARY/django_logging/commit/4c4e9f5))
+  - Refactored commands to dynamically fetch the `log_dir` from the new `SettingsManager`.
+
+### 🎨 Enhancements
+- **update(console)**: Enhance colors in the console colorizer and add new placeholders. ([d208ebc](https://github.com/MEHRSHAD-MIRSHEKARY/django_logging/commit/d208ebc))
+  - Updated the colorizer utility to support additional colors and placeholders for improved console output formatting.
+
+### 🐛 Bug Fixes
+- **fix(logging)**: Fixed minor issues related to logging configurations being fetched incorrectly.
+
+### 🔀 Merged
+- **Merge PR #126**: Update console colors and add new placeholders. ([2961228](https://github.com/MEHRSHAD-MIRSHEKARY/django_logging/commit/2961228))
+- **Merge PR #125**: Add `SettingsManager` and refactor commands. ([a630d4c](https://github.com/MEHRSHAD-MIRSHEKARY/django_logging/commit/a630d4c))
+
+### ⚡ Miscellaneous
+- **Update(codebase)**: General updates and cleanup across the project. ([43ef34d](https://github.com/MEHRSHAD-MIRSHEKARY/django_logging/commit/43ef34d))
+
 ## v2.0.0 (2024-10-13)
 
 ### ✨ Features
