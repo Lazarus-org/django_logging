@@ -1,16 +1,21 @@
 [build-system]
 build-backend = "poetry.core.masonry.api"
-requires = [ "poetry-core" ]
 
-[tool.poetry]
+requires = [ "poetry-core>=2,<3" ]
+
+[project]
 name = "dj-logging"
 version = "2.0.1"
 description = "A package for logging in django applications"
-authors = [ "ARYAN-NIKNEZHAD <aryan513966@gmail.com>", "MEHRSHAD-MIRSHEKARY <mehrshad_mirshekary@email.com>" ]
-license = "MIT"
 readme = "README.md"
-keywords = [ "django_logging", "django", "logging" ]
+keywords = [ "django", "django logging", "logging" ]
 
+license = { text = "MIT" }
+authors = [
+  { name = "ARYAN-NIKNEZHAD", email = "aryan513966@gmail.com" },
+  { name = "MEHRSHAD-MIRSHEKARY", email = "mehrshad_mirshekary@email.com" },
+]
+requires-python = ">=3.9"
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Environment :: Web Environment",
@@ -18,11 +23,11 @@ classifiers = [
   "Framework :: Django :: 4.2",
   "Framework :: Django :: 5.0",
   "Framework :: Django :: 5.1",
+  "Framework :: Django :: 5.2",
   "Intended Audience :: Developers",
   "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
@@ -32,6 +37,7 @@ classifiers = [
   "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 
+[tool.poetry]
 packages = [
   { include = "django_logging" },
 ]
@@ -41,6 +47,9 @@ packages = [
 "Source Code" = "https://github.com/lazarus-org/django_logging"
 "Changelog" = "https://github.com/lazarus-org/django_logging/blob/main/CHANGELOG.md"
 "Issues" = "https://github.com/lazarus-org/django_logging/issues"
+
+[tool.poetry.requires-plugins]
+poetry-plugin-export = ">=1.9"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<4.0"

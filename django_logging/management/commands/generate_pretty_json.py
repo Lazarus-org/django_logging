@@ -60,9 +60,10 @@ class Command(BaseCommand):
             new_file_path (str): The path where the reformatted JSON file will be saved.
 
         """
-        with open(file_path, encoding="utf-8") as infile, open(
-            new_file_path, "w", encoding="utf-8"
-        ) as outfile:
+        with (
+            open(file_path, encoding="utf-8") as infile,
+            open(new_file_path, "w", encoding="utf-8") as outfile,
+        ):
             outfile.write("[\n")  # Start the JSON array
             first_object = True  # Flag to handle commas
 
