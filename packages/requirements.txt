@@ -1,5 +1,5 @@
 asgiref==3.8.1 ; python_version >= "3.9" and python_version < "4.0"
-django==4.2.20 ; python_version >= "3.9" and python_version < "3.10"
+django==4.2.20 ; python_version == "3.9"
 django==5.2 ; python_version >= "3.10" and python_version < "4.0"
 sqlparse==0.5.3 ; python_version >= "3.9" and python_version < "4.0"
 typing-extensions==4.13.2 ; python_version >= "3.9" and python_version < "3.11"
