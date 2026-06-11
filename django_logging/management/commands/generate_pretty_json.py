@@ -12,18 +12,21 @@ class Command(BaseCommand):
     """A Django management command to find JSON files within a specified log
     directory and generate pretty JSON.
 
-    The command looks for `.json` files inside the `json` subdirectory of the log directory, attempts to
-    parse multiple JSON objects from a single file, and then formats them into a valid JSON array.
+    The command looks for `.json` files inside the `json` subdirectory
+    of the log directory, attempts to parse multiple JSON objects from a
+    single file, and then formats them into a valid JSON array.
 
-    The reformatted JSON content is saved in a `pretty` subdirectory with the prefix `formatted_`.
+    The reformatted JSON content is saved in a `pretty` subdirectory
+    with the prefix `formatted_`.
 
     """
 
     help = "Find JSON files in log directory and generates pretty JSON"
 
     def handle(self, *args: Tuple, **kwargs: Dict) -> None:
-        """Main command handler. This method retrieves the log directory, sets
-        up necessary directories, processes each `.json` file, and reformats
+        """Main command handler.
+
+        This method retrieves the log directory, sets up necessary directories, processes each `.json` file, and reformats
         the content.
 
         Args:

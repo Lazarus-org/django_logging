@@ -14,13 +14,13 @@ logger = logging.getLogger(__name__)
 class Command(BaseCommand):
     """Trigger an immediate rotation of all active rotating log handlers.
 
-    This is useful in deployment scripts — call it right after a deploy so the
-    new process starts with fresh log files, and the old files are safely
-    preserved as rotated backups.
+    This is useful in deployment scripts — call it right after a deploy
+    so the new process starts with fresh log files, and the old files
+    are safely preserved as rotated backups.
 
-    Only ``RotatingFileHandler`` and ``TimedRotatingFileHandler`` (and their
-    compressed variants) support programmatic rotation.  Plain ``FileHandler``
-    instances are reported but skipped gracefully.
+    Only ``RotatingFileHandler`` and ``TimedRotatingFileHandler`` (and
+    their compressed variants) support programmatic rotation.  Plain
+    ``FileHandler`` instances are reported but skipped gracefully.
 
     """
 

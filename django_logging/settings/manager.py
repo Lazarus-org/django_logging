@@ -21,8 +21,9 @@ from django_logging.constants.config_types import (
 
 # pylint: disable=too-many-instance-attributes
 class SettingsManager:
-    """Manages DJANGO_LOGGING settings for the Django Logging application. All
-    configurations are initialized at once and accessible via attributes.
+    """Manages DJANGO_LOGGING settings for the Django Logging application.
+
+    All configurations are initialized at once and accessible via attributes.
 
     Attributes:
         log_dir (str): The directory where log files are stored.

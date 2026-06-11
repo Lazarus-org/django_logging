@@ -10,7 +10,6 @@ def get_config() -> Dict:
         Dict: A dictionary containing all necessary configurations for logging.
 
     """
-
     config = {
         "log_levels": settings_manager.log_levels,
         "log_dir": settings_manager.log_dir,

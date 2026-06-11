@@ -1,6 +1,5 @@
 [build-system]
 build-backend = "poetry.core.masonry.api"
-
 requires = [ "poetry-core>=2,<3" ]
 
 [project]
@@ -9,7 +8,6 @@ version = "2.0.1"
 description = "A package for logging in django applications"
 readme = "README.md"
 keywords = [ "django", "django logging", "logging" ]
-
 license = { text = "MIT" }
 authors = [
   { name = "ARYAN-NIKNEZHAD", email = "aryan513966@gmail.com" },
@@ -34,6 +32,7 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 
@@ -41,43 +40,35 @@ classifiers = [
 packages = [
   { include = "django_logging" },
 ]
-
-[tool.poetry.urls]
-"Documentation" = "https://django-logging.readthedocs.io"
-"Source Code" = "https://github.com/lazarus-org/django_logging"
-"Changelog" = "https://github.com/lazarus-org/django_logging/blob/main/CHANGELOG.md"
-"Issues" = "https://github.com/lazarus-org/django_logging/issues"
-
-[tool.poetry.requires-plugins]
-poetry-plugin-export = ">=1.9"
-
-[tool.poetry.dependencies]
-python = ">=3.10,<4.0"
-django = [
-  { version = ">=5.2,<5.3", python = ">=3.10,<3.12" }, # Django 5.2 only for Python 3.10, 3.11
-  { version = ">=5.2,<6.1", python = ">=3.12" },       # Django 5.2 and 6.0 for Python 3.12+
+dependencies.python = ">=3.10,<4.0"
+dependencies.django = [
+  { version = ">=5.2,<5.3", python = ">=3.10,<3.12" },  # Django 5.2 only for Python 3.10, 3.11
+  { version = ">=5.2,<6.1", python = ">=3.12" },  # Django 5.2 and 6.0 for Python 3.12+
 ]
-
-[tool.poetry.group.dev.dependencies]
-pytest = "^8.3.2"
-pytest-asyncio = "^0.24.0"
-pytest-django = "^4.8.0"
-pytest-cov = "^5.0.0"
-pylint = "^3.2.6"
-pylint-django = "^2.5.5"
-mypy = "^1.11.1"
-isort = "^5.13.2"
-black = "^24.4.2"
-commitizen = "^3.28.0"
-pre-commit = "^3.5.0"
-bandit = { extras = [ "toml" ], version = "^1.7.9" }
-tox = "^4.16.0"
-django-stubs = "^5.0.4"
-sphinx = "^6.2.1"
-sphinx-rtd-theme = "^2.0.0"
-docformatter = "^1.7.5"
-codecov = "^2.1.13"
-python-semantic-release = "^9.8.8"
+group.dev.dependencies.bandit = { extras = [ "toml" ], version = "^1.7.9" }
+group.dev.dependencies.black = "^24.4.2"
+group.dev.dependencies.codecov = "^2.1.13"
+group.dev.dependencies.commitizen = "^3.28.0"
+group.dev.dependencies.django-stubs = "^5.0.4"
+group.dev.dependencies.docformatter = "^1.7.5"
+group.dev.dependencies.isort = "^5.13.2"
+group.dev.dependencies.mypy = "^1.11.1"
+group.dev.dependencies.pre-commit = "^3.5.0"
+group.dev.dependencies.pylint = "^3.2.6"
+group.dev.dependencies.pylint-django = "^2.5.5"
+group.dev.dependencies.pytest = "^8.3.2"
+group.dev.dependencies.pytest-asyncio = "^0.24.0"
+group.dev.dependencies.pytest-cov = "^5.0.0"
+group.dev.dependencies.pytest-django = "^4.8.0"
+group.dev.dependencies.python-semantic-release = "^9.8.8"
+group.dev.dependencies.sphinx = "^6.2.1"
+group.dev.dependencies.sphinx-rtd-theme = "^2.0.0"
+group.dev.dependencies.tox = "^4.16.0"
+urls."Source Code" = "https://github.com/lazarus-org/django_logging"
+urls.Changelog = "https://github.com/lazarus-org/django_logging/blob/main/CHANGELOG.md"
+urls.Documentation = "https://django-logging.readthedocs.io"
+urls.Issues = "https://github.com/lazarus-org/django_logging/issues"
+requires-plugins.poetry-plugin-export = ">=1.9"
 
 [tool.black]
 line-length = 88
@@ -105,152 +96,94 @@ exclude = '''
 profile = "black"
 line_length = 88
 skip = [
-  "venv",
-  ".venv",
-  ".tox",
-  "build",
-  "dist",
-  ".git",
-  "__pycache__",
   "*.egg-info",
+  ".git",
   ".mypy_cache",
   ".pytest_cache",
-  "migrations",
-  "node_modules",
+  ".tox",
+  ".venv",
+  "__pycache__",
+  "build",
+  "dist",
   "env",
   "kernel",
+  "migrations",
+  "node_modules",
+  "venv",
 ]
 
 [tool.pylint]
+argument-rgx = "[a-z_][a-z0-9_]{2,30}$"
+attr-rgx = "[a-z_][a-z0-9_]{2,30}$"
+class-rgx = "[A-Z_][a-zA-Z0-9]+$"
+const-rgx = "([A-Z_][A-Z0-9_]*)|(__.*__)"
 disable = [
   "C0103", # Invalid constant name
   "C0114", # Missing module docstring
   "C0115", # Missing class docstring
   "C0116", # Missing function or method docstring
-  "E1101", # Instance of 'Foo' has no 'bar' member
-  "W0212", # Access to a protected member
   "C0301", # Line too long
   "C0411", # Wrong import order
+  "C0415",
+  "E1101", # Instance of 'Foo' has no 'bar' member
+  "R0401",
+  "R0801", # Duplicate code
+  "R0903", # Too few public methods
+  "R0914",
+  "R1705", # Unnecessary "elif" after "return"
+  "R1719", # The if expression can be replaced with 'bool(test)'
+  "W0212", # Access to a protected member
   "W0611", # Unused imports
   "W0613", # Unused arguments
-  "W0622", # Redefining built-in names
-  "R0914",
-  "R0903", # Too few public methods
-  "R0801", # Duplicate code
   "W0621",
-  "C0415",
-  "R1719", # The if expression can be replaced with 'bool(test)'
-  "R1705", # Unnecessary "elif" after "return"
-  "R0401",
-]
-max-line-length = 88
-max-args = 8
-max-positional-arguments = 8
-
-ignore = [
-  "tests",
-  "migrations/*",
-  "venv/*",
-  "build/*",
-  "dist/*",
-  ".git/*",
-  ".tox/*",
-  "__pycache__/*",
-  "*.egg-info/*",
-  ".mypy_cache/*",
-  ".pytest_cache/*",
+  "W0622", # Redefining built-in names
 ]
 django-settings-module = "kernel.settings"
-load-plugins = [
-  "pylint_django",
-  "pylint.extensions.docparams",
-]
-
-suggestion-mode = true
-const-rgx = "([A-Z_][A-Z0-9_]*)|(__.*__)"
-attr-rgx = "[a-z_][a-z0-9_]{2,30}$"
-variable-rgx = "[a-z_][a-z0-9_]{2,30}$"
-argument-rgx = "[a-z_][a-z0-9_]{2,30}$"
-method-rgx = "[a-z_][a-z0-9_]{2,30}$"
 function-rgx = "[a-z_][a-z0-9_]{2,30}$"
-class-rgx = "[A-Z_][a-zA-Z0-9]+$"
+ignore = [
+  "*.egg-info/*",
+  ".git/*",
+  ".mypy_cache/*",
+  ".pytest_cache/*",
+  ".tox/*",
+  "__pycache__/*",
+  "build/*",
+  "dist/*",
+  "migrations/*",
+  "tests",
+  "venv/*",
+]
+load-plugins = [
+  "pylint.extensions.docparams",
+  "pylint_django",
+]
+max-args = 8
+max-line-length = 88
+max-positional-arguments = 8
+method-rgx = "[a-z_][a-z0-9_]{2,30}$"
 module-rgx = "(([a-z_][a-z0-9_]*)|(__.*__))$"
+suggestion-mode = true
+variable-rgx = "[a-z_][a-z0-9_]{2,30}$"
 
-[tool.pytest.ini_options]
-python_files = [ "tests.py", "test_*.py" ]
-addopts = "--cov --cov-report=term-missing --cov-report=html --cov-fail-under=90"
-asyncio_mode = "auto"
-asyncio_default_fixture_loop_scope = "function"
-markers = [
-  "commands: Tests for Django management commands in the logging package.",
-  "commands_send_logs: Tests focused on the `send_logs` management command.",
-  "commands_generate_pretty_json: Tests for the command that generates pretty-formatted JSON logs.",
-  "commands_generate_pretty_xml: Tests for the command that generates pretty-formatted XML logs.",
-  "commands_logs_size_audit: Tests for the command that audits log sizes to ensure they don't exceed defined limits.",
-  "filters: Tests that verify log filtering mechanisms.",
-  "filters_level_filter: Tests for filtering logs based on their severity level.",
-  "formatters: Tests for log formatters that structure log messages.",
-  "base_formatter: Tests for the base class of formatters.",
-  "flat_formatter: Tests for the formatter that creates flat log formats.",
-  "json_formatter: Tests for the formatter that structures logs as JSON objects.",
-  "xml_formatter: Tests for the formatter that structures logs as XML documents.",
-  "colored_formatter: Tests for a formatter that adds color coding to log messages.",
-  "handlers: Tests for components that dispatch log messages to their destinations.",
-  "email_handler: Tests for the handler responsible for sending logs via email.",
-  "middleware: Tests related to middleware components in logging.",
-  "base_middleware: Tests for the base class of middleware components.",
-  "request_middleware: Tests for middleware handling incoming HTTP requests in logging.",
-  "monitor_log_size_middleware: Tests for middleware that monitors the size of log files.",
-  "settings: Tests that ensure logging settings are correctly applied.",
-  "settings_checks: Tests for validating the correctness of logging settings.",
-  "settings_conf: Tests for verifying the configuration of logging settings.",
-  "utils: Tests for utility functions supporting the logging package.",
-  "utils_context_manager: Tests for context managers handling resources in logging.",
-  "utils_email_notifier: Tests for utilities that send notifications via email.",
-  "utils_get_conf: Tests for utility functions that retrieve configuration settings.",
-  "utils_log_and_notify: Tests for logging utilities that trigger notifications.",
-  "utils_set_conf: Tests for utility functions that set configuration settings.",
-  "utils_process_file: Tests for utility functions that process files.",
-  "validators: Tests for validating configurations and inputs in the logging package.",
-  "config_validator: Tests focused on validators that check configuration settings.",
-  "email_settings_validator: Tests for validators that ensure email settings are valid.",
-  "decorators: Tests focused on custom decorators used throughout the package.",
-  "decorators_execution_tracking: Tests specifically for the execution_tracking module.",
-  "contextvar: Tests for context variable handling in the logging package.",
-  "contextvar_manager: Tests for managing context variables across different log contexts.",
-  "views: Tests for MVT views in the django logging package.",
-  "views_log_iboard: Tests specially for the log_iboard view.",
-  "commands_archive_logs: Tests for the command that archives and compresses rotated log files.",
-  "commands_rotate_logs: Tests for the command that manually triggers log rotation.",
-  "handlers_rotating: Tests for the compressed rotating file handlers.",
-  "settings_rotation_checks: Tests for validating LOG_ROTATION and LOG_ROTATION_OVERRIDES settings.",
-  "settings_rotation_conf: Tests for rotation-aware LogConfig and LogManager behaviour.",
-  "validators_rotation: Tests for validators that check rotation configuration inputs.",
+[tool.bandit]
+exclude_dirs = [
+  "migrations",
+  "tests",
 ]
-
-[tool.coverage.run]
-source = [ "django_logging" ]
-omit = [
-  "*/tests/*",
-  "*/migrations/*",
-]
-
-[tool.coverage.report]
-exclude_lines = [
-  "pragma: no cover",
-  "def __repr__",
-  "if self\\.debug",
-  "raise AssertionError",
-  "if 0:",
-  "if __name__ == .__main__.:",
-]
+targets = [ "./django_logging" ]
+confidence = "medium"
+exclude_tests = [ "B301", "B302" ]
+include = [ "B101", "B102" ]
+max_lines = 500
+output_file = "bandit_report.txt"
+output_format = "screen"
+plugins.B104 = { check_typed_list = true }
+progress = true
+reports = true
+severity = "medium"
 
 [tool.mypy]
 mypy_path = "stubs"
-disallow_untyped_calls = true
-disallow_untyped_defs = true
-ignore_missing_imports = true
-explicit_package_bases = true
 exclude = """
 ^docs/source/conf.py|
 ^build/|
@@ -258,88 +191,135 @@ exclude = """
 ^stubs/|
 ^kernel/
 """
+explicit_package_bases = true
+ignore_missing_imports = true
+disallow_untyped_calls = true
+disallow_untyped_defs = true
 
-[tool.bandit]
-targets = [ "./django_logging" ]
-exclude_dirs = [
-  "tests",
-  "migrations",
+[tool.pytest]
+ini_options.python_files = [ "test_*.py", "tests.py" ]
+ini_options.addopts = "--cov --cov-report=term-missing --cov-report=html --cov-fail-under=90"
+ini_options.markers = [
+  "base_formatter: Tests for the base class of formatters.",
+  "base_middleware: Tests for the base class of middleware components.",
+  "colored_formatter: Tests for a formatter that adds color coding to log messages.",
+  "commands: Tests for Django management commands in the logging package.",
+  "commands_archive_logs: Tests for the command that archives and compresses rotated log files.",
+  "commands_generate_pretty_json: Tests for the command that generates pretty-formatted JSON logs.",
+  "commands_generate_pretty_xml: Tests for the command that generates pretty-formatted XML logs.",
+  "commands_logs_size_audit: Tests for the command that audits log sizes to ensure they don't exceed defined limits.",
+  "commands_rotate_logs: Tests for the command that manually triggers log rotation.",
+  "commands_send_logs: Tests focused on the `send_logs` management command.",
+  "config_validator: Tests focused on validators that check configuration settings.",
+  "contextvar: Tests for context variable handling in the logging package.",
+  "contextvar_manager: Tests for managing context variables across different log contexts.",
+  "decorators: Tests focused on custom decorators used throughout the package.",
+  "decorators_execution_tracking: Tests specifically for the execution_tracking module.",
+  "email_handler: Tests for the handler responsible for sending logs via email.",
+  "email_settings_validator: Tests for validators that ensure email settings are valid.",
+  "filters: Tests that verify log filtering mechanisms.",
+  "filters_level_filter: Tests for filtering logs based on their severity level.",
+  "flat_formatter: Tests for the formatter that creates flat log formats.",
+  "formatters: Tests for log formatters that structure log messages.",
+  "handlers: Tests for components that dispatch log messages to their destinations.",
+  "handlers_rotating: Tests for the compressed rotating file handlers.",
+  "json_formatter: Tests for the formatter that structures logs as JSON objects.",
+  "middleware: Tests related to middleware components in logging.",
+  "monitor_log_size_middleware: Tests for middleware that monitors the size of log files.",
+  "request_middleware: Tests for middleware handling incoming HTTP requests in logging.",
+  "settings: Tests that ensure logging settings are correctly applied.",
+  "settings_checks: Tests for validating the correctness of logging settings.",
+  "settings_conf: Tests for verifying the configuration of logging settings.",
+  "settings_rotation_checks: Tests for validating LOG_ROTATION and LOG_ROTATION_OVERRIDES settings.",
+  "settings_rotation_conf: Tests for rotation-aware LogConfig and LogManager behaviour.",
+  "utils: Tests for utility functions supporting the logging package.",
+  "utils_context_manager: Tests for context managers handling resources in logging.",
+  "utils_email_notifier: Tests for utilities that send notifications via email.",
+  "utils_get_conf: Tests for utility functions that retrieve configuration settings.",
+  "utils_log_and_notify: Tests for logging utilities that trigger notifications.",
+  "utils_process_file: Tests for utility functions that process files.",
+  "utils_set_conf: Tests for utility functions that set configuration settings.",
+  "validators: Tests for validating configurations and inputs in the logging package.",
+  "validators_rotation: Tests for validators that check rotation configuration inputs.",
+  "views: Tests for MVT views in the django logging package.",
+  "views_log_iboard: Tests specially for the log_iboard view.",
+  "xml_formatter: Tests for the formatter that structures logs as XML documents.",
 ]
-severity = "medium"
-confidence = "medium"
-max_lines = 500
-progress = true
-reports = true
-output_format = "screen"
-output_file = "bandit_report.txt"
-include = [ "B101", "B102" ]
-exclude_tests = [ "B301", "B302" ]
+ini_options.asyncio_default_fixture_loop_scope = "function"
+ini_options.asyncio_mode = "auto"
 
-[tool.bandit.plugins]
-B104 = { check_typed_list = true }
+[tool.coverage]
+run.omit = [
+  "*/migrations/*",
+  "*/tests/*",
+]
+run.source = [ "django_logging" ]
+report.exclude_lines = [
+  "def __repr__",
+  "if __name__ == .__main__.:",
+  "if 0:",
+  "if self\\.debug",
+  "pragma: no cover",
+  "raise AssertionError",
+]
 
 [tool.commitizen]
 name = "cz_conventional_commits"
 version = "2.0.1"
 tag_format = "v$version"
-
-[tool.commitizen.settings]
-increment_types = [ "feat", "fix" ]
+settings.increment_types = [ "feat", "fix" ]
 
 [tool.semantic_release]
-assets = [  ]
-build_command_env = [  ]
-commit_message = "{version}\n\nAutomatically generated by python-semantic-release"
-commit_parser = "emoji"
-logging_use_named_masks = false
+tag_format = "v{version}"
 major_on_zero = true
 allow_zero_version = true
+build_command_env = []
 no_git_verify = false
-tag_format = "v{version}"
-#version_variables = [ "django_logging/version.py:__version__" ]
-
-[tool.semantic_release.branches.main]
-match = "(main|master)"
-prerelease_token = "rc"
-prerelease = false
-
-[tool.semantic_release.changelog]
-template_dir = "templates"
-changelog_file = "CHANGELOG.md"
-exclude_commit_patterns = [  ]
-
-[tool.semantic_release.changelog.environment]
-block_start_string = "{%"
-block_end_string = "%}"
-variable_start_string = "{{"
-variable_end_string = "}}"
-comment_start_string = "{#"
-comment_end_string = "#}"
-trim_blocks = false
-lstrip_blocks = false
-newline_sequence = "\n"
-keep_trailing_newline = false
-extensions = [  ]
-autoescape = true
-
-[tool.semantic_release.commit_author]
-env = "GIT_COMMIT_AUTHOR"
-default = "semantic-release <semantic-release>"
-
-[tool.semantic_release.commit_parser_options]
-allowed_tags = [ "build", "chore", "ci", "docs", "feat", "fix", "perf", "style", "refactor", "test" ]
-minor_tags = [ "feat" ]
-patch_tags = [ "fix", "perf" ]
-default_bump_level = 0
-parse_emoji = true
-
-[tool.semantic_release.remote]
-name = "origin"
-token = ""
-type = "github"
-ignore_token_for_push = false
-insecure = false
-
-[tool.semantic_release.publish]
-dist_glob_patterns = [ "dist/*" ]
-upload_to_vcs_release = true
+assets = []
+commit_message = "{version}\n\nAutomatically generated by python-semantic-release"
+commit_author.default = "semantic-release <semantic-release>"
+commit_author.env = "GIT_COMMIT_AUTHOR"
+logging_use_named_masks = false
+commit_parser = "emoji"
+commit_parser_options.allowed_tags = [
+  "build",
+  "chore",
+  "ci",
+  "docs",
+  "feat",
+  "fix",
+  "perf",
+  "style",
+  "refactor",
+  "test"
+]
+commit_parser_options.default_bump_level = 0
+commit_parser_options.minor_tags = [ "feat" ]
+commit_parser_options.parse_emoji = true
+commit_parser_options.patch_tags = [ "fix", "perf" ]
+# version_variables = [ "django_logging/version.py:__version__" ]
+branches.main.match = "(main|master)"
+branches.main.prerelease = false
+branches.main.prerelease_token = "rc"
+publish.dist_glob_patterns = [ "dist/*" ]
+publish.upload_to_vcs_release = true
+changelog.changelog_file = "CHANGELOG.md"
+changelog.environment.autoescape = true
+changelog.environment.block_end_string = "%}"
+changelog.environment.block_start_string = "{%"
+changelog.environment.comment_end_string = "#}"
+changelog.environment.comment_start_string = "{#"
+changelog.environment.extensions = []
+changelog.environment.keep_trailing_newline = false
+changelog.environment.lstrip_blocks = false
+changelog.environment.newline_sequence = "\n"
+changelog.environment.trim_blocks = false
+changelog.environment.variable_end_string = "}}"
+changelog.environment.variable_start_string = "{{"
+changelog.exclude_commit_patterns = []
+changelog.template_dir = "templates"
+remote.ignore_token_for_push = false
+remote.insecure = false
+remote.name = "origin"
+remote.token = ""
+remote.type = "github"
