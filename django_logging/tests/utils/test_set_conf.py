@@ -106,6 +106,8 @@ class TestSetConf:
             False,
             ["ERROR"],
             1,
+            log_rotation=None,
+            log_rotation_overrides=None,
         )
         mock_LogManager.assert_called_once_with(mock_LogConfig.return_value)
 
@@ -236,3 +238,73 @@ class TestSetConf:
                 colors.RED,
                 colors.RESET,
             )
+
+
+class TestSetConfRotation:
+
+    @patch("django_logging.utils.set_conf.LogConfig")
+    @patch("django_logging.utils.set_conf.LogManager")
+    @patch("django_logging.utils.set_conf.is_auto_initialization_enabled")
+    def test_set_config_passes_rotation_to_log_config(
+        self,
+        mock_auto_init: MagicMock,
+        mock_LogManager: MagicMock,
+        mock_LogConfig: MagicMock,
+    ) -> None:
+        """log_rotation and log_rotation_overrides are forwarded to LogConfig."""
+        mock_auto_init.return_value = True
+
+        rotation = {"TYPE": "size", "MAX_BYTES": 5_000_000, "BACKUP_COUNT": 10}
+        overrides = {"ERROR": {"TYPE": "time", "WHEN": "midnight"}}
+
+        set_config(
+            log_levels=["DEBUG", "INFO"],
+            log_dir="/path/to/logs",
+            log_file_formats={"DEBUG": 1},
+            log_file_format_types={"DEBUG": "NORMAL"},
+            extra_log_files={"DEBUG": False},
+            console_level="DEBUG",
+            console_format=1,
+            colorize_console=False,
+            log_date_format="%Y-%m-%d",
+            log_email_notifier_enable=False,
+            log_email_notifier_log_levels=[None, None],
+            log_email_notifier_log_format=1,
+            log_rotation=rotation,
+            log_rotation_overrides=overrides,
+        )
+
+        call_kwargs = mock_LogConfig.call_args
+        assert call_kwargs.kwargs["log_rotation"] == rotation
+        assert call_kwargs.kwargs["log_rotation_overrides"] == overrides
+
+    @patch("django_logging.utils.set_conf.LogConfig")
+    @patch("django_logging.utils.set_conf.LogManager")
+    @patch("django_logging.utils.set_conf.is_auto_initialization_enabled")
+    def test_set_config_rotation_defaults_to_none(
+        self,
+        mock_auto_init: MagicMock,
+        mock_LogManager: MagicMock,
+        mock_LogConfig: MagicMock,
+    ) -> None:
+        """When rotation params are omitted they default to None."""
+        mock_auto_init.return_value = True
+
+        set_config(
+            log_levels=["INFO"],
+            log_dir="/tmp",
+            log_file_formats={},
+            log_file_format_types={},
+            extra_log_files={},
+            console_level="INFO",
+            console_format=1,
+            colorize_console=False,
+            log_date_format="%Y-%m-%d",
+            log_email_notifier_enable=False,
+            log_email_notifier_log_levels=[None, None],
+            log_email_notifier_log_format=1,
+        )
+
+        call_kwargs = mock_LogConfig.call_args
+        assert call_kwargs.kwargs.get("log_rotation") is None
+        assert call_kwargs.kwargs.get("log_rotation_overrides") is None

@@ -52,10 +52,10 @@ packages = [
 poetry-plugin-export = ">=1.9"
 
 [tool.poetry.dependencies]
-python = ">=3.9,<4.0"
+python = ">=3.10,<4.0"
 django = [
-  { version = ">=4.2,<5.0", python = ">=3.9,<3.10" },
-  { version = ">=4.2,<5.3", python = ">=3.10" },      # Django 4.2 and 5.x for Python 3.10+
+  { version = ">=5.2,<5.3", python = ">=3.10,<3.12" }, # Django 5.2 only for Python 3.10, 3.11
+  { version = ">=5.2,<6.1", python = ">=3.12" },       # Django 5.2 and 6.0 for Python 3.12+
 ]
 
 [tool.poetry.group.dev.dependencies]
@@ -134,6 +134,7 @@ disable = [
   "W0611", # Unused imports
   "W0613", # Unused arguments
   "W0622", # Redefining built-in names
+  "R0914",
   "R0903", # Too few public methods
   "R0801", # Duplicate code
   "W0621",
@@ -214,6 +215,12 @@ markers = [
   "contextvar_manager: Tests for managing context variables across different log contexts.",
   "views: Tests for MVT views in the django logging package.",
   "views_log_iboard: Tests specially for the log_iboard view.",
+  "commands_archive_logs: Tests for the command that archives and compresses rotated log files.",
+  "commands_rotate_logs: Tests for the command that manually triggers log rotation.",
+  "handlers_rotating: Tests for the compressed rotating file handlers.",
+  "settings_rotation_checks: Tests for validating LOG_ROTATION and LOG_ROTATION_OVERRIDES settings.",
+  "settings_rotation_conf: Tests for rotation-aware LogConfig and LogManager behaviour.",
+  "validators_rotation: Tests for validators that check rotation configuration inputs.",
 ]
 asyncio_default_fixture_loop_scope = [ "function" ]
 

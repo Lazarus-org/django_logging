@@ -24,6 +24,8 @@ def get_config() -> Dict:
         "log_email_notifier_enable": settings_manager.email_notifier_enabled,
         "log_email_notifier_log_levels": settings_manager.email_notifier_log_levels,
         "log_email_notifier_log_format": settings_manager.email_notifier_log_format,
+        "log_rotation": settings_manager.log_rotation,
+        "log_rotation_overrides": settings_manager.log_rotation_overrides,
     }
 
     return config

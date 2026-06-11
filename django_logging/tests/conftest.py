@@ -24,6 +24,7 @@ from django_logging.tests.fixtures import (
     temp_json_log_directory,
     temp_log_directory,
     temp_xml_log_directory,
+    log_dir_with_rotated_files,
     xml_formatter,
     setup_users,
     client
