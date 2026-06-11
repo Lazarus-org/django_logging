@@ -1,3 +1,15 @@
+## v2.1.0 (2026-06-12)
+
+### ✨ Features
+
+- **commands**: add archive_logs management command
+- **commands**: add rotate_logs management command
+- **handlers**: Add rotating file handler support and file compression option
+
+### Fix
+
+- **tests**: test roating handler max byte and pytest-asyncio version
+
 ## v2.0.1 (2024-10-17)
 
 ### ✨ Features
