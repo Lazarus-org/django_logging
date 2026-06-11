@@ -144,6 +144,9 @@ disable = [
   "R0401",
 ]
 max-line-length = 88
+max-args = 8
+max-positional-arguments = 8
+
 ignore = [
   "tests",
   "migrations/*",
