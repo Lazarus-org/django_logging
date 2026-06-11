@@ -25,7 +25,7 @@ class TestCompressedRotatingFileHandler:
     def test_rollover_produces_gz_file(self, tmp_path):
         """After rollover, the rotated file has a .gz extension."""
         log_file = str(tmp_path / "app.log")
-        handler = CompressedRotatingFileHandler(log_file, maxBytes=10, backupCount=3)
+        handler = CompressedRotatingFileHandler(log_file, maxBytes=100_000, backupCount=3)
         handler.setLevel(logging.DEBUG)
 
         record = logging.LogRecord(
@@ -45,7 +45,7 @@ class TestCompressedRotatingFileHandler:
     def test_rotated_gz_file_is_valid_gzip(self, tmp_path):
         """The .gz file produced on rollover is a valid gzip archive."""
         log_file = str(tmp_path / "app.log")
-        handler = CompressedRotatingFileHandler(log_file, maxBytes=10, backupCount=3)
+        handler = CompressedRotatingFileHandler(log_file, maxBytes=100_000, backupCount=3)
         handler.setLevel(logging.DEBUG)
 
         record = logging.LogRecord(
@@ -70,7 +70,7 @@ class TestCompressedRotatingFileHandler:
     def test_original_log_file_remains_writable(self, tmp_path):
         """After rollover the original log file is recreated and still writable."""
         log_file = str(tmp_path / "app.log")
-        handler = CompressedRotatingFileHandler(log_file, maxBytes=10, backupCount=3)
+        handler = CompressedRotatingFileHandler(log_file, maxBytes=100_000, backupCount=3)
 
         record = logging.LogRecord(
             name="test", level=logging.INFO,
@@ -97,16 +97,18 @@ class TestCompressedRotatingFileHandler:
         log_file = str(tmp_path / "app.log")
         backup_count = 2
         handler = CompressedRotatingFileHandler(
-            log_file, maxBytes=5, backupCount=backup_count
+            log_file, maxBytes=100_000, backupCount=backup_count
         )
 
-        for i in range(10):
-            record = logging.LogRecord(
-                name="test", level=logging.INFO,
-                pathname="", lineno=0,
-                msg=f"line {i} padding padding", args=(), exc_info=None,
-            )
+        # Trigger rotations manually — each doRollover() produces one .gz file
+        record = logging.LogRecord(
+            name="test", level=logging.INFO,
+            pathname="", lineno=0,
+            msg="line padding", args=(), exc_info=None,
+        )
+        for _ in range(backup_count + 3):
             handler.emit(record)
+            handler.doRollover()
 
         handler.close()
 

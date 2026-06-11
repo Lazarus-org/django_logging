@@ -179,6 +179,8 @@ module-rgx = "(([a-z_][a-z0-9_]*)|(__.*__))$"
 [tool.pytest.ini_options]
 python_files = [ "tests.py", "test_*.py" ]
 addopts = "--cov --cov-report=term-missing --cov-report=html --cov-fail-under=90"
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 markers = [
   "commands: Tests for Django management commands in the logging package.",
   "commands_send_logs: Tests focused on the `send_logs` management command.",
@@ -225,7 +227,6 @@ markers = [
   "settings_rotation_conf: Tests for rotation-aware LogConfig and LogManager behaviour.",
   "validators_rotation: Tests for validators that check rotation configuration inputs.",
 ]
-asyncio_default_fixture_loop_scope = [ "function" ]
 
 [tool.coverage.run]
 source = [ "django_logging" ]
