@@ -2,6 +2,7 @@ from .commands_fixture import (
     temp_json_log_directory,
     temp_log_directory,
     temp_xml_log_directory,
+    log_dir_with_rotated_files,
 )
 from .conf_fixture import log_config, log_manager
 from .email_handler_fixture import email_handler

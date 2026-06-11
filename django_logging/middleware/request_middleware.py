@@ -253,8 +253,9 @@ class RequestLogMiddleware(BaseMiddleware):
 
     @staticmethod
     def get_ip_address(request: HttpRequest) -> str:
-        """Retrieves the client's IP address from the request. Caches the
-        result for reuse.
+        """Retrieves the client's IP address from the request.
+
+        Caches the result for reuse.
 
         Args:
             request (HttpRequest): The incoming HTTP request.

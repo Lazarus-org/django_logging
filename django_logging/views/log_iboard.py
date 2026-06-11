@@ -18,8 +18,9 @@ class LogiBoardView(TemplateView):
     def get(
         self, request: HttpRequest, *args: Any, **kwargs: Dict[str, Any]
     ) -> HttpResponse:
-        """Handles GET requests. Renders the LogiBoard page for superusers,
-        otherwise returns a 403 error response for non-superusers.
+        """Handles GET requests.
+
+        Renders the LogiBoard page for superusers, otherwise returns a 403 error response for non-superusers.
 
         Args:
             request (HttpRequest): The HTTP request object.

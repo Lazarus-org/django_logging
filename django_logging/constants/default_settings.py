@@ -12,6 +12,8 @@ from django_logging.constants.config_types import (
     LogFileFormatTypes,
     LogLevel,
     LogLevels,
+    LogRotationConfig,
+    LogRotationOverrides,
 )
 
 
@@ -52,7 +54,6 @@ class DefaultLoggingSettings:
             },
         )
     )
-
     extra_log_files: ExtraLogFiles = field(
         default_factory=lambda: cast(
             ExtraLogFiles,
@@ -65,7 +66,6 @@ class DefaultLoggingSettings:
             },
         )
     )
-
     log_email_notifier: LogEmailNotifier = field(
         default_factory=lambda: cast(
             LogEmailNotifier,
@@ -77,6 +77,25 @@ class DefaultLoggingSettings:
                 "USE_TEMPLATE": True,
             },
         )
+    )
+
+    # --- Rotation defaults ---
+    # Applied to all levels unless LOG_ROTATION_OVERRIDES provides per-level values.
+    log_rotation: LogRotationConfig = field(
+        default_factory=lambda: cast(
+            LogRotationConfig,
+            {
+                "TYPE": "none",  # no rotation by default (plain FileHandler)
+                "MAX_BYTES": 10_485_760,  # 10 MB — used when TYPE="size"
+                "BACKUP_COUNT": 5,  # rotated files to keep
+                "WHEN": "midnight",  # used when TYPE="time"
+                "INTERVAL": 1,
+                "COMPRESS": False,  # gzip old files on rotate
+            },
+        )
+    )
+    log_rotation_overrides: LogRotationOverrides = field(
+        default_factory=lambda: cast(LogRotationOverrides, {})
     )
 
 

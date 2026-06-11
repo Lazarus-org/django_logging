@@ -18,18 +18,22 @@ from django_logging.constants.config_types import (
     LogFileFormatTypes,
     LogLevel,
     LogLevels,
+    LogRotationConfig,
+    LogRotationOverrides,
     NotifierLogLevels,
 )
 from django_logging.filters.log_level_filter import LoggingLevelFilter
 
 
-# pylint: disable=too-many-instance-attributes, too-many-arguments, too-many-positional-arguments
+# pylint: disable=too-many-instance-attributes, too-many-arguments, too-many-positional-arguments, too-many-locals
 class LogConfig:
     """Configuration class for django_logging.
 
     Attributes:
         log_levels (List[str]): A list of log levels to be used in logging.
         log_dir (str): The directory where log files will be stored.
+        log_rotation (LogRotationConfig): Global rotation defaults.
+        log_rotation_overrides (LogRotationOverrides): Per-level rotation overrides.
 
     """
 
@@ -47,6 +51,8 @@ class LogConfig:
         log_email_notifier_enable: bool,
         log_email_notifier_log_levels: NotifierLogLevels,
         log_email_notifier_log_format: FormatOption,
+        log_rotation: Optional[LogRotationConfig] = None,
+        log_rotation_overrides: Optional[LogRotationOverrides] = None,
     ) -> None:
         self.log_levels = log_levels
         self.log_dir = log_dir
@@ -64,6 +70,17 @@ class LogConfig:
         )
         self.log_file_format_types = log_file_format_types
         self.extra_log_files = extra_log_files
+
+        # Rotation — fall back to defaults when not supplied
+        default_rotation = dict(DefaultLoggingSettings().log_rotation)
+        if log_rotation:
+            default_rotation.update(log_rotation)
+        self.log_rotation: LogRotationConfig = default_rotation  # type: ignore[assignment]
+        self.log_rotation_overrides: LogRotationOverrides = log_rotation_overrides or {}
+
+    # ------------------------------------------------------------------
+    # Format helpers
+    # ------------------------------------------------------------------
 
     def _resolve_file_formats(self, log_file_formats: LogFileFormats) -> Dict:
         resolved_formats = {}
@@ -109,6 +126,19 @@ class LogConfig:
             resolved_format = LogConfig.remove_ansi_escape_sequences(resolved_format)
 
         return resolved_format
+
+    def get_rotation_config_for_level(self, level: str) -> LogRotationConfig:
+        """Return the effective rotation config for *level*.
+
+        Per-level overrides are shallow-merged on top of the global
+        rotation defaults so callers only need to specify the keys that
+        differ.
+
+        """
+        effective = dict(self.log_rotation)
+        override = self.log_rotation_overrides.get(level, {})
+        effective.update(override)
+        return effective  # type: ignore[return-value]
 
 
 class LogManager:
@@ -161,26 +191,86 @@ class LogManager:
         """
         return self.log_files.get(log_level)
 
+    def _build_file_handler_config(self, log_file: str, level: str) -> Dict:
+        """Return a dictConfig-compatible handler dict for *level*.
+
+        The handler class and its kwargs are chosen based on the effective
+        rotation config for the level:
+
+        * ``TYPE = "none"``  → plain ``logging.FileHandler``
+        * ``TYPE = "size"``  → ``RotatingFileHandler`` (or compressed variant)
+        * ``TYPE = "time"``  → ``TimedRotatingFileHandler`` (or compressed variant)
+
+        """
+        rotation = self.log_config.get_rotation_config_for_level(level)
+        rotation_type = str(rotation.get("TYPE", "none")).lower()
+        compress = bool(rotation.get("COMPRESS", False))
+        backup_count = int(rotation.get("BACKUP_COUNT", 5))
+
+        if rotation_type == "size":
+            max_bytes = int(rotation.get("MAX_BYTES", 10_485_760))
+            if compress:
+                handler_class = "django_logging.handlers.CompressedRotatingFileHandler"
+            else:
+                handler_class = "logging.handlers.RotatingFileHandler"
+            return {
+                "class": handler_class,
+                "filename": log_file,
+                "maxBytes": max_bytes,
+                "backupCount": backup_count,
+            }
+
+        if rotation_type == "time":
+            when = str(rotation.get("WHEN", "midnight"))
+            interval = int(rotation.get("INTERVAL", 1))
+            if compress:
+                handler_class = (
+                    "django_logging.handlers.CompressedTimedRotatingFileHandler"
+                )
+            else:
+                handler_class = "logging.handlers.TimedRotatingFileHandler"
+            return {
+                "class": handler_class,
+                "filename": log_file,
+                "when": when,
+                "interval": interval,
+                "backupCount": backup_count,
+            }
+
+        # default: plain FileHandler
+        return {
+            "class": "logging.FileHandler",
+            "filename": log_file,
+        }
+
     def set_conf(self) -> None:
         """Sets the logging configuration using the generated log files."""
-        formatters = {}
+        formatters: Dict = {}
         default_settings = DefaultLoggingSettings()
-        handlers = {
-            level.lower(): {
-                "class": "logging.FileHandler",
-                "filename": log_file,
-                "formatter": f"{level.lower()}",
-                "level": level,
-                "filters": [level.lower(), "context_var_filter"],
-            }
-            for level, log_file in self.log_files.items()
-        }
+
+        # Build file handlers — each level gets its own handler with the
+        # appropriate rotation strategy.
+        handlers: Dict = {}
+        for level, log_file in self.log_files.items():
+            handler_cfg = self._build_file_handler_config(log_file, level)
+            handler_cfg.update(
+                {
+                    "formatter": level.lower(),
+                    "level": level,
+                    "filters": [level.lower(), "context_var_filter"],
+                }
+            )
+            handlers[level.lower()] = handler_cfg
+
+        # Console handler
         handlers["console"] = {
             "class": "logging.StreamHandler",
             "formatter": "console",
             "level": self.log_config.console_level,
             "filters": ["context_var_filter"],
         }
+
+        # Email handlers (optional)
         email_handler = {
             f"email_{level.lower()}": {
                 "class": "django_logging.handlers.EmailHandler",
@@ -194,7 +284,8 @@ class LogManager:
         if self.log_config.email_notifier_enable:
             handlers.update(email_handler)
 
-        filters = {
+        # Filters
+        filters: Dict = {
             level.lower(): {
                 "()": LoggingLevelFilter,
                 "logging_level": getattr(logging, level),
@@ -207,6 +298,7 @@ class LogManager:
             "()": "django_logging.filters.ContextVarFilter",
         }
 
+        # Formatters
         for level in self.log_config.log_levels:
             formatter = {
                 level.lower(): {
@@ -235,7 +327,7 @@ class LogManager:
             "datefmt": self.log_config.log_date_format,
         }
 
-        loggers = {
+        loggers: Dict = {
             level.lower(): {
                 "level": level,
                 "handlers": [level.lower()],

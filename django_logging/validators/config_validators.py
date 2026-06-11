@@ -10,6 +10,8 @@ from django_logging.constants import (
     VALID_DIRECTIVES,
 )
 from django_logging.constants.config_types import (
+    VALID_ROTATION_TYPES,
+    VALID_TIMED_WHEN,
     FormatOption,
     LogEmailNotifier,
     LogLevels,
@@ -318,4 +320,131 @@ def validate_extra_log_files(
                         id=f"django_logging.E027_{config_name}",
                     )
                 )
+    return errors
+
+
+def validate_rotation_config(
+    rotation_config: Dict, config_name: str, valid_levels: List[str]
+) -> List[Error]:
+    """Validate a LOG_ROTATION or LOG_ROTATION_OVERRIDES configuration dict.
+
+    For LOG_ROTATION pass the top-level dict directly. For
+    LOG_ROTATION_OVERRIDES pass each per-level sub-dict.
+
+    """
+    errors: List[Error] = []
+
+    if not isinstance(rotation_config, dict):
+        errors.append(
+            Error(
+                f"{config_name} is not a dictionary.",
+                hint=f"Ensure {config_name} is a dict with rotation keys.",
+                id=f"django_logging.E030_{config_name}",
+            )
+        )
+        return errors
+
+    rotation_type = str(rotation_config.get("TYPE", "none")).lower()
+
+    if rotation_type not in VALID_ROTATION_TYPES:
+        errors.append(
+            Error(
+                f"Invalid TYPE '{rotation_type}' in {config_name}.",
+                hint=f"Valid values are: {sorted(VALID_ROTATION_TYPES)}.",
+                id=f"django_logging.E031_{config_name}",
+            )
+        )
+
+    if "MAX_BYTES" in rotation_config:
+        val = rotation_config["MAX_BYTES"]
+        if not isinstance(val, int) or val <= 0:
+            errors.append(
+                Error(
+                    f"MAX_BYTES in {config_name} must be a positive integer.",
+                    hint="Set MAX_BYTES to e.g. 10_485_760 (10 MB).",
+                    id=f"django_logging.E032_{config_name}",
+                )
+            )
+
+    if "BACKUP_COUNT" in rotation_config:
+        val = rotation_config["BACKUP_COUNT"]
+        if not isinstance(val, int) or val < 0:
+            errors.append(
+                Error(
+                    f"BACKUP_COUNT in {config_name} must be a non-negative integer.",
+                    hint="Set BACKUP_COUNT to 0 (keep all) or a positive number.",
+                    id=f"django_logging.E033_{config_name}",
+                )
+            )
+
+    if "WHEN" in rotation_config:
+        when = str(rotation_config["WHEN"]).lower()
+        if when not in VALID_TIMED_WHEN:
+            errors.append(
+                Error(
+                    f"Invalid WHEN '{rotation_config['WHEN']}' in {config_name}.",
+                    hint=f"Valid values are: {sorted(VALID_TIMED_WHEN)}.",
+                    id=f"django_logging.E034_{config_name}",
+                )
+            )
+
+    if "INTERVAL" in rotation_config:
+        val = rotation_config["INTERVAL"]
+        if not isinstance(val, int) or val < 1:
+            errors.append(
+                Error(
+                    f"INTERVAL in {config_name} must be a positive integer.",
+                    hint="INTERVAL controls how many 'WHEN' units between rotations.",
+                    id=f"django_logging.E035_{config_name}",
+                )
+            )
+
+    if "COMPRESS" in rotation_config:
+        val = rotation_config["COMPRESS"]
+        if not isinstance(val, bool):
+            errors.append(
+                Error(
+                    f"COMPRESS in {config_name} must be a boolean.",
+                    hint="Set COMPRESS to True or False.",
+                    id=f"django_logging.E036_{config_name}",
+                )
+            )
+
+    return errors
+
+
+def validate_rotation_overrides(
+    overrides: Dict, config_name: str, valid_levels: List[str]
+) -> List[Error]:
+    """Validate the LOG_ROTATION_OVERRIDES dictionary."""
+    errors: List[Error] = []
+
+    if not isinstance(overrides, dict):
+        errors.append(
+            Error(
+                f"{config_name} is not a dictionary.",
+                hint=f"Ensure {config_name} maps log levels to rotation config dicts.",
+                id=f"django_logging.E037_{config_name}",
+            )
+        )
+        return errors
+
+    for level, sub_config in overrides.items():
+        if level not in valid_levels:
+            errors.append(
+                Error(
+                    f"Invalid log level '{level}' in {config_name}.",
+                    hint=f"Valid log levels are: {valid_levels}.",
+                    id=f"django_logging.E038_{config_name}",
+                )
+            )
+        else:
+            errors.extend(
+                validate_rotation_config(
+                    sub_config,
+                    f"{config_name}['{level}']",
+                    valid_levels,
+                )
+            )
+
     return errors

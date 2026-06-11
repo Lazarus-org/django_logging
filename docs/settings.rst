@@ -11,8 +11,8 @@ Default configuration
     DJANGO_LOGGING = {
         "AUTO_INITIALIZATION_ENABLE": True,
         "INITIALIZATION_MESSAGE_ENABLE": True,
-        "INCLUDE_LOG_iBOARD": True,
-        "LOG_SQL_QUERIES_ENABLE": True,
+        "INCLUDE_LOG_iBOARD": False,
+        "LOG_SQL_QUERIES_ENABLE": False,
         "LOG_FILE_LEVELS": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
         "LOG_DIR": "logs",
         "LOG_DIR_SIZE_LIMIT": 1024,  # MB
@@ -48,6 +48,16 @@ Default configuration
             "LOG_FORMAT": 1,
             "USE_TEMPLATE": True,
         },
+        # Rotation — all keys are optional; defaults shown below
+        "LOG_ROTATION": {
+            "TYPE": "none",  # "none" | "size" | "time"
+            "MAX_BYTES": 10485760,  # 10 MB, used when TYPE="size"
+            "BACKUP_COUNT": 5,
+            "WHEN": "midnight",  # used when TYPE="time"
+            "INTERVAL": 1,
+            "COMPRESS": False,
+        },
+        "LOG_ROTATION_OVERRIDES": {},
     }
 
 Configuration Options
@@ -70,8 +80,7 @@ Here's a breakdown of the available configuration options:
 ----------------------
 
 - **Type**: ``bool``
-- **Description**: Makes LogiBoard url accessible in the project. Defaults to ``False``. for setting up the LogiBoard, please refer to the :doc:`LogiBoard Integration <log_iboard>`.
-
+- **Description**: Makes LogiBoard url accessible in the project. Defaults to ``False``. For setting up the LogiBoard, please refer to the :doc:`LogiBoard Integration <log_iboard>`.
 
 ``LOG_SQL_QUERIES_ENABLE``
 --------------------------
@@ -115,13 +124,13 @@ Here's a breakdown of the available configuration options:
       - ``normal``: Standard text log.
       - ``JSON``: Structured logs in JSON format.
       - ``XML``: Structured logs in XML format.
-      - ``FLAT``: logs with Flat format.
+      - ``FLAT``: Logs with flat format.
 
 ``EXTRA_LOG_FILES``
 -------------------
 
 - **Type**: ``dict[str, bool]``
-- **Description**: Determines whether separate log files for ``JSON`` or ``XML`` formats should be created for each log level. When set to ``True`` for a specific level, a dedicated directory (e.g., ``logs/json`` or ``logs/xml``) will be created with files like ``info.json`` or ``info.xml``. if ``False``, json and xml logs will be written to ``.log`` files.
+- **Description**: Determines whether separate log files for ``JSON`` or ``XML`` formats should be created for each log level. When set to ``True`` for a specific level, a dedicated directory (e.g., ``logs/json`` or ``logs/xml``) will be created with files like ``info.json`` or ``info.xml``. If ``False``, JSON and XML logs will be written to ``.log`` files.
 - **Default**: ``False`` for all levels.
 
 ``LOG_CONSOLE_LEVEL``
@@ -174,6 +183,96 @@ Here's a breakdown of the available configuration options:
       - **Type**: ``bool``
       - **Description**: Determines whether the email should include an HTML template. Defaults to ``True``.
 
+``LOG_ROTATION``
+----------------
+
+- **Type**: ``dict``
+- **Description**: Controls how log files are rotated. By default no rotation is applied and a plain ``FileHandler`` is used. Setting ``TYPE`` to ``"size"`` or ``"time"`` switches the underlying handler automatically for every log level, with no other code changes required.
+
+    - ``TYPE``:
+      - **Type**: ``str``
+      - **Choices**: ``"none"``, ``"size"``, ``"time"``
+      - **Description**:
+
+        - ``"none"`` — No rotation. Plain ``logging.FileHandler`` (default).
+        - ``"size"`` — Rotate when a file reaches ``MAX_BYTES``. Uses ``RotatingFileHandler``.
+        - ``"time"`` — Rotate on a time schedule. Uses ``TimedRotatingFileHandler``.
+
+      - **Default**: ``"none"``
+
+    - ``MAX_BYTES``:
+      - **Type**: ``int``
+      - **Description**: Maximum file size in bytes before rotation. Only used when ``TYPE="size"``.
+      - **Default**: ``10485760`` (10 MB)
+
+    - ``BACKUP_COUNT``:
+      - **Type**: ``int``
+      - **Description**: Number of rotated backup files to keep. ``0`` means keep all rotated files indefinitely.
+      - **Default**: ``5``
+
+    - ``WHEN``:
+      - **Type**: ``str``
+      - **Description**: Time unit for timed rotation. Only used when ``TYPE="time"``. Accepted values: ``"s"``, ``"m"``, ``"h"``, ``"d"``, ``"midnight"``, ``"W0"``–``"W6"`` (Monday–Sunday).
+      - **Default**: ``"midnight"``
+
+    - ``INTERVAL``:
+      - **Type**: ``int``
+      - **Description**: Number of ``WHEN`` units between rotations. Only used when ``TYPE="time"``.
+      - **Default**: ``1``
+
+    - ``COMPRESS``:
+      - **Type**: ``bool``
+      - **Description**: When ``True``, each rotated file is gzip-compressed automatically (e.g., ``debug.log.1.gz``). Works with both ``"size"`` and ``"time"`` rotation types.
+      - **Default**: ``False``
+
+  **Example — size-based rotation with compression:**
+
+  .. code-block:: python
+
+   DJANGO_LOGGING = {
+       "LOG_ROTATION": {
+           "TYPE": "size",
+           "MAX_BYTES": 5_000_000,
+           "BACKUP_COUNT": 10,
+           "COMPRESS": True,
+       }
+   }
+
+  **Example — daily time-based rotation:**
+
+  .. code-block:: python
+
+    DJANGO_LOGGING = {
+        "LOG_ROTATION": {
+            "TYPE": "time",
+            "WHEN": "midnight",
+            "INTERVAL": 1,
+            "BACKUP_COUNT": 30,
+        }
+    }
+
+``LOG_ROTATION_OVERRIDES``
+--------------------------
+
+- **Type**: ``dict[str, dict]``
+- **Description**: Per-level rotation overrides. Each key must be a valid log level (``"DEBUG"``, ``"INFO"``, ``"WARNING"``, ``"ERROR"``, ``"CRITICAL"``). The value is a partial ``LOG_ROTATION`` dict — only the keys you supply are changed; all other keys are inherited from the global ``LOG_ROTATION`` config.
+- **Default**: ``{}`` (no overrides)
+
+  **Example — ERROR and CRITICAL rotate daily while all other levels rotate by size:**
+
+  .. code-block:: python
+
+    DJANGO_LOGGING = {
+        "LOG_ROTATION": {
+            "TYPE": "size",
+            "MAX_BYTES": 5_000_000,
+            "BACKUP_COUNT": 5,
+        },
+        "LOG_ROTATION_OVERRIDES": {
+            "ERROR": {"TYPE": "time", "WHEN": "midnight", "BACKUP_COUNT": 30},
+            "CRITICAL": {"TYPE": "time", "WHEN": "midnight", "BACKUP_COUNT": 90},
+        },
+    }
 
 .. _available_format_options:
 

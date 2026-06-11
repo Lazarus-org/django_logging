@@ -186,3 +186,35 @@ def check_logging_settings(app_configs: Dict[str, Any], **kwargs: Any) -> List[E
         errors.extend(check_email_settings())
 
     return errors
+
+
+@register()
+def check_rotation_settings(app_configs: Dict[str, Any], **kwargs: Any) -> List[Error]:
+    """Validate LOG_ROTATION and LOG_ROTATION_OVERRIDES settings."""
+    from django_logging.validators.config_validators import (
+        validate_rotation_config,
+        validate_rotation_overrides,
+    )
+
+    errors: List[Error] = []
+    logging_defaults = DefaultLoggingSettings()
+
+    # Validate LOG_ROTATION
+    errors.extend(
+        validate_rotation_config(
+            settings_manager.log_rotation,
+            "LOG_ROTATION",
+            logging_defaults.log_levels,
+        )
+    )
+
+    # Validate LOG_ROTATION_OVERRIDES
+    errors.extend(
+        validate_rotation_overrides(
+            settings_manager.log_rotation_overrides,
+            "LOG_ROTATION_OVERRIDES",
+            logging_defaults.log_levels,
+        )
+    )
+
+    return errors
