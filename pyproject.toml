@@ -4,7 +4,7 @@ requires = [ "poetry-core>=2,<3" ]
 
 [project]
 name = "dj-logging"
-version = "2.0.1"
+version = "2.1.0"
 description = "A package for logging in django applications"
 readme = "README.md"
 keywords = [ "django", "django logging", "logging" ]
@@ -265,7 +265,7 @@ report.exclude_lines = [
 
 [tool.commitizen]
 name = "cz_conventional_commits"
-version = "2.0.1"
+version = "2.1.0"
 tag_format = "v$version"
 settings.increment_types = [ "feat", "fix" ]
 
