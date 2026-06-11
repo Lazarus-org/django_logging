@@ -560,36 +560,223 @@ Running the command will process the following files:
 logs_size_audit Command
 --------------------------
 
-This Django management command monitors the size of your log directory. If the total size exceeds the configured limit, the command sends a warning email notification to the admin. The size check helps maintain log storage and prevent overflow by ensuring administrators are informed when logs grow too large.
+This Django management command monitors the size of your log directory. If the total size exceeds the configured limit, the command sends a warning email notification to the admin. It also prints a per-category breakdown showing the size of active, rotated, compressed, and archived files separately.
 
 Key Features
 ^^^^^^^^^^^^
 
-- **Log Directory Size Check**: Automatically calculates the total size of the log directory.
-- **Configurable Size Limit**: Compares the total size of the log directory against a configured limit.
-- **Email Notification**: Sends an email warning to the administrator when the log size exceeds the defined limit.
+- **Log Directory Size Check**: Calculates the total size of the log directory.
+- **Per-Category Breakdown**: Separates file sizes into four buckets: active log files, rotated backups, gzip-compressed files, and archived bundles.
+- **Configurable Size Limit**: Compares the total size against ``LOG_DIR_SIZE_LIMIT`` in settings.
+- **Email Notification**: Sends a warning email to the administrator when the limit is exceeded, including the full breakdown in the email body.
 
 How It Works
 ^^^^^^^^^^^^
 
-1. **Setup Log Directory**: The command retrieves the log directory from Django settings, specifically `DJANGO_LOGGING['LOG_DIR']` or the Default. If the directory doesn't exist, an error is logged and displayed.
-2. **Calculate Directory Size**: It calculates the total size of the files in the log directory.
-3. **Compare with Size Limit**: The command compares the total directory size (in MB) with the configured size limit, which can be configured as ``LOG_DIR_SIZE_LIMIT`` in settings.
-4. **Send Warning Email**: If the directory size exceeds the configured limit, the command sends a warning email to the admin, detailing the current log size.
+1. **Setup Log Directory**: Retrieves the log directory from ``DJANGO_LOGGING['LOG_DIR']``. If the directory doesn't exist, an error is displayed.
+2. **Categorize Files**: Classifies each file as active (``<level>.log``), rotated (``<level>.log.N``, etc.), compressed (``.gz``), or archived (inside ``archive/``).
+3. **Compare with Size Limit**: Compares the total size in MB with ``LOG_DIR_SIZE_LIMIT``.
+4. **Send Warning Email**: If the limit is exceeded, sends a warning email to ``ADMIN_EMAIL`` that includes the full breakdown.
 
 Command Execution
 ^^^^^^^^^^^^^^^^^
 
 To execute the command, use the following syntax:
 
-.. code-block:: bash
+.. code-block:: shell
 
    python manage.py logs_size_audit
 
 Example
 ^^^^^^^
 
-Running the command when the log directory exceeds the size limit will trigger an email to the administrator:
+Running the command produces a size breakdown:
 
-- Example log size: ``1200 MB`` (limit: ``1024 MB``)
-- An email will be sent to ``ADMIN_EMAIL`` configured in Django settings.
+.. code-block:: text
+
+   Log directory size breakdown:
+     active          5 file(s)       0.42 MB
+     rotated        12 file(s)      18.30 MB
+     compressed      8 file(s)       4.10 MB
+     archived        3 file(s)       2.00 MB
+     TOTAL                          24.82 MB
+
+If the total exceeds ``LOG_DIR_SIZE_LIMIT``, an email is sent to ``ADMIN_EMAIL`` configured in Django settings.
+
+rotate_logs Command
+-------------------
+
+This management command manually triggers an immediate rollover on all active rotating log handlers. It is useful in deployment scripts to start fresh log files right after a release, while safely preserving old log content in numbered backup files.
+
+Key Features
+^^^^^^^^^^^^
+
+- **Immediate rollover**: calls ``doRollover()`` on every live ``RotatingFileHandler`` or ``TimedRotatingFileHandler`` found across all active loggers.
+- **Graceful skip**: plain ``FileHandler`` instances (when ``LOG_ROTATION TYPE`` is ``"none"``) are reported as skipped rather than causing an error.
+- **Multi-handler support**: rotates all qualifying handlers in a single pass, regardless of which logger they are attached to.
+
+How It Works
+^^^^^^^^^^^^
+
+1. Iterates over the root logger and all named loggers.
+2. For each handler that is a ``RotatingFileHandler`` or ``TimedRotatingFileHandler``, acquires the handler lock, calls ``doRollover()``, and releases the lock.
+3. Reports rotated file paths and skipped plain handlers to stdout.
+
+Command Execution
+^^^^^^^^^^^^^^^^^
+
+.. code-block:: shell
+
+   python manage.py rotate_logs
+
+Example Output
+^^^^^^^^^^^^^^
+
+When rotation succeeds:
+
+.. code-block:: text
+
+   Rotated 5 handler(s):
+     /var/log/myapp/debug.log
+     /var/log/myapp/info.log
+     ...
+
+When no rotating handlers are configured:
+
+.. code-block:: text
+
+   No rotating handlers found. Set LOG_ROTATION TYPE to 'size' or 'time' to enable rotation.
+
+
+archive_logs Command
+--------------------
+
+This management command moves rotated log files into a timestamped subdirectory under ``logs/archive/``. Active ``<level>.log`` files are never touched. Optionally, individual files can be gzip-compressed before moving, and the entire archive directory can be bundled into a single ``tar.gz`` or ``zip`` file.
+
+Key Features
+^^^^^^^^^^^^
+
+- **Safe archiving**: only rotated files (``debug.log.1``, ``info.log.2024-01-15``, etc.) are moved. Active ``.log`` files remain in place.
+- **``--compress``**: gzip-compresses each uncompressed rotated file before archiving (``info.log.1`` → ``info.log.1.gz``).
+- **``--bundle``**: after archiving, bundles the entire timestamped directory into a single ``tar.gz`` or ``zip`` file and removes the directory.
+- **``--dry-run``**: prints exactly what would happen without touching any files.
+- **Re-run safe**: existing ``archive/`` subdirectories are never re-archived on subsequent runs.
+
+How It Works
+^^^^^^^^^^^^
+
+1. Scans the log directory for files that do not match the active ``<level>.log`` naming pattern.
+2. Creates ``<LOG_DIR>/archive/<YYYY-MM-DD_HHMMSS>/`` and moves the rotated files into it.
+3. If ``--compress`` is set, uncompressed files are gzip-compressed during the move.
+4. If ``--bundle`` is set, the timestamped directory is compressed into a single file and then deleted.
+
+Command Execution
+^^^^^^^^^^^^^^^^^
+
+.. code-block:: shell
+
+   # Basic — move rotated files into archive/
+   python manage.py archive_logs
+
+   # Gzip each file before moving
+   python manage.py archive_logs --compress
+
+   # Bundle archive directory into a tar.gz and remove the directory
+   python manage.py archive_logs --bundle tar.gz
+
+   # Bundle into a zip file
+   python manage.py archive_logs --bundle zip
+
+   # Compress individual files and then bundle into tar.gz
+   python manage.py archive_logs --compress --bundle tar.gz
+
+   # Preview everything without touching any files
+   python manage.py archive_logs --compress --bundle tar.gz --dry-run
+
+Arguments
+^^^^^^^^^
+
+``--compress``
+  Gzip-compress each uncompressed rotated file before moving it to the archive directory. Files that are already ``.gz`` are moved as-is.
+
+``--bundle <FORMAT>``
+  After archiving, bundle the entire timestamped archive directory into a single compressed file and remove the source directory. Supported formats: ``tar.gz``, ``zip``.
+
+``--dry-run``
+  Print what would be archived and bundled without moving or creating any files.
+
+Example Output
+^^^^^^^^^^^^^^
+
+.. code-block:: text
+
+   Archived 3 file(s) to /var/log/myapp/archive/2024-03-15_143022:
+     /var/log/myapp/archive/2024-03-15_143022/debug.log.1.gz
+     /var/log/myapp/archive/2024-03-15_143022/info.log.2024-03-14.gz
+     /var/log/myapp/archive/2024-03-15_143022/error.log.1.gz
+   Bundled archive directory into /var/log/myapp/archive/2024-03-15_143022.tar.gz (0.04 MB) and removed the source directory.
+
+Resulting layout after ``--bundle tar.gz``:
+
+.. code-block:: text
+
+   logs/
+     debug.log                           ← active, untouched
+     info.log                            ← active, untouched
+     archive/
+       2024-03-15_143022.tar.gz          ← all rotated files, bundled
+
+
+Log Rotation
+------------
+
+``django_logging`` supports dynamic log file rotation through the ``LOG_ROTATION`` setting. By default no rotation is applied. Setting ``TYPE`` to ``"size"`` or ``"time"`` switches the underlying handler automatically — no other code changes are needed.
+
+For full configuration details refer to the :doc:`Settings <settings>` documentation.
+
+Size-based rotation example
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: python
+
+   DJANGO_LOGGING = {
+       "LOG_ROTATION": {
+           "TYPE": "size",
+           "MAX_BYTES": 5_000_000,  # 5 MB
+           "BACKUP_COUNT": 10,
+           "COMPRESS": True,  # produces debug.log.1.gz, info.log.1.gz …
+       },
+   }
+
+Time-based rotation example
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: python
+
+   DJANGO_LOGGING = {
+       "LOG_ROTATION": {
+           "TYPE": "time",
+           "WHEN": "midnight",
+           "INTERVAL": 1,
+           "BACKUP_COUNT": 30,
+       },
+   }
+
+Per-level rotation overrides
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Use ``LOG_ROTATION_OVERRIDES`` to give individual log levels a different strategy. Only the keys you specify are changed; everything else inherits from ``LOG_ROTATION``.
+
+.. code-block:: python
+
+   DJANGO_LOGGING = {
+       "LOG_ROTATION": {
+           "TYPE": "size",
+           "MAX_BYTES": 5_000_000,
+           "BACKUP_COUNT": 5,
+       },
+       "LOG_ROTATION_OVERRIDES": {
+           "ERROR": {"TYPE": "time", "WHEN": "midnight", "BACKUP_COUNT": 30},
+           "CRITICAL": {"TYPE": "time", "WHEN": "midnight", "BACKUP_COUNT": 90},
+       },
+   }

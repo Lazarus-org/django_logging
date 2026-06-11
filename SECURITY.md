@@ -4,12 +4,13 @@
 
 We actively support the following versions of `django_logging` with security updates:
 
-| Version   | Supported          |
-| --------- | ------------------ |
-| 2.0.x     | ✅ Fully supported |
-| 1.2.x     | ✅ Supported  |
-| 1.1.x     | ✅ Supported        |
-| 1.0.x     | ⚠️ Limited support |
+| Version | Supported          |
+|---------| ------------------ |
+| 2.1.x   | ✅ Fully supported |
+| 2.0.x   | ✅ Supported       |
+| 1.2.x   | ⚠️ Limited support |
+| 1.1.x   | ❌ Not supported   |
+| 1.0.x   | ❌ Not supported   |
 
 ## Reporting a Vulnerability
 
@@ -39,6 +40,7 @@ When a vulnerability is confirmed:
 - Keep your `django_logging` package up to date with the latest versions to ensure you benefit from the latest security fixes.
 - Follow our changelog for announcements regarding security fixes.
 - Ensure that your logging configuration is secure and does not expose sensitive information in log files.
+- When using log rotation with compression (`COMPRESS: True`), ensure your archive directory has appropriate filesystem permissions to prevent unauthorized access to rotated log files.
 
 ## Responsible Disclosure
 
