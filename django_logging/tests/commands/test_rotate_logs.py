@@ -116,3 +116,22 @@ class TestRotateLogsCommand:
             root_logger.removeHandler(handler_b)
             handler_a.close()
             handler_b.close()
+
+
+def test_shared_handler_is_rotated_once(tmp_path):
+    """Additive initialization attaches package handler to root and package logger."""
+    handler = logging.handlers.RotatingFileHandler(
+        str(tmp_path / "shared.log"), maxBytes=100_000, backupCount=1
+    )
+    root_logger = logging.getLogger()
+    package_logger = logging.getLogger("django_logging")
+    root_logger.addHandler(handler)
+    package_logger.addHandler(handler)
+    try:
+        with patch.object(handler, "doRollover") as roll:
+            call_command("rotate_logs", stdout=StringIO())
+        roll.assert_called_once()
+    finally:
+        root_logger.removeHandler(handler)
+        package_logger.removeHandler(handler)
+        handler.close()

@@ -209,6 +209,8 @@ def validate_date_format(date_format: str, config_name: str) -> List[Error]:
 
 
 def validate_email_notifier(notifier_config: LogEmailNotifier) -> List[Error]:
+    # Exact built-in types prevent bools from being accepted as numeric limits.
+    # pylint: disable=unidiomatic-typecheck
     errors = []
     if not isinstance(notifier_config, dict):
         errors.append(
@@ -221,20 +223,30 @@ def validate_email_notifier(notifier_config: LogEmailNotifier) -> List[Error]:
         return errors
 
     for key, value in notifier_config.items():
-        expected_type = type(value)
         config_name = f"LOG_EMAIL_NOTIFIER['{key}']"
-        bool_attrs = ["ENABLE", "NOTIFY_ERROR", "NOTIFY_CRITICAL", "USE_TEMPLATE"]
-
-        if expected_type is bool and key in bool_attrs:
-            errors.extend(validate_boolean_setting(bool(value), config_name))
-        elif isinstance(value, (int, str)) and key == "LOG_FORMAT":
+        if key in ("ENABLE", "NOTIFY_ERROR", "NOTIFY_CRITICAL", "USE_TEMPLATE"):
+            if type(value) is not bool:
+                errors.append(
+                    Error(
+                        f"{config_name} must be a boolean.",
+                        id=f"django_logging.E018_{config_name}",
+                    )
+                )
+        elif key == "LOG_FORMAT":
             errors.extend(validate_format_option(value, config_name))
-
+        elif key in ("MAX_CONCURRENT", "SMTP_TIMEOUT"):
+            max_value = 64 if key == "MAX_CONCURRENT" else 120
+            if type(value) is not int or not 1 <= value <= max_value:
+                errors.append(
+                    Error(
+                        f"{config_name} must be an integer from 1 to {max_value}.",
+                        id="django_logging.E043_EMAIL_LIMIT",
+                    )
+                )
         else:
             errors.append(
                 Error(
-                    f"Unknown type '{expected_type}' for {config_name}.",
-                    hint="Check the expected types in LogEmailNotifierType.",
+                    f"Unknown LOG_EMAIL_NOTIFIER key: {key}.",
                     id=f"django_logging.E018_{config_name}",
                 )
             )
@@ -323,6 +335,23 @@ def validate_extra_log_files(
     return errors
 
 
+def _rotation_integer_errors(
+    config: Dict, key: str, config_name: str, minimum: int, error_code: str, hint: str
+) -> List[Error]:
+    """Validate an optional numeric rotation field with a consistent
+    message."""
+    if key in config and (not isinstance(config[key], int) or config[key] < minimum):
+        qualifier = "positive" if minimum else "non-negative"
+        return [
+            Error(
+                f"{key} in {config_name} must be a {qualifier} integer.",
+                hint=hint,
+                id=f"django_logging.{error_code}_{config_name}",
+            )
+        ]
+    return []
+
+
 def validate_rotation_config(
     rotation_config: Dict, config_name: str, valid_levels: List[str]
 ) -> List[Error]:
@@ -355,27 +384,27 @@ def validate_rotation_config(
             )
         )
 
-    if "MAX_BYTES" in rotation_config:
-        val = rotation_config["MAX_BYTES"]
-        if not isinstance(val, int) or val <= 0:
-            errors.append(
-                Error(
-                    f"MAX_BYTES in {config_name} must be a positive integer.",
-                    hint="Set MAX_BYTES to e.g. 10_485_760 (10 MB).",
-                    id=f"django_logging.E032_{config_name}",
-                )
-            )
+    errors.extend(
+        _rotation_integer_errors(
+            rotation_config,
+            "MAX_BYTES",
+            config_name,
+            1,
+            "E032",
+            "Set MAX_BYTES to e.g. 10_485_760 (10 MB).",
+        )
+    )
 
-    if "BACKUP_COUNT" in rotation_config:
-        val = rotation_config["BACKUP_COUNT"]
-        if not isinstance(val, int) or val < 0:
-            errors.append(
-                Error(
-                    f"BACKUP_COUNT in {config_name} must be a non-negative integer.",
-                    hint="Set BACKUP_COUNT to 0 (keep all) or a positive number.",
-                    id=f"django_logging.E033_{config_name}",
-                )
-            )
+    errors.extend(
+        _rotation_integer_errors(
+            rotation_config,
+            "BACKUP_COUNT",
+            config_name,
+            0,
+            "E033",
+            "Set BACKUP_COUNT to 0 (keep all) or a positive number.",
+        )
+    )
 
     if "WHEN" in rotation_config:
         when = str(rotation_config["WHEN"]).lower()
@@ -388,16 +417,24 @@ def validate_rotation_config(
                 )
             )
 
-    if "INTERVAL" in rotation_config:
-        val = rotation_config["INTERVAL"]
-        if not isinstance(val, int) or val < 1:
-            errors.append(
-                Error(
-                    f"INTERVAL in {config_name} must be a positive integer.",
-                    hint="INTERVAL controls how many 'WHEN' units between rotations.",
-                    id=f"django_logging.E035_{config_name}",
-                )
+    errors.extend(
+        _rotation_integer_errors(
+            rotation_config,
+            "INTERVAL",
+            config_name,
+            1,
+            "E035",
+            "INTERVAL controls how many 'WHEN' units between rotations.",
+        )
+    )
+
+    if rotation_type == "external" and rotation_config.get("COMPRESS") is True:
+        errors.append(
+            Error(
+                f"COMPRESS must be False with TYPE='external' in {config_name}; compression belongs to the external rotator.",
+                id=f"django_logging.E045_{config_name}",
             )
+        )
 
     if "COMPRESS" in rotation_config:
         val = rotation_config["COMPRESS"]

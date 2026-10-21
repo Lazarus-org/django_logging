@@ -80,11 +80,11 @@ class TestConf:
         - The `os.makedirs` function is called to create the log directory.
         - The `open` function is called for each log level with the expected file path.
         """
-        with mock.patch("os.makedirs") as makedirs_mock, mock.patch(
-            "os.path.exists"
-        ) as path_exists_mock, mock.patch(
-            "builtins.open", mock.mock_open()
-        ) as open_mock:
+        with (
+            mock.patch("os.makedirs") as makedirs_mock,
+            mock.patch("os.path.exists") as path_exists_mock,
+            mock.patch("builtins.open", mock.mock_open()) as open_mock,
+        ):
             path_exists_mock.return_value = False
             log_manager.log_config.log_levels = ["INFO", "ERROR"]
             log_manager.log_files = {}

@@ -4,7 +4,7 @@ import sys
 from io import StringIO
 from pathlib import Path
 from typing import Any
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
 
 import pytest
 from django.core.management import call_command
@@ -26,9 +26,7 @@ class TestJsonReformatCommand:
     parses multiple JSON objects, and saves them in a 'pretty' subdirectory in a valid JSON array format.
     """
 
-    @patch(
-        "django_logging.management.commands.generate_pretty_json.settings_manager"
-    )
+    @patch("django_logging.management.commands.generate_pretty_json.settings_manager")
     def test_command_successful_processing(
         self, settings: Mock, temp_json_log_directory: str
     ) -> None:
@@ -52,7 +50,7 @@ class TestJsonReformatCommand:
         # Check output
         assert "Processing file" in out.getvalue(), f"Output: {out.getvalue()}"
         assert (
-                "reformatted and generated new pretty file successfully" in out.getvalue()
+            "reformatted and generated new pretty file successfully" in out.getvalue()
         ), f"Output: {out.getvalue()}"
 
         # Verify that the formatted JSON file exists in the pretty directory
@@ -67,9 +65,7 @@ class TestJsonReformatCommand:
             assert len(data) == 2
             assert data[0]["key"] == "value"
 
-    @patch(
-        "django_logging.management.commands.generate_pretty_json.settings_manager"
-    )
+    @patch("django_logging.management.commands.generate_pretty_json.settings_manager")
     def test_command_file_not_found_error(self, settings: Any) -> None:
         """
         Test handling of FileNotFoundError when the log directory does not exist.
@@ -85,10 +81,10 @@ class TestJsonReformatCommand:
         # Check if the command logs the directory not found error
         assert "does not exist." in out.getvalue()
 
-    @patch(
-        "django_logging.management.commands.generate_pretty_json.settings_manager"
-    )
-    def test_command_invalid_json(self, settings: Any, temp_json_log_directory: str) -> None:
+    @patch("django_logging.management.commands.generate_pretty_json.settings_manager")
+    def test_command_invalid_json(
+        self, settings: Any, temp_json_log_directory: str
+    ) -> None:
         """
         Test the command's handling of invalid JSON files.
 
@@ -102,12 +98,10 @@ class TestJsonReformatCommand:
 
         # Create a faulty JSON file with invalid syntax.
         faulty_json_file = Path(temp_json_log_directory) / "json" / "faulty.json"
-        faulty_json_file.write_text(
-            """
+        faulty_json_file.write_text("""
             {"key": "value", \n "key2" }
             
-            """
-        )  # Invalid JSON
+            """)  # Invalid JSON
 
         out = StringIO()
         call_command("generate_pretty_json", stdout=out)

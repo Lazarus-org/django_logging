@@ -24,11 +24,9 @@ class TestGeneratePrettyXMLCommand:
     reformats them by wrapping their content in a <logs> element, and saves them in a 'pretty' subdirectory.
     """
 
-    @patch(
-        "django_logging.management.commands.generate_pretty_xml.settings_manager"
-    )
+    @patch("django_logging.management.commands.generate_pretty_xml.settings_manager")
     def test_command_successful_processing(
-            self, settings: Any, temp_xml_log_directory: str
+        self, settings: Any, temp_xml_log_directory: str
     ) -> None:
         """
         Test the successful processing and reformatting of XML files.
@@ -54,9 +52,7 @@ class TestGeneratePrettyXMLCommand:
         assert "File test.xml reformatted successfully." in out.getvalue()
 
         # Verify that the reformatted XML file exists in the pretty directory
-        pretty_dir = os.path.join(
-            settings.log_dir, "xml", "pretty"
-        )
+        pretty_dir = os.path.join(settings.log_dir, "xml", "pretty")
         formatted_file = os.path.join(pretty_dir, "formatted_test.xml")
         assert os.path.exists(formatted_file), "Reformatted file was not created."
 
@@ -67,9 +63,7 @@ class TestGeneratePrettyXMLCommand:
             assert "<entry>Test Entry</entry>" in content
             assert "</logs>" in content
 
-    @patch(
-        "django_logging.management.commands.generate_pretty_xml.settings_manager"
-    )
+    @patch("django_logging.management.commands.generate_pretty_xml.settings_manager")
     def test_command_directory_not_found(self, settings: Any) -> None:
         """
         Test that the command handles the case when the XML directory is missing.

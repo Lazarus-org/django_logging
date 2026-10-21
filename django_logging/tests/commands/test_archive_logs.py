@@ -1,4 +1,5 @@
 """Tests for the archive_logs management command."""
+
 import gzip
 import os
 import sys
@@ -63,9 +64,9 @@ class TestArchiveLogsCommand:
             call_command("archive_logs", stdout=StringIO())
 
         for level in active_levels:
-            assert os.path.exists(os.path.join(log_dir, f"{level}.log")), (
-                f"{level}.log should not have been moved"
-            )
+            assert os.path.exists(
+                os.path.join(log_dir, f"{level}.log")
+            ), f"{level}.log should not have been moved"
 
     def test_no_rotated_files_prints_success(self, tmp_path):
         """When there are no rotated files the command exits cleanly."""
@@ -143,7 +144,9 @@ class TestArchiveLogsCommand:
     # --bundle tar.gz
     # ------------------------------------------------------------------
 
-    def test_bundle_targz_creates_archive_and_removes_dir(self, log_dir_with_rotated_files):
+    def test_bundle_targz_creates_archive_and_removes_dir(
+        self, log_dir_with_rotated_files
+    ):
         """--bundle tar.gz creates a .tar.gz file and removes the directory."""
         log_dir = log_dir_with_rotated_files
 
@@ -179,7 +182,9 @@ class TestArchiveLogsCommand:
         assert any("debug.log.1" in n for n in names)
         assert any("info.log.2024-01-15" in n for n in names)
 
-    def test_bundle_zip_creates_archive_and_removes_dir(self, log_dir_with_rotated_files):
+    def test_bundle_zip_creates_archive_and_removes_dir(
+        self, log_dir_with_rotated_files
+    ):
         """--bundle zip creates a .zip file and removes the directory."""
         log_dir = log_dir_with_rotated_files
 
@@ -225,7 +230,9 @@ class TestArchiveLogsCommand:
             "django_logging.management.commands.archive_logs.settings_manager.log_dir",
             log_dir,
         ):
-            call_command("archive_logs", compress=True, bundle="tar.gz", stdout=StringIO())
+            call_command(
+                "archive_logs", compress=True, bundle="tar.gz", stdout=StringIO()
+            )
 
         archive_root = os.path.join(log_dir, "archive")
         bundle_path = os.path.join(archive_root, os.listdir(archive_root)[0])
@@ -258,7 +265,9 @@ class TestArchiveLogsCommand:
         # No archive directory should have been created
         assert not os.path.isdir(os.path.join(log_dir, "archive"))
 
-    def test_dry_run_with_compress_shows_gzip_annotation(self, log_dir_with_rotated_files):
+    def test_dry_run_with_compress_shows_gzip_annotation(
+        self, log_dir_with_rotated_files
+    ):
         """--dry-run --compress annotates plain rotated files with (+ gzip)."""
         log_dir = log_dir_with_rotated_files
         out = StringIO()
@@ -295,12 +304,15 @@ class TestArchiveLogsCommand:
         log_dir = log_dir_with_rotated_files
 
         # First run — moves rotated files into archive/
-        with patch(
-            "django_logging.management.commands.archive_logs.settings_manager.log_dir",
-            log_dir,
-        ), patch(
-            "django_logging.management.commands.archive_logs.datetime",
-        ) as mock_dt_first:
+        with (
+            patch(
+                "django_logging.management.commands.archive_logs.settings_manager.log_dir",
+                log_dir,
+            ),
+            patch(
+                "django_logging.management.commands.archive_logs.datetime",
+            ) as mock_dt_first,
+        ):
             mock_dt_first.now.return_value.strftime.return_value = "2024-01-01_100000"
             call_command("archive_logs", stdout=StringIO())
 
@@ -308,12 +320,15 @@ class TestArchiveLogsCommand:
         open(os.path.join(log_dir, "warning.log.1"), "w").close()
 
         out = StringIO()
-        with patch(
-            "django_logging.management.commands.archive_logs.settings_manager.log_dir",
-            log_dir,
-        ), patch(
-            "django_logging.management.commands.archive_logs.datetime",
-        ) as mock_dt_second:
+        with (
+            patch(
+                "django_logging.management.commands.archive_logs.settings_manager.log_dir",
+                log_dir,
+            ),
+            patch(
+                "django_logging.management.commands.archive_logs.datetime",
+            ) as mock_dt_second,
+        ):
             mock_dt_second.now.return_value.strftime.return_value = "2024-01-02_100000"
             call_command("archive_logs", stdout=out)
 
@@ -322,4 +337,84 @@ class TestArchiveLogsCommand:
         assert "warning.log.1" in output
         # Should have created a second timestamp subdirectory
         archive_dirs = os.listdir(os.path.join(log_dir, "archive"))
-        assert len([d for d in archive_dirs if os.path.isdir(os.path.join(log_dir, "archive", d))]) == 2
+        assert (
+            len(
+                [
+                    d
+                    for d in archive_dirs
+                    if os.path.isdir(os.path.join(log_dir, "archive", d))
+                ]
+            )
+            == 2
+        )
+
+
+def test_archive_skips_unrelated_files_and_symlinks(tmp_path):
+    """Do not touch application files or symlinks in LOG_DIR."""
+    from django_logging.management.commands.archive_logs import Command
+
+    (tmp_path / "info.log.1").write_text("rotate")
+    (tmp_path / "notes.txt").write_text("untouched")
+    (tmp_path / "secrets.json").write_text("untouched")
+    (tmp_path / "info.log").write_text("active")
+    # Simulate a symlink when Windows does not grant symlink privileges;
+    # still exercise file selection instead of skipping the whole test.
+    link = tmp_path / "info.log.2"
+    try:
+        link.symlink_to(tmp_path / "notes.txt")
+    except OSError:
+        link.write_text("link placeholder")
+    real_islink = os.path.islink
+    with (
+        patch(
+            "django_logging.management.commands.archive_logs.settings_manager.log_dir",
+            str(tmp_path),
+        ),
+        patch(
+            "django_logging.management.commands.archive_logs.os.path.islink",
+            side_effect=lambda path: os.fspath(path) == str(link) or real_islink(path),
+        ),
+    ):
+        files = Command()._collect_rotated_files(str(tmp_path))
+    assert files == [str(tmp_path / "info.log.1")]
+
+
+def test_archive_preserves_relative_directories(tmp_path):
+    """Rotated files with equal names in different folders do not collide."""
+    from django_logging.management.commands.archive_logs import Command
+
+    for folder in ("a", "b"):
+        path = tmp_path / folder
+        path.mkdir()
+        (path / "info.log.1").write_text(folder)
+    with patch(
+        "django_logging.management.commands.archive_logs.settings_manager.log_dir",
+        str(tmp_path),
+    ):
+        call_command("archive_logs", stdout=StringIO())
+    dirs = list((tmp_path / "archive").iterdir())
+    assert len(dirs) == 1
+    assert (dirs[0] / "a" / "info.log.1").read_text() == "a"
+    assert (dirs[0] / "b" / "info.log.1").read_text() == "b"
+
+
+def test_archive_failed_compression_preserves_source(tmp_path):
+    """An interrupted compressed archive leaves its input available for retry."""
+    from django_logging.management.commands.archive_logs import Command
+
+    file = tmp_path / "info.log.1"
+    file.write_bytes(b"do not lose")
+    with patch(
+        "django_logging.management.commands.archive_logs.settings_manager.log_dir",
+        str(tmp_path),
+    ):
+        with patch(
+            "django_logging.management.commands.archive_logs.shutil.copyfileobj",
+            side_effect=OSError("disk full"),
+        ):
+            with pytest.raises(OSError):
+                Command()._move_files(
+                    [str(file)], str(tmp_path / "archive" / "example"), compress=True
+                )
+    assert file.read_bytes() == b"do not lose"
+    assert list((tmp_path / "archive" / "example").iterdir()) == []

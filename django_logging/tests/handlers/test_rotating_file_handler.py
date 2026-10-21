@@ -1,4 +1,5 @@
 """Tests for the compressed rotating file handlers."""
+
 import gzip
 import logging
 import logging.handlers
@@ -25,42 +26,52 @@ class TestCompressedRotatingFileHandler:
     def test_rollover_produces_gz_file(self, tmp_path):
         """After rollover, the rotated file has a .gz extension."""
         log_file = str(tmp_path / "app.log")
-        handler = CompressedRotatingFileHandler(log_file, maxBytes=100_000, backupCount=3)
+        handler = CompressedRotatingFileHandler(
+            log_file, maxBytes=100_000, backupCount=3
+        )
         handler.setLevel(logging.DEBUG)
 
         record = logging.LogRecord(
-            name="test", level=logging.INFO,
-            pathname="", lineno=0,
-            msg="hello world trigger rotation", args=(), exc_info=None,
+            name="test",
+            level=logging.INFO,
+            pathname="",
+            lineno=0,
+            msg="hello world trigger rotation",
+            args=(),
+            exc_info=None,
         )
         handler.emit(record)
         handler.doRollover()
         handler.close()
 
         rotated_files = [f for f in os.listdir(tmp_path) if f != "app.log"]
-        assert any(f.endswith(".gz") for f in rotated_files), (
-            f"Expected a .gz file in {list(os.listdir(tmp_path))}"
-        )
+        assert any(
+            f.endswith(".gz") for f in rotated_files
+        ), f"Expected a .gz file in {list(os.listdir(tmp_path))}"
 
     def test_rotated_gz_file_is_valid_gzip(self, tmp_path):
         """The .gz file produced on rollover is a valid gzip archive."""
         log_file = str(tmp_path / "app.log")
-        handler = CompressedRotatingFileHandler(log_file, maxBytes=100_000, backupCount=3)
+        handler = CompressedRotatingFileHandler(
+            log_file, maxBytes=100_000, backupCount=3
+        )
         handler.setLevel(logging.DEBUG)
 
         record = logging.LogRecord(
-            name="test", level=logging.INFO,
-            pathname="", lineno=0,
-            msg="content that will be rotated", args=(), exc_info=None,
+            name="test",
+            level=logging.INFO,
+            pathname="",
+            lineno=0,
+            msg="content that will be rotated",
+            args=(),
+            exc_info=None,
         )
         handler.emit(record)
         handler.doRollover()
         handler.close()
 
         gz_files = [
-            str(tmp_path / f)
-            for f in os.listdir(tmp_path)
-            if f.endswith(".gz")
+            str(tmp_path / f) for f in os.listdir(tmp_path) if f.endswith(".gz")
         ]
         assert gz_files, "No .gz file was created"
         with gzip.open(gz_files[0], "rb") as f:
@@ -70,21 +81,31 @@ class TestCompressedRotatingFileHandler:
     def test_original_log_file_remains_writable(self, tmp_path):
         """After rollover the original log file is recreated and still writable."""
         log_file = str(tmp_path / "app.log")
-        handler = CompressedRotatingFileHandler(log_file, maxBytes=100_000, backupCount=3)
+        handler = CompressedRotatingFileHandler(
+            log_file, maxBytes=100_000, backupCount=3
+        )
 
         record = logging.LogRecord(
-            name="test", level=logging.INFO,
-            pathname="", lineno=0,
-            msg="initial content", args=(), exc_info=None,
+            name="test",
+            level=logging.INFO,
+            pathname="",
+            lineno=0,
+            msg="initial content",
+            args=(),
+            exc_info=None,
         )
         handler.emit(record)
         handler.doRollover()
 
         # Write a new record after rollover
         new_record = logging.LogRecord(
-            name="test", level=logging.INFO,
-            pathname="", lineno=0,
-            msg="post-rollover content", args=(), exc_info=None,
+            name="test",
+            level=logging.INFO,
+            pathname="",
+            lineno=0,
+            msg="post-rollover content",
+            args=(),
+            exc_info=None,
         )
         handler.emit(new_record)
         handler.close()
@@ -102,9 +123,13 @@ class TestCompressedRotatingFileHandler:
 
         # Trigger rotations manually — each doRollover() produces one .gz file
         record = logging.LogRecord(
-            name="test", level=logging.INFO,
-            pathname="", lineno=0,
-            msg="line padding", args=(), exc_info=None,
+            name="test",
+            level=logging.INFO,
+            pathname="",
+            lineno=0,
+            msg="line padding",
+            args=(),
+            exc_info=None,
         )
         for _ in range(backup_count + 3):
             handler.emit(record)
@@ -127,18 +152,22 @@ class TestCompressedTimedRotatingFileHandler:
         handler.setLevel(logging.DEBUG)
 
         record = logging.LogRecord(
-            name="test", level=logging.INFO,
-            pathname="", lineno=0,
-            msg="timed rotation test", args=(), exc_info=None,
+            name="test",
+            level=logging.INFO,
+            pathname="",
+            lineno=0,
+            msg="timed rotation test",
+            args=(),
+            exc_info=None,
         )
         handler.emit(record)
         handler.doRollover()
         handler.close()
 
         rotated_files = [f for f in os.listdir(tmp_path) if f != "timed.log"]
-        assert any(f.endswith(".gz") for f in rotated_files), (
-            f"Expected a .gz rotated file, got: {rotated_files}"
-        )
+        assert any(
+            f.endswith(".gz") for f in rotated_files
+        ), f"Expected a .gz rotated file, got: {rotated_files}"
 
     def test_rotated_gz_is_valid_gzip(self, tmp_path):
         """The .gz file produced by timed rollover is a valid gzip archive."""
@@ -148,9 +177,13 @@ class TestCompressedTimedRotatingFileHandler:
         )
 
         record = logging.LogRecord(
-            name="test", level=logging.INFO,
-            pathname="", lineno=0,
-            msg="timed content", args=(), exc_info=None,
+            name="test",
+            level=logging.INFO,
+            pathname="",
+            lineno=0,
+            msg="timed content",
+            args=(),
+            exc_info=None,
         )
         handler.emit(record)
         handler.doRollover()

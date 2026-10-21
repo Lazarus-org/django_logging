@@ -74,7 +74,10 @@ class TestCheckLogSizeCommand:
         with patch("os.path.getsize", side_effect=[60 * 1024 * 1024, 50 * 1024 * 1024]):
             out = StringIO()
             with patch("django.conf.settings.ADMIN_EMAIL", "admin@example.com"):
-                with patch("django_logging.management.commands.logs_size_audit.settings_manager.log_dir_size_limit", 100):
+                with patch(
+                    "django_logging.management.commands.logs_size_audit.settings_manager.log_dir_size_limit",
+                    100,
+                ):
                     call_command("logs_size_audit", stdout=out)
 
         # Verify that the warning email was sent
@@ -123,6 +126,7 @@ class TestCheckLogSizeCommand:
     ) -> None:
         """_categorize_files correctly splits active, rotated, archived, and compressed."""
         from django.core.management import BaseCommand
+
         from django_logging.management.commands.logs_size_audit import Command
 
         log_dir = tmp_path / "logs"
@@ -148,8 +152,10 @@ class TestCheckLogSizeCommand:
         compressed_paths, _ = breakdown["compressed"]
         archived_paths, _ = breakdown["archived"]
 
-        assert any("info.log" in p and not p.endswith(".1") and not p.endswith(".gz")
-                   for p in active_paths)
+        assert any(
+            "info.log" in p and not p.endswith(".1") and not p.endswith(".gz")
+            for p in active_paths
+        )
         assert any("info.log.1" in p for p in rotated_paths)
         assert any("info.log.2.gz" in p for p in compressed_paths)
         assert any("debug.log.1" in p for p in archived_paths)
@@ -172,14 +178,21 @@ class TestCheckLogSizeCommand:
             side_effect=[60 * 1024 * 1024, 50 * 1024 * 1024],
         ):
             out = StringIO()
-            with patch("django.conf.settings.ADMIN_EMAIL", "admin@example.com"), \
-                 patch(
-                     "django_logging.management.commands.logs_size_audit.settings_manager.log_dir_size_limit",
-                     100,
-                 ):
+            with (
+                patch("django.conf.settings.ADMIN_EMAIL", "admin@example.com"),
+                patch(
+                    "django_logging.management.commands.logs_size_audit.settings_manager.log_dir_size_limit",
+                    100,
+                ),
+            ):
                 call_command("logs_size_audit", stdout=out)
 
         mock_send_email.assert_called_once()
-        email_body = mock_send_email.call_args.kwargs.get("body", "") or \
-                     mock_send_email.call_args[1].get("body", "")
-        assert "active" in email_body or "rotated" in email_body or "Breakdown" in email_body
+        email_body = mock_send_email.call_args.kwargs.get(
+            "body", ""
+        ) or mock_send_email.call_args[1].get("body", "")
+        assert (
+            "active" in email_body
+            or "rotated" in email_body
+            or "Breakdown" in email_body
+        )

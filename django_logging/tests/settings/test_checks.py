@@ -97,9 +97,9 @@ class TestChecks:
         - An error with the ID `django_logging.E020_LOG_FILE_FORMATS` is returned for invalid type.
         """
         settings_manager.log_file_formats = {
-                "DEBUG": "%(levelname)s: %(invalid)s",
-                "invalid": "%(message)s",
-            }
+            "DEBUG": "%(levelname)s: %(invalid)s",
+            "invalid": "%(message)s",
+        }
 
         errors: List[Error] = check_logging_settings(None)  # type: ignore
         assert any(
@@ -163,7 +163,7 @@ class TestChecks:
         -------
         - An error with the ID `django_logging.E014_LOG_CONSOLE_COLORIZE` is returned.
         """
-        settings_manager.colorize_console = "not_a_boolean",
+        settings_manager.colorize_console = ("not_a_boolean",)
 
         errors: List[Error] = check_logging_settings(None)  # type: ignore
         assert any(
@@ -199,7 +199,7 @@ class TestChecks:
         -------
         - An error with the ID `django_logging.E014_AUTO_INITIALIZATION_ENABLE` is returned.
         """
-        settings_manager.auto_initialization_enabled = "not_a_boolean",
+        settings_manager.auto_initialization_enabled = ("not_a_boolean",)
 
         errors: List[Error] = check_logging_settings(None)  # type: ignore
         assert any(
@@ -218,7 +218,7 @@ class TestChecks:
         -------
         - An error with the ID `django_logging.E014_INITIALIZATION_MESSAGE_ENABLE` is returned.
         """
-        settings_manager.initialization_message_enabled = "not_a_boolean",
+        settings_manager.initialization_message_enabled = ("not_a_boolean",)
 
         errors: List[Error] = check_logging_settings(None)  # type: ignore
         assert any(
@@ -238,7 +238,7 @@ class TestChecks:
         - An error with the ID `django_logging.E018_LOG_EMAIL_NOTIFIER['ENABLE']` is returned.
         """
         settings_manager.email_notifier = {
-                "ENABLE": "not_a_boolean",
+            "ENABLE": "not_a_boolean",
         }
         errors: List[Error] = check_logging_settings(None)  # type: ignore
         assert any(
@@ -262,7 +262,7 @@ class TestChecks:
         - An error with the ID `django_logging.E010_EMAIL_SETTINGS` is returned.
         """
         settings_manager.email_notifier = {
-                "ENABLE": True,
+            "ENABLE": True,
         }
         with patch("django_logging.settings.checks.check_email_settings") as mock_check:
             mock_check.return_value = [

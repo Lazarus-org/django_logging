@@ -59,7 +59,7 @@ class TestEmailNotifier:
         email_sent_event.wait()
 
         mock_smtp.assert_called_once_with(
-            email_mock_settings.EMAIL_HOST, email_mock_settings.EMAIL_PORT
+            email_mock_settings.EMAIL_HOST, email_mock_settings.EMAIL_PORT, timeout=10
         )
         mock_smtp_instance = mock_smtp.return_value
 

@@ -28,9 +28,7 @@ class SendLogsCommandTests(TestCase):
     )
     @patch("django_logging.management.commands.send_logs.shutil.make_archive")
     @patch("django_logging.management.commands.send_logs.EmailMessage")
-    @patch(
-        "django_logging.management.commands.send_logs.settings_manager"
-    )
+    @patch("django_logging.management.commands.send_logs.settings_manager")
     def test_handle_success(
         self,
         mock_settings_manager: Mock,
@@ -121,10 +119,10 @@ class SendLogsCommandTests(TestCase):
     @patch(
         "django_logging.management.commands.send_logs.Command.validate_email_settings"
     )
-    @patch(
-        "django_logging.management.commands.send_logs.settings_manager"
-    )
-    def test_handle_missing_log_dir(self, mock_validate_email_settings: Mock, mock_settings_manager: Mock) -> None:
+    @patch("django_logging.management.commands.send_logs.settings_manager")
+    def test_handle_missing_log_dir(
+        self, mock_validate_email_settings: Mock, mock_settings_manager: Mock
+    ) -> None:
         """
         Test that the `send_logs` command logs an error when the specified log directory does not exist
         and skips the email validation step.
@@ -149,7 +147,8 @@ class SendLogsCommandTests(TestCase):
                 call_command("send_logs", "test@example.com")
 
         self.assertIn(
-            "ERROR:django_logging.management.commands.send_logs:Log directory" and "does not exist.",
+            "ERROR:django_logging.management.commands.send_logs:Log directory"
+            and "does not exist.",
             cm.output[0],
         )
         mock_validate_email_settings.assert_not_called()

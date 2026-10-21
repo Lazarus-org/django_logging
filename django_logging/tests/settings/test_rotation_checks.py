@@ -1,4 +1,5 @@
 """Tests for the rotation-related system checks."""
+
 import sys
 from typing import List
 from unittest.mock import patch
@@ -57,7 +58,11 @@ class TestRotationChecks:
 
     def test_valid_overrides(self, reset_settings):
         """Per-level overrides with valid configs produce no errors."""
-        settings_manager.log_rotation = {"TYPE": "size", "MAX_BYTES": 5_000_000, "BACKUP_COUNT": 5}
+        settings_manager.log_rotation = {
+            "TYPE": "size",
+            "MAX_BYTES": 5_000_000,
+            "BACKUP_COUNT": 5,
+        }
         settings_manager.log_rotation_overrides = {
             "ERROR": {"TYPE": "time", "WHEN": "midnight", "BACKUP_COUNT": 30},
             "CRITICAL": {"TYPE": "time", "WHEN": "W0", "BACKUP_COUNT": 90},
@@ -192,3 +197,10 @@ class TestRotationChecks:
         settings_manager.log_rotation_overrides = ["ERROR", "CRITICAL"]  # type: ignore
         errors: List[Error] = check_rotation_settings(None)  # type: ignore
         assert any("E037" in e.id for e in errors)
+
+
+def test_external_rotation_rejects_internal_compression(reset_settings):
+    settings_manager.log_rotation = {"TYPE": "external", "COMPRESS": True}
+    settings_manager.log_rotation_overrides = {}
+    errors = check_rotation_settings(None)
+    assert any(error.id == "django_logging.E045_LOG_ROTATION" for error in errors)

@@ -141,7 +141,7 @@ class TestEmailHandler:
         mock_handle_error.assert_called_once_with(error_log_record)
 
     @patch(
-        "django_logging.handlers.email_handler.RequestLogMiddleware.get_ip_address",
+        "django_logging.handlers.email_handler.resolve_client_ip",
         return_value="127.0.0.1",
     )
     @patch(
@@ -204,3 +204,26 @@ class TestEmailHandler:
             }
         )
         assert rendered_output == "<html>Formatted Log</html>"
+
+
+@pytest.mark.parametrize(
+    "peer,forwarded,trusted,expected",
+    [
+        ("127.0.0.1", "198.51.100.4", [], "127.0.0.1"),
+        ("127.0.0.1", "198.51.100.4", ["127.0.0.1/32"], "198.51.100.4"),
+        ("127.0.0.1", "198.51.100.4", ["10.0.0.0/8"], "127.0.0.1"),
+        ("invalid", "198.51.100.4", [], "Unknown"),
+    ],
+)
+def test_render_template_uses_verified_client_ip(
+    settings, peer, forwarded, trusted, expected
+):
+    from django.test import RequestFactory
+
+    settings.DJANGO_LOGGING = {"REQUEST_LOGGING": {"TRUSTED_PROXY_CIDRS": trusted}}
+    request = RequestFactory().get("/", REMOTE_ADDR=peer, HTTP_X_REAL_IP=forwarded)
+    with patch("django_logging.handlers.email_handler.engines") as engines:
+        template = engines["django"].get_template.return_value
+        template.render.return_value = "rendered"
+        assert EmailHandler.render_template("event", request) == "rendered"
+        assert template.render.call_args.args[0]["ip_address"] == expected

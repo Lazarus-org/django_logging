@@ -32,11 +32,15 @@ class Command(BaseCommand):
 
         rotated: list = []
         skipped: list = []
+        visited: set[int] = set()
 
         for lg in all_loggers:
             if not isinstance(lg, logging.Logger):
                 continue
             for handler in lg.handlers:
+                if id(handler) in visited:
+                    continue
+                visited.add(id(handler))
                 if isinstance(
                     handler,
                     (

@@ -3,8 +3,10 @@
 import gzip
 import logging
 import os
+import re
 import shutil
 import tarfile
+import tempfile
 import zipfile
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
@@ -84,7 +86,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS("No rotated log files found."))
             return
 
-        timestamp = datetime.now().strftime("%Y-%m-%d_%H%M%S")
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H%M%S_%f")
         archive_dir = os.path.join(log_dir, "archive", timestamp)
         bundle_path = f"{archive_dir}.{bundle}" if bundle else None
 
@@ -116,27 +118,38 @@ class Command(BaseCommand):
     # ------------------------------------------------------------------
 
     def _collect_rotated_files(self, log_dir: str) -> List[str]:
-        """Walk *log_dir* and return paths of rotated (non-active) log files.
+        """Select only known level-file rotation names, never arbitrary files.
 
-        Active files match exactly ``<level>.log`` (e.g. ``debug.log``).
-        Everything else (``debug.log.1``, ``info.log.gz``,
-        ``error.log.2024-03-01``, etc.) is considered rotated.
+        The archive tree and symlinks are excluded. Paths remain
+        relative to the configured LOG_DIR to prevent name collisions in
+        nested folders.
 
         """
         from django_logging.constants.default_settings import DefaultLoggingSettings
 
-        levels = [lvl.lower() for lvl in DefaultLoggingSettings().log_levels]
-        active_names = {f"{lvl}.log" for lvl in levels}
-
+        levels = set(DefaultLoggingSettings().log_levels)
+        configured = settings_manager.log_levels
+        if isinstance(configured, (list, tuple)):
+            levels.update(lvl for lvl in configured if isinstance(lvl, str))
+        prefixes = "|".join(re.escape(level.lower()) for level in sorted(levels))
+        # Matches standard size and timed rotations, with optional gzip.
+        rotated_name = re.compile(
+            rf"^(?:{prefixes})\.(?:log|json|xml)\."
+            rf"(?:[1-9][0-9]*|[0-9]{{4}}-[0-9]{{2}}-[0-9]{{2}}"
+            rf"(?:_[0-9]{{2}}(?:-[0-9]{{2}}(?:-[0-9]{{2}})?)?)?)"
+            rf"(?:\.gz)?$"
+        )
         rotated: List[str] = []
-        for root, _dirs, files in os.walk(log_dir):
-            # Never descend into existing archive subdirectories
-            if "archive" in root.split(os.sep):
-                continue
+        for root, dirs, files in os.walk(log_dir, followlinks=False):
+            dirs[:] = [
+                d
+                for d in dirs
+                if d != "archive" and not os.path.islink(os.path.join(root, d))
+            ]
             for fname in files:
-                if fname not in active_names:
-                    rotated.append(os.path.join(root, fname))
-
+                path = os.path.join(root, fname)
+                if not os.path.islink(path) and rotated_name.fullmatch(fname):
+                    rotated.append(path)
         return sorted(rotated)
 
     # ------------------------------------------------------------------
@@ -146,22 +159,39 @@ class Command(BaseCommand):
     def _move_files(
         self, rotated_files: List[str], archive_dir: str, compress: bool
     ) -> List[str]:
-        """Move *rotated_files* into *archive_dir*, gzipping if requested."""
-        os.makedirs(archive_dir, exist_ok=True)
+        """Archive rotated files, retaining their relative directory layout."""
+        log_dir = settings_manager.log_dir
+        os.makedirs(archive_dir, exist_ok=False)
         archived: List[str] = []
 
         for src in rotated_files:
-            filename = os.path.basename(src)
-
+            relative = os.path.relpath(src, log_dir)
+            if relative.startswith(".." + os.sep) or relative == "..":
+                raise ValueError("Rotated log path escapes LOG_DIR")
+            dest = os.path.join(archive_dir, relative)
             if compress and not src.endswith(".gz"):
-                dest = os.path.join(archive_dir, filename + ".gz")
-                with open(src, "rb") as f_in, gzip.open(dest, "wb") as f_out:
-                    shutil.copyfileobj(f_in, f_out)
-                os.remove(src)
+                dest += ".gz"
+            os.makedirs(os.path.dirname(dest), exist_ok=True)
+            if os.path.exists(dest):
+                raise FileExistsError(dest)
+            if compress and not src.endswith(".gz"):
+                fd, tmp = tempfile.mkstemp(
+                    prefix=".dj-logging-", suffix=".tmp", dir=os.path.dirname(dest)
+                )
+                try:
+                    with (
+                        os.fdopen(fd, "wb") as raw,
+                        gzip.GzipFile(fileobj=raw, mode="wb") as gz,
+                    ):
+                        with open(src, "rb") as original:
+                            shutil.copyfileobj(original, gz)
+                    os.replace(tmp, dest)
+                    os.remove(src)
+                finally:
+                    if os.path.exists(tmp):
+                        os.unlink(tmp)
             else:
-                dest = os.path.join(archive_dir, filename)
                 shutil.move(src, dest)
-
             archived.append(dest)
 
         return archived

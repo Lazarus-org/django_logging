@@ -1,6 +1,6 @@
 from typing import List, Literal, TypedDict, Union
 
-VALID_ROTATION_TYPES = {"none", "size", "time"}
+VALID_ROTATION_TYPES = {"none", "size", "time", "external"}
 VALID_TIMED_WHEN = {
     "s",
     "m",
@@ -21,7 +21,7 @@ FormatOption = Union[int, str]
 # Type Aliases for configurations
 LogFileFormatType = Literal["JSON", "XML", "FLAT", "NORMAL"]
 LogLevel = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
-LogRotationType = Literal["none", "size", "time"]
+LogRotationType = Literal["none", "size", "time", "external"]
 LogDir = str
 LogLevels = List[LogLevel]
 NotifierLogLevels = List[Union[Literal["ERROR", "CRITICAL"], None]]
@@ -34,6 +34,8 @@ class LogEmailNotifier(TypedDict, total=False):
     NOTIFY_CRITICAL: bool
     LOG_FORMAT: FormatOption
     USE_TEMPLATE: bool
+    MAX_CONCURRENT: int
+    SMTP_TIMEOUT: int
 
 
 class LogFileFormats(TypedDict, total=False):
