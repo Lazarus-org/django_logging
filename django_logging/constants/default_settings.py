@@ -15,6 +15,8 @@ from django_logging.constants.config_types import (
     LogRotationConfig,
     LogRotationOverrides,
 )
+from django_logging.constants.request_logging import REQUEST_LOGGING_DEFAULTS
+from django_logging.constants.structured_logging import STRUCTURED_LOGGING_DEFAULTS
 
 
 # pylint: disable=too-many-instance-attributes
@@ -27,8 +29,16 @@ class DefaultLoggingSettings:
     )
     log_date_format: LogDateFormat = "%Y-%m-%d %H:%M:%S"
     auto_initialization_enable: bool = True
+    logging_setup_mode: str = "additive"
     initialization_message_enable: bool = True
     log_sql_queries_enable: bool = False
+    log_size_audit_in_request: bool = False
+    request_logging: dict = field(
+        default_factory=lambda: dict(REQUEST_LOGGING_DEFAULTS)
+    )
+    structured_logging: dict = field(
+        default_factory=lambda: dict(STRUCTURED_LOGGING_DEFAULTS)
+    )
     include_log_iboard: bool = False
     log_file_formats: LogFileFormats = field(
         default_factory=lambda: cast(
@@ -75,6 +85,8 @@ class DefaultLoggingSettings:
                 "NOTIFY_CRITICAL": False,
                 "LOG_FORMAT": 1,
                 "USE_TEMPLATE": True,
+                "MAX_CONCURRENT": 4,
+                "SMTP_TIMEOUT": 10,
             },
         )
     )

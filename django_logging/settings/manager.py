@@ -104,12 +104,18 @@ class SettingsManager:
             "AUTO_INITIALIZATION_ENABLE",
             self.default_logging.auto_initialization_enable,
         )
+        self.logging_setup_mode: str = self.get(
+            "LOGGING_SETUP_MODE", self.default_logging.logging_setup_mode
+        )
         self.initialization_message_enabled: bool = self.get(
             "INITIALIZATION_MESSAGE_ENABLE",
             self.default_logging.initialization_message_enable,
         )
         self.log_sql_queries_enabled: bool = self.get(
             "LOG_SQL_QUERIES_ENABLE", self.default_logging.log_sql_queries_enable
+        )
+        self.log_size_audit_in_request: bool = self.get(
+            "LOG_SIZE_AUDIT_IN_REQUEST", self.default_logging.log_size_audit_in_request
         )
         self.log_dir_size_limit: int = self.get(
             "LOG_DIR_SIZE_LIMIT", self.default_logging.log_dir_size_limit
@@ -120,6 +126,19 @@ class SettingsManager:
         self.use_email_notifier_template: bool = self.email_notifier.get(
             "USE_TEMPLATE", True
         )
+
+        # Request middleware configuration is owned by the same DJANGO_LOGGING
+        # settings namespace. Validation is performed by Django system checks
+        # and again when request middleware is instantiated.
+        self.request_logging = self.get(
+            "REQUEST_LOGGING", self.default_logging.request_logging
+        )
+
+        self.structured_logging = self.get(
+            "STRUCTURED_LOGGING", self.default_logging.structured_logging
+        )
+
+        self.components = self.get("COMPONENTS", {})
 
         # Rotation settings — merge user config over the dataclass defaults
         user_rotation: LogRotationConfig = self.get("LOG_ROTATION", {})

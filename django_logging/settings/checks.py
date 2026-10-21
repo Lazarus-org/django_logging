@@ -156,6 +156,22 @@ def check_logging_settings(app_configs: Dict[str, Any], **kwargs: Any) -> List[E
         )
     )
 
+    # Validate the mode even when auto-configuration is disabled so typos
+    # cannot silently activate the wrong logging policy later.
+    from django_logging.settings.manager import SettingsManager
+
+    if SettingsManager().logging_setup_mode not in (
+        "additive",
+        "isolated",
+        "replace_root",
+    ):
+        errors.append(
+            Error(
+                "LOGGING_SETUP_MODE must be 'additive', 'isolated', or 'replace_root'.",
+                id="django_logging.E041_LOGGING_SETUP_MODE",
+            )
+        )
+
     # Validate INITIALIZATION_MESSAGE_ENABLE
     errors.extend(
         validate_boolean_setting(
@@ -170,6 +186,15 @@ def check_logging_settings(app_configs: Dict[str, Any], **kwargs: Any) -> List[E
             settings_manager.log_sql_queries_enabled, "LOG_SQL_QUERIES_ENABLE"
         )
     )
+
+    # Legacy synchronous audits must be an explicit request-time opt-in.
+    if not isinstance(SettingsManager().log_size_audit_in_request, bool):
+        errors.append(
+            Error(
+                "LOG_SIZE_AUDIT_IN_REQUEST must be a boolean.",
+                id="django_logging.E044_LOG_SIZE_AUDIT",
+            )
+        )
 
     # Validate LOG_DIR_SIZE_LIMIT
     errors.extend(
@@ -217,4 +242,95 @@ def check_rotation_settings(app_configs: Dict[str, Any], **kwargs: Any) -> List[
         )
     )
 
+    # Validate effective per-level settings too: an override can inherit an
+    # incompatible COMPRESS=True from global rotation defaults.
+    if isinstance(settings_manager.log_rotation_overrides, dict) and isinstance(
+        settings_manager.log_rotation, dict
+    ):
+        for level, override in settings_manager.log_rotation_overrides.items():
+            if isinstance(override, dict):
+                effective = {**settings_manager.log_rotation, **override}
+                if (
+                    str(effective.get("TYPE", "none")).lower() == "external"
+                    and effective.get("COMPRESS") is True
+                ):
+                    if not (
+                        str(settings_manager.log_rotation.get("TYPE", "none")).lower()
+                        == "external"
+                        and settings_manager.log_rotation.get("COMPRESS") is True
+                        and "COMPRESS" not in override
+                    ):
+                        errors.append(
+                            Error(
+                                f"Effective rotation for {level} cannot combine TYPE='external' with COMPRESS=True.",
+                                id="django_logging.E045_LOG_ROTATION_EFFECTIVE",
+                            )
+                        )
+
     return errors
+
+
+@register()
+def check_request_logging_settings(app_configs: Any, **kwargs: Any) -> List[Error]:
+    """Validate the request logging subsection against its shared schema."""
+    from django_logging.settings.manager import SettingsManager
+    from django_logging.settings.request_logging import request_logging_errors
+
+    # Read current Django settings instead of a potentially stale module-level
+    # singleton (important for override_settings and Django's system checks).
+    current = SettingsManager().request_logging
+    return [
+        Error(message, id="django_logging.E040_REQUEST_LOGGING")
+        for message in request_logging_errors(current)
+    ]
+
+
+@register()
+def check_structured_logging_settings(app_configs: Any, **kwargs: Any) -> List[Error]:
+    """Check structured formatter options against the runtime schema."""
+    from django_logging.settings.manager import SettingsManager
+    from django_logging.settings.structured_logging import structured_logging_errors
+
+    return [
+        Error(message, id="django_logging.E042_STRUCTURED_LOGGING")
+        for message in structured_logging_errors(SettingsManager().structured_logging)
+    ]
+
+
+@register()
+def check_logging_components(app_configs: Any, **kwargs: Any) -> List[Error]:
+    """Validate user component schema and references during Django checks."""
+    from django_logging.settings.components import ComponentConfigurationError
+    from django_logging.settings.conf import LogConfig, LogManager
+    from django_logging.settings.manager import SettingsManager
+    from django_logging.utils.get_conf import get_config
+
+    try:
+        options = get_config()
+        # Read current configuration rather than a stale settings singleton
+        # for Django override_settings/system-check invocations.
+        current = SettingsManager()
+        options.update(
+            {
+                "log_levels": current.log_levels,
+                "log_dir": current.log_dir,
+                "log_file_formats": current.log_file_formats,
+                "log_file_format_types": current.log_file_format_types,
+                "extra_log_files": current.extra_log_files,
+                "console_level": current.console_level,
+                "console_format": current.console_format,
+                "colorize_console": current.colorize_console,
+                "log_date_format": current.log_date_format,
+                "log_email_notifier_enable": current.email_notifier_enabled,
+                "log_email_notifier_log_levels": current.email_notifier_log_levels,
+                "log_email_notifier_log_format": current.email_notifier_log_format,
+                "log_rotation": current.log_rotation,
+                "log_rotation_overrides": current.log_rotation_overrides,
+                "structured_logging": current.structured_logging,
+                "components": current.components,
+            }
+        )
+        LogManager(LogConfig(**options)).build_logging_dict()
+    except ComponentConfigurationError as exc:
+        return [Error(str(exc), id="django_logging.E046_COMPONENTS")]
+    return []

@@ -100,13 +100,13 @@ class TestRequestMiddleware:
             - The request ID is correctly retrieved from the request headers.
         """
         request = request_factory.get("/")
-        request.headers = {"x-request-id": "12345"}
+        request.META["HTTP_X_REQUEST_ID"] = "12345"
         request.user = AnonymousUser()
 
         response = request_middleware(request)
 
         assert response.status_code == 200
-        assert request_middleware.context["request_id"] == "12345"
+        assert request.request_id == "12345"
 
     @pytest.mark.asyncio
     async def test_async_streaming_response(
@@ -168,7 +168,9 @@ class TestRequestMiddleware:
             assert response.status_code == 200
             assert response.streaming
 
-    def test_sync_streaming_wrapper_raises_exception(self, request_middleware: RequestLogMiddleware) -> None:
+    def test_sync_streaming_wrapper_raises_exception(
+        self, request_middleware: RequestLogMiddleware
+    ) -> None:
         """
         Test that sync_streaming_wrapper handles an exception during streaming.
 
@@ -200,7 +202,9 @@ class TestRequestMiddleware:
             )
 
     @pytest.mark.asyncio
-    async def test_async_streaming_wrapper_cancelled_error(self, request_middleware: RequestLogMiddleware) -> None:
+    async def test_async_streaming_wrapper_cancelled_error(
+        self, request_middleware: RequestLogMiddleware
+    ) -> None:
         """
         Test that async_streaming_wrapper handles asyncio.CancelledError properly.
 
@@ -210,6 +214,7 @@ class TestRequestMiddleware:
         """
 
         request_id = "test-request-id"
+        request_middleware.log_streaming_events = True
 
         # Mock the streaming content to raise asyncio.CancelledError
         streaming_content = AsyncMock()
@@ -231,7 +236,9 @@ class TestRequestMiddleware:
             )
 
     @pytest.mark.asyncio
-    async def test_async_streaming_wrapper_generic_exception(self, request_middleware: RequestLogMiddleware) -> None:
+    async def test_async_streaming_wrapper_generic_exception(
+        self, request_middleware: RequestLogMiddleware
+    ) -> None:
         """
         Test that async_streaming_wrapper handles a generic Exception properly.
 
@@ -261,7 +268,9 @@ class TestRequestMiddleware:
                 "Streaming failed: request_id=%s", request_id
             )
 
-    def test_sync_streaming_response_wrapper(self, request_factory: RequestFactory, request_middleware: RequestLogMiddleware) -> None:
+    def test_sync_streaming_response_wrapper(
+        self, request_factory: RequestFactory, request_middleware: RequestLogMiddleware
+    ) -> None:
         """
         Test that the synchronous streaming wrapper works correctly.
         """
@@ -283,7 +292,9 @@ class TestRequestMiddleware:
         assert streaming_content == [b"chunk1", b"chunk2"]
 
     @pytest.mark.django_db
-    def test_get_user_authenticated(self, request_factory: RequestFactory, request_middleware: RequestLogMiddleware) -> None:
+    def test_get_user_authenticated(
+        self, request_factory: RequestFactory, request_middleware: RequestLogMiddleware
+    ) -> None:
         """
         Test that the middleware retrieves the correct username for authenticated users.
         """
@@ -295,9 +306,11 @@ class TestRequestMiddleware:
         response = request_middleware(request)
 
         assert response.status_code == 200
-        assert request_middleware.get_user(request) == f"[testuser (ID:{user.pk})]"
+        assert request_middleware.get_user(request) == f"[user_id={user.pk}]"
 
-    def test_get_user_anonymous(self, request_factory: RequestFactory, request_middleware: RequestLogMiddleware) -> None:
+    def test_get_user_anonymous(
+        self, request_factory: RequestFactory, request_middleware: RequestLogMiddleware
+    ) -> None:
         """
         Test that the middleware retrieves 'Anonymous' for unauthenticated users.
         """
@@ -309,7 +322,9 @@ class TestRequestMiddleware:
         assert response.status_code == 200
         assert request_middleware.get_user(request) == "Anonymous"
 
-    def test_get_ip_address(self, request_factory: RequestFactory, request_middleware: RequestLogMiddleware) -> None:
+    def test_get_ip_address(
+        self, request_factory: RequestFactory, request_middleware: RequestLogMiddleware
+    ) -> None:
         """
         Test that the middleware correctly retrieves the client's IP address.
         """
@@ -322,20 +337,25 @@ class TestRequestMiddleware:
         assert response.status_code == 200
         assert request_middleware.get_ip_address(request) == "192.168.1.1"
 
-        request.META["REMOTE_ADDR"] = None
+        # Headers from untrusted peers may not impersonate clients.
+        new_request = request_factory.get("/", HTTP_X_FORWARDED_FOR="203.0.113.9")
+        new_request.META["REMOTE_ADDR"] = "192.0.2.1"
+        assert request_middleware.get_ip_address(new_request) == "192.0.2.1"
 
-        request.META["HTTP_X_FORWARDED_FOR"] = "192.168.1.1,"
-        assert request_middleware.get_ip_address(request) == "192.168.1.1"
+        # An explicitly set application attribute is not a verified proxy source.
+        another_request = request_factory.get("/")
+        another_request.META["REMOTE_ADDR"] = "198.51.100.5"
+        another_request.ip_address = "203.0.113.44"
+        assert request_middleware.get_ip_address(another_request) == "198.51.100.5"
 
-        request.ip_address = "192.168.1.1"
-        assert request_middleware.get_ip_address(request) == "192.168.1.1"
-
-    def test_get_request_id(self, request_factory: RequestFactory, request_middleware: RequestLogMiddleware) -> None:
+    def test_get_request_id(
+        self, request_factory: RequestFactory, request_middleware: RequestLogMiddleware
+    ) -> None:
         """
         Test that the middleware correctly retrieves the request ID from headers.
         """
         request = request_factory.get("/")
-        request.headers = {"x-request-id": "12345"}
+        request.META["HTTP_X_REQUEST_ID"] = "12345"
         request.user = AnonymousUser()
 
         response = request_middleware(request)
@@ -343,12 +363,13 @@ class TestRequestMiddleware:
         assert response.status_code == 200
         assert request_middleware.get_request_id(request) == "12345"
 
-        request.headers = {}
         request.META["HTTP_X_REQUEST_ID"] = "12345"
         request_middleware(request)
         assert request_middleware.get_request_id(request) == "12345"
 
-    def test_log_sql_queries_with_queries(self, request_middleware: RequestLogMiddleware) -> None:
+    def test_log_sql_queries_with_queries(
+        self, request_middleware: RequestLogMiddleware
+    ) -> None:
         """
         Test that _log_sql_queries correctly logs and formats SQL queries.
         """
