@@ -47,7 +47,9 @@ class TestFLATFormatter:
         assert "message" in formatted_output, "message field not present."
 
     def test_format_with_exception(
-        self, flat_formatter: FLATFormatter, error_with_exc_log_record: logging.LogRecord
+        self,
+        flat_formatter: FLATFormatter,
+        error_with_exc_log_record: logging.LogRecord,
     ) -> None:
         """
         Test that the `format` method correctly adds exception debugrmation to the flat line string.
@@ -66,4 +68,6 @@ class TestFLATFormatter:
         formatted_output = flat_formatter.format(error_with_exc_log_record)
 
         # Check that exception debug is included in the output
-        assert "exception" in formatted_output, "Exception info not present in the formatted log."
+        assert (
+            "exception" in formatted_output
+        ), "Exception info not present in the formatted log."

@@ -17,7 +17,7 @@ pytestmark = [
 class TestXMLFormatter:
 
     def test_format_creates_valid_xml(
-            self, xml_formatter: XMLFormatter, debug_log_record: logging.LogRecord
+        self, xml_formatter: XMLFormatter, debug_log_record: logging.LogRecord
     ) -> None:
         """
         Test that the `format` method produces a valid XML string.
@@ -43,7 +43,7 @@ class TestXMLFormatter:
             pytest.fail(f"Formatted output is not valid XML: {e}")
 
     def test_format_includes_message_field(
-            self, xml_formatter: XMLFormatter, debug_log_record: logging.LogRecord
+        self, xml_formatter: XMLFormatter, debug_log_record: logging.LogRecord
     ) -> None:
         """
         Test that the `format` method includes the 'message' field in the output.
@@ -66,12 +66,12 @@ class TestXMLFormatter:
         root = ET.fromstring(formatted_output)
         message_element = root.find("message")
         assert message_element is not None, "Message field not found in XML."
-        assert message_element.text == debug_log_record.getMessage(), (
-            f"Expected message to be '{debug_log_record.getMessage()}', but got '{message_element.text}'"
-        )
+        assert (
+            message_element.text == debug_log_record.getMessage()
+        ), f"Expected message to be '{debug_log_record.getMessage()}', but got '{message_element.text}'"
 
     def test_format_pretty_prints_xml(
-            self, xml_formatter: XMLFormatter, debug_log_record: logging.LogRecord
+        self, xml_formatter: XMLFormatter, debug_log_record: logging.LogRecord
     ) -> None:
         """
         Test that the `format` method returns a pretty-printed XML string.
@@ -101,7 +101,7 @@ class TestXMLFormatter:
                 assert line.startswith("  "), "XML elements are not properly indented."
 
     def test_format_includes_exception_if_present(
-            self, xml_formatter: XMLFormatter, error_with_exc_log_record: logging.LogRecord
+        self, xml_formatter: XMLFormatter, error_with_exc_log_record: logging.LogRecord
     ) -> None:
         """
         Test that the `format` method includes the 'exception' field in the XML output
@@ -125,7 +125,7 @@ class TestXMLFormatter:
         assert exception_element.text, "Exception field is empty."
 
     def test_format_handles_list_in_field(
-            self, xml_formatter: XMLFormatter, debug_log_record: logging.LogRecord
+        self, xml_formatter: XMLFormatter, debug_log_record: logging.LogRecord
     ) -> None:
         """
         Test that the `format` method correctly handles a log field containing a list.
@@ -152,12 +152,16 @@ class TestXMLFormatter:
         # Check if the 'custom_list' field is correctly formatted as XML
         custom_list_element = root.find("custom_list")
         assert custom_list_element is not None, "custom_list field not found in XML."
-        assert len(custom_list_element) == 4, "List items not correctly formatted in XML."
+        assert (
+            len(custom_list_element) == 4
+        ), "List items not correctly formatted in XML."
         for i, item in enumerate(custom_list_element):
-            assert item.text == str(i + 1), f"List item {i} does not match expected value."
+            assert item.text == str(
+                i + 1
+            ), f"List item {i} does not match expected value."
 
     def test_format_handles_dict_in_field(
-            self, xml_formatter: XMLFormatter, debug_log_record: logging.LogRecord
+        self, xml_formatter: XMLFormatter, debug_log_record: logging.LogRecord
     ) -> None:
         """
         Test that the `format` method correctly handles a log field containing a dictionary.
@@ -193,5 +197,9 @@ class TestXMLFormatter:
         assert user_name_element is not None, "Name element not found in XML."
 
         # Ensure that the values match
-        assert user_id_element.text == "123", f"Expected ID to be '123', got {user_id_element.text}"
-        assert user_name_element.text == "John", f"Expected name to be 'John', got {user_name_element.text}"
+        assert (
+            user_id_element.text == "123"
+        ), f"Expected ID to be '123', got {user_id_element.text}"
+        assert (
+            user_name_element.text == "John"
+        ), f"Expected name to be 'John', got {user_name_element.text}"

@@ -24,6 +24,8 @@ def get_config() -> Dict:
         "log_email_notifier_log_levels": settings_manager.email_notifier_log_levels,
         "log_email_notifier_log_format": settings_manager.email_notifier_log_format,
         "log_rotation": settings_manager.log_rotation,
+        "structured_logging": settings_manager.structured_logging,
+        "components": settings_manager.components,
         "log_rotation_overrides": settings_manager.log_rotation_overrides,
     }
 
@@ -50,6 +52,11 @@ def is_auto_initialization_enabled() -> bool:
 
     """
     return settings_manager.auto_initialization_enabled
+
+
+def get_logging_setup_mode() -> str:
+    """Return the mode for explicitly enabled automatic initialization."""
+    return settings_manager.logging_setup_mode
 
 
 def is_initialization_message_enabled() -> bool:

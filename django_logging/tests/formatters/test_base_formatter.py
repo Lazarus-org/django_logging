@@ -68,9 +68,14 @@ class TestBaseStructuredFormatter:
 
         # Test custom field
         debug_log_record.custom_field = "CustomValue"
-        assert formatter._get_field_value(debug_log_record, "custom_field") == "CustomValue"
+        assert (
+            formatter._get_field_value(debug_log_record, "custom_field")
+            == "CustomValue"
+        )
 
-    def test_get_field_value_unknown_field(self, error_with_exc_log_record: LogRecord) -> None:
+    def test_get_field_value_unknown_field(
+        self, error_with_exc_log_record: LogRecord
+    ) -> None:
         """
         Test that `_get_field_value` returns None when an unknown field is requested.
 
@@ -87,5 +92,6 @@ class TestBaseStructuredFormatter:
         formatter._add_exception(error_with_exc_log_record, {})
 
         assert (
-            formatter._get_field_value(error_with_exc_log_record, "unknown_field") is None
+            formatter._get_field_value(error_with_exc_log_record, "unknown_field")
+            is None
         ), "Should return None for unknown field."

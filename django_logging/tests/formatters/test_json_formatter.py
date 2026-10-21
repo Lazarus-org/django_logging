@@ -70,85 +70,23 @@ class TestJSONFormatter:
             parsed_output["message"] == debug_log_record.getMessage()
         ), "Message field is missing or incorrect."
 
-    def test_key_value_pairs_are_extracted(
+    def test_message_key_values_are_not_reinterpreted(
         self, json_formatter: JSONFormatter, debug_log_record: logging.LogRecord
     ) -> None:
-        """
-        Test that the `format` method extracts 'key=value' pairs from the log message.
+        debug_log_record.msg = "user_id=123 action=login password=private"
+        parsed = json.loads(json_formatter.format(debug_log_record))
+        assert parsed["message"] == debug_log_record.msg
+        assert "password" not in parsed
+        assert "user_id" not in parsed
 
-        This test checks that key-value pairs present in the log message are extracted and included in the JSON output.
-
-        Parameters:
-        ----------
-        json_formatter : JSONFormatter
-            The formatter instance being tested.
-        debug_log_record : logging.LogRecord
-            The dummy log record created by the fixture, which includes key-value pairs.
-
-        Asserts:
-        -------
-        - The key-value pairs from the log message are correctly parsed and included in the JSON output.
-        """
-        debug_log_record.msg = "user_id=123 action=login is_active=True"
-        formatted_output = json_formatter.format(debug_log_record)
-        parsed_output = json.loads(formatted_output)
-
-        assert parsed_output["user_id"] == 123, "Key 'user_id' not correctly extracted."
-        assert (
-            parsed_output["action"] == "login"
-        ), "Key 'action' not correctly extracted."
-
-    def test_clean_message_removes_key_value_pairs(
+    def test_extra_fields_are_typed_and_redacted(
         self, json_formatter: JSONFormatter, debug_log_record: logging.LogRecord
     ) -> None:
-        """
-        Test that the `format` method removes key-value pairs from the message after extracting them.
-
-        This test ensures that after key-value pairs are extracted, the original log message is cleaned up by removing those pairs.
-
-        Parameters:
-        ----------
-        json_formatter : JSONFormatter
-            The formatter instance being tested.
-        debug_log_record : logging.LogRecord
-            The dummy log record created by the fixture, which includes key-value pairs.
-
-        Asserts:
-        -------
-        - The final message in the output does not include key-value pairs.
-        """
-        debug_log_record.msg = "user_id=123 action=login"
-        formatted_output = json_formatter.format(debug_log_record)
-        parsed_output = json.loads(formatted_output)
-
-        # The message field should not include the key-value pairs
-        assert parsed_output["message"] == "", "Message still contains key-value pairs."
-
-    def test_format_handles_complex_types(
-        self, json_formatter: JSONFormatter, debug_log_record: logging.LogRecord
-    ) -> None:
-        """
-        Test that the `format` method correctly handles complex types such as dict, list, and tuple in the message.
-
-        This test verifies that key-value pairs with complex types like dictionaries, lists, and tuples
-        are parsed correctly and included in the JSON output.
-
-        Parameters:
-        ----------
-        json_formatter : JSONFormatter
-            The formatter instance being tested.
-        debug_log_record : logging.LogRecord
-            The dummy log record created by the fixture, which includes complex types.
-
-        Asserts:
-        -------
-        - Complex types are correctly parsed and converted in the JSON output.
-        """
-        debug_log_record.msg = "data={'key': 'value'} items=[1,2,3] coords=(1,2)"
-        formatted_output = json_formatter.format(debug_log_record)
-        parsed_output = json.loads(formatted_output)
-
-        assert parsed_output["data"] == {
-            "key": "value"
-        }, "Dictionary type not correctly parsed."
-        assert parsed_output["items"] == [1, 2, 3], "List type not correctly parsed."
+        debug_log_record.context = {"request_id": "test", "access_token": "secret"}
+        debug_log_record.custom_dict = {"id": 123, "secret": "value"}
+        debug_log_record.custom_list = [1, 2, 3]
+        json_formatter.specifiers = ["context", "levelname"]
+        parsed = json.loads(json_formatter.format(debug_log_record))
+        assert parsed["context"] == {"request_id": "test", "access_token": "[REDACTED]"}
+        assert parsed["extra"]["custom_dict"] == {"id": 123, "secret": "[REDACTED]"}
+        assert parsed["extra"]["custom_list"] == [1, 2, 3]

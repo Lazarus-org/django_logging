@@ -1,131 +1,195 @@
+"""Shared, bounded serialization for structured Django log formatters."""
+
+import datetime
+import decimal
 import logging
-import sys
-from unittest.mock import MagicMock, patch
+import math
+import re
+from collections.abc import Mapping
+from logging import Formatter, LogRecord
+from typing import Any, Dict, List, Optional, Union
 
-import pytest
+from django_logging.constants.structured_validation import resolve_structured_logging
 
-from django_logging.formatters import ColoredFormatter
-from django_logging.tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
+# Only explicitly named structured values can be reliably redacted. Free-form
+# messages and exception text may contain secrets and require caller discipline.
+_DEFAULT_SECRET_PARTS = (
+    "password",
+    "passwd",
+    "secret",
+    "token",
+    "authorization",
+    "cookie",
+    "session",
+    "credential",
+    "private_key",
+    "api_key",
+    "access_key",
+    "refresh_token",
+    "csrf",
+    "otp",
+    "phone",
+    "mobile",
+    "email",
+    "national_code",
+    "verification_code",
+    "signature",
+)
+_REDACTED = "[REDACTED]"
+_OMITTED = "[OMITTED]"
 
-pytestmark = [
-    pytest.mark.formatters,
-    pytest.mark.colored_formatter,
-    pytest.mark.skipif(sys.version_info < PYTHON_VERSION, reason=PYTHON_VERSION_REASON),
-]
+# LogRecord keys are not necessarily all specified by a format string; extra={}
+# attributes live on the record itself. Do not duplicate framework internals.
+_STANDARD_RECORD_FIELDS = frozenset(logging.makeLogRecord({}).__dict__) | {
+    "message",
+    "asctime",
+    "context",
+    "exc_text",
+    "taskName",
+}
 
 
-class TestColoredFormatter:
+class BaseStructuredFormatter(Formatter):
+    """Formatter base compatible with existing ``fmt``/``datefmt`` arguments.
 
-    @patch(
-        "django_logging.formatters.colored_formatter.colorize_log_format", autospec=True
-    )
-    @patch(
-        "django_logging.settings.conf.LogConfig.remove_ansi_escape_sequences",
-        side_effect=lambda fmt: fmt,
-    )
-    def test_format_applies_colorization(
+    ``structured_logging`` is optional and can be passed by dictConfig. This
+    allows direct formatter construction without Django settings initialization.
+    """
+
+    def __init__(
         self,
-        mock_remove_ansi: MagicMock,
-        mock_colorize: MagicMock,
-        colored_formatter: ColoredFormatter,
-        debug_log_record: logging.LogRecord,
+        fmt: Optional[str] = None,
+        datefmt: Optional[str] = None,
+        *,
+        structured_logging: Optional[dict] = None,
     ) -> None:
-        """
-        Test that the `format` method of `ColoredFormatter` applies colorization.
-
-        This test verifies that the `format` method calls the `colorize_log_format`
-        function to apply colorization based on the log level.
-
-        Parameters:
-        ----------
-        mock_remove_ansi : MagicMock
-            Mock for `remove_ansi_escape_sequences`.
-        mock_colorize : MagicMock
-            Mock for `colorize_log_format`.
-        colored_formatter : ColoredFormatter
-            The formatter instance being tested.
-        debug_log_record : logging.LogRecord
-            The dummy log record created by the fixture.
-
-        Asserts:
-        -------
-        - The `colorize_log_format` function is called once with the correct arguments.
-        """
-        # Mock the colorize_log_format to return a predictable format
-        mock_colorize.return_value = "%(levelname)s: %(message)s"
-
-        colored_formatter.format(debug_log_record)
-
-        # Ensuring colorization should have been triggered
-        mock_colorize.assert_called_once_with(
-            "%(levelname)s: %(message)s", debug_log_record.levelname
+        super().__init__(fmt, datefmt)
+        self.specifiers = self._extract_specifiers(fmt)
+        self.options = resolve_structured_logging(structured_logging)
+        self._redact_names = frozenset(
+            self._normalize_name(name) for name in self.options["REDACT_FIELDS"]
         )
 
-    @patch(
-        "django_logging.settings.conf.LogConfig.remove_ansi_escape_sequences",
-        side_effect=lambda fmt: fmt,
-    )
-    def test_format_resets_to_original_format(
-        self,
-        mock_remove_ansi: MagicMock,
-        colored_formatter: ColoredFormatter,
-        debug_log_record: logging.LogRecord,
-    ) -> None:
-        """
-        Test that the `format` method resets the format string to its original state after formatting.
+    @staticmethod
+    def _normalize_name(name: str) -> str:
+        return re.sub(r"[^a-z0-9]+", "_", name.casefold()).strip("_")
 
-        This test ensures that the formatter's internal format string is not permanently modified
-        by the colorization process and is reset to its original value after each log record is formatted.
-
-        Parameters:
-        ----------
-        mock_remove_ansi : MagicMock
-            Mock for `remove_ansi_escape_sequences`.
-        colored_formatter : ColoredFormatter
-            The formatter instance being tested.
-        debug_log_record : logging.LogRecord
-            The dummy log record created by the fixture.
-
-        Asserts:
-        -------
-        - The formatter's internal format string (`_style._fmt`) matches the original format after formatting.
-        """
-        original_format = colored_formatter._style._fmt
-        colored_formatter.format(debug_log_record)
-        assert (
-            colored_formatter._style._fmt == original_format
-        ), f"Expected format string to reset to original format, but got {colored_formatter._style._fmt}"
-
-    @patch(
-        "django_logging.settings.conf.LogConfig.remove_ansi_escape_sequences",
-        side_effect=lambda fmt: fmt,
-    )
-    def test_format_returns_formatted_output(
-        self, colored_formatter: ColoredFormatter, debug_log_record: logging.LogRecord
-    ) -> None:
-        """
-        Test that the `format` method returns the correctly formatted log output.
-
-        This test verifies that the formatted output matches the expected structure,
-        including the log level name and the log message.
-
-        Parameters:
-        ----------
-        colored_formatter : ColoredFormatter
-            The formatter instance being tested.
-        debug_log_record : logging.LogRecord
-            The dummy log record created by the fixture.
-
-        Asserts:
-        -------
-        - The formatted output starts with the expected log level and message.
-        """
-        expected_output = (
-            f"{logging.getLevelName(debug_log_record.levelno)}: {debug_log_record.msg}"
+    def _is_sensitive(self, name: str) -> bool:
+        normalized = self._normalize_name(name)
+        return normalized in self._redact_names or any(
+            part in normalized for part in _DEFAULT_SECRET_PARTS
         )
-        formatted_output = colored_formatter.format(debug_log_record)
 
-        # Directly comparing the output assuming it might include color codes
-        assert formatted_output.startswith(
-            f"DEBUG: Test message"
-        ), f"Expected formatted output to start with '{expected_output}', but got '{formatted_output}'"
+    def _extract_specifiers(self, fmt: Optional[str]) -> List[str]:
+        return re.findall(r"%\((.*?)\)", fmt) if fmt is not None else []
+
+    def _get_field_value(self, record: LogRecord, specifier: str) -> Optional[Any]:
+        if specifier == "message":
+            return record.getMessage()
+        if specifier == "asctime":
+            return self.formatTime(record, self.datefmt)
+        return getattr(record, specifier, None)
+
+    def _sanitize(
+        self,
+        value: Any,
+        *,
+        key: str = "",
+        depth: int = 0,
+        seen: Optional[set[int]] = None,
+    ) -> Any:
+        if key and self._is_sensitive(key):
+            return _REDACTED
+        if value is None or isinstance(value, (bool, int)):
+            return value
+        if isinstance(value, float):
+            return value if math.isfinite(value) else None
+        if isinstance(value, str):
+            return value[: self.options["MAX_STRING_LENGTH"]]
+        if isinstance(value, (datetime.date, datetime.time, datetime.datetime)):
+            return value.isoformat()
+        if isinstance(value, decimal.Decimal):
+            return str(value)
+        if isinstance(value, (bytes, bytearray, memoryview)):
+            return "[binary omitted]"
+        if depth >= self.options["MAX_DEPTH"]:
+            return _OMITTED
+        if isinstance(value, (Mapping, list, tuple, set, frozenset)):
+            if seen is None:
+                seen = set()
+            if id(value) in seen:
+                return "[circular]"
+            seen.add(id(value))
+            try:
+                if isinstance(value, Mapping):
+                    result = {}
+                    for index, (raw_key, item) in enumerate(value.items()):
+                        if index >= self.options["MAX_ITEMS"]:
+                            result["_truncated"] = True
+                            break
+                        name = (
+                            raw_key if isinstance(raw_key, str) else "[non-string key]"
+                        )
+                        name = name[: self.options["MAX_STRING_LENGTH"]]
+                        result[name] = self._sanitize(
+                            item, key=name, depth=depth + 1, seen=seen
+                        )
+                    return result
+                result_list = []
+                for index, item in enumerate(value):
+                    if index >= self.options["MAX_ITEMS"]:
+                        result_list.append(_OMITTED)
+                        break
+                    result_list.append(self._sanitize(item, depth=depth + 1, seen=seen))
+                return result_list
+            finally:
+                seen.remove(id(value))
+        # Do not call an arbitrary object's __str__/__repr__: it may reveal data
+        # or execute unpredictable code in the logging hot path.
+        return "[unsupported object]"
+
+    def _handle_complex_value(
+        self, value: Any
+    ) -> Union[str, Dict[str, Any], List[Any], None]:
+        """Kept for compatibility with existing formatter subclasses."""
+        return self._sanitize(value)
+
+    def _event(self, record: LogRecord) -> Dict[str, Any]:
+        result = {}
+        message = record.getMessage()
+        for name in self.specifiers:
+            value = (
+                message if name == "message" else self._get_field_value(record, name)
+            )
+            if value is not None:
+                result[name] = self._sanitize(value, key=name)
+        # Keep message intact; never parse or remove key=value fragments.
+        result["message"] = self._sanitize(message, key="message")
+        if self.options["INCLUDE_EXTRA"]:
+            extra = {
+                name: value
+                for name, value in vars(record).items()
+                if name not in _STANDARD_RECORD_FIELDS
+                and name not in self.specifiers
+                and name != "context"
+            }
+            if extra:
+                result["extra"] = self._sanitize(extra)
+        exception = self._exception_value(record)
+        if exception is not None:
+            result["exception"] = exception
+        return result
+
+    def _exception_value(self, record: LogRecord) -> Optional[str]:
+        if not record.exc_info or self.options["EXCEPTION_MODE"] == "omit":
+            return None
+        if self.options["EXCEPTION_MODE"] == "type":
+            return record.exc_info[0].__name__ if record.exc_info[0] else "Exception"
+        # Existing traceback behavior remains available by default. This text
+        # cannot be safely auto-redacted; its length is bounded.
+        return self._sanitize(self.formatException(record.exc_info))
+
+    def _add_exception(self, record: LogRecord, data: Dict[str, Any]) -> None:
+        exception = self._exception_value(record)
+        if exception is not None:
+            data["exception"] = exception

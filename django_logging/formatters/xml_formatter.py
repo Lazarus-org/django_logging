@@ -1,89 +1,74 @@
-import xml.etree.ElementTree as ET  # nosec B405
+"""XML formatter with safe names, bounded values and valid XML characters."""
+
+import re
+import xml.etree.ElementTree as ET  # nosec B405: parsing below rejects DTD/entity declarations.
 from logging import LogRecord
 from typing import Any
-from xml.dom import minidom  # nosec B408
 
 from django_logging.formatters.base import BaseStructuredFormatter
 
+_TAG = re.compile(r"^[A-Za-z_][A-Za-z0-9_.-]*$")
+_INVALID_XML_TEXT = re.compile(
+    r"[^\x09\x0a\x0d\x20-\ud7ff\ue000-\ufffd\U00010000-\U0010ffff]"
+)
+
+
+def _xml_text(value: Any) -> str:
+    # XML 1.0 forbids C0 controls except tab/newline/carriage return and
+    # surrogate code points. Escaping alone cannot make these valid.
+    return _INVALID_XML_TEXT.sub("", str(value))
+
 
 class XMLFormatter(BaseStructuredFormatter):
-    """A custom log formatter that formats log records as XML strings."""
+    """Existing pretty XML presentation with safe nested field handling."""
 
     def format(self, record: LogRecord) -> str:
-        """Converts the log record to an XML string.
-
-        Args:
-        ----
-            record (logging.LogRecord): The log record object.
-
-        Returns:
-        -------
-            str: The formatted XML string.
-
-        """
-        log_element = ET.Element("log")
-        for specifier in self.specifiers:
-            value = self._get_field_value(record, specifier)
-            if value not in [None, ""]:
-                self._add_field_to_xml(
-                    log_element, specifier, self._handle_complex_value(value)
-                )
-
-        self._add_exception_to_xml(record, log_element)
-        return self._pretty_print_xml(ET.tostring(log_element, encoding="unicode"))
+        root = ET.Element("log")
+        for key, value in self._event(record).items():
+            self._add_field_to_xml(root, key, value)
+        if self.options["XML_PRETTY"]:
+            ET.indent(root, space="  ")
+        result = ET.tostring(root, encoding="unicode")
+        if len(result.encode("utf-8")) > self.options["MAX_EVENT_BYTES"]:
+            return "<log><message>[log event omitted: too large]</message></log>"
+        return result
 
     def _add_field_to_xml(
         self, parent_element: ET.Element, field_name: str, field_value: Any
     ) -> None:
-        """Adds a field and its value to the XML structure.
-
-        Args:
-        ----
-            parent_element (ET.Element): The parent XML element.
-            field_name (str): The name of the field.
-            field_value (Any): The value of the field.
-
-        """
-        field_element = ET.SubElement(parent_element, field_name)
-        if isinstance(field_value, dict):
-            for sub_key, sub_value in field_value.items():
-                sub_element = ET.SubElement(field_element, sub_key)
-                sub_element.text = str(sub_value)
-
-        elif isinstance(field_value, (list, tuple)):
-            for index, item in enumerate(field_value):
-                sub_element = ET.SubElement(field_element, f"item_{index}")
-                sub_element.text = str(item)
+        if _TAG.fullmatch(field_name) and not field_name.casefold().startswith("xml"):
+            element = ET.SubElement(parent_element, field_name)
         else:
-            field_element.text = str(field_value)
+            element = ET.SubElement(
+                parent_element, "field", {"name": _xml_text(field_name)}
+            )
+        if isinstance(field_value, dict):
+            for key, value in field_value.items():
+                self._add_field_to_xml(element, key, value)
+        elif isinstance(field_value, list):
+            for index, value in enumerate(field_value):
+                self._add_field_to_xml(element, f"item_{index}", value)
+        elif field_value is not None:
+            element.text = _xml_text(field_value)
 
     def _add_exception_to_xml(
         self, record: LogRecord, parent_element: ET.Element
     ) -> None:
-        """Adds exception information to the XML structure, if present in the
-        log record.
-
-        Args:
-        ----
-            record (logging.LogRecord): The log record object.
-            parent_element (ET.Element): The parent XML element to which exception info will be added.
-
-        """
-        if record.exc_info:
-            exception_element = ET.SubElement(parent_element, "exception")
-            exception_element.text = self.formatException(record.exc_info)
+        exception = self._exception_value(record)
+        if exception is not None:
+            self._add_field_to_xml(parent_element, "exception", exception)
 
     def _pretty_print_xml(self, xml_string: str) -> str:
-        """Pretty-prints the XML string.
-
-        Args:
-        ----
-            xml_string (str): The raw XML string.
-
-        Returns:
-        -------
-            str: The pretty-printed XML string.
-
-        """
-        dom = minidom.parseString(xml_string)  # nosec B318
-        return dom.toprettyxml(indent="  ", newl="\n").split("?>", 1)[-1].strip()
+        """Retain public utility method for existing callers."""
+        if (
+            len(xml_string) > self.options["MAX_EVENT_BYTES"]
+            or len(xml_string.encode("utf-8")) > self.options["MAX_EVENT_BYTES"]
+        ):
+            raise ValueError("XML exceeds MAX_EVENT_BYTES")
+        if "<!DOCTYPE" in xml_string.upper() or "<!ENTITY" in xml_string.upper():
+            raise ValueError("XML declarations are not supported")
+        root = ET.fromstring(
+            xml_string
+        )  # nosec B314: bounded input, DTD and entities rejected above.
+        ET.indent(root, space="  ")
+        return ET.tostring(root, encoding="unicode")
