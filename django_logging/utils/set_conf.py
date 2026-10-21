@@ -2,7 +2,6 @@ import os
 
 from django.core.exceptions import ImproperlyConfigured
 
-from django_logging.constants.ansi_colors import AnsiColors
 from django_logging.constants.config_types import (
     ExtraLogFiles,
     FormatOption,
@@ -18,6 +17,7 @@ from django_logging.constants.config_types import (
 )
 from django_logging.settings.conf import LogConfig, LogManager
 from django_logging.utils.get_conf import (
+    get_logging_setup_mode,
     is_auto_initialization_enabled,
     is_initialization_message_enabled,
 )
@@ -39,12 +39,15 @@ def set_config(
     log_email_notifier_log_format: FormatOption,
     log_rotation: LogRotationConfig = None,
     log_rotation_overrides: LogRotationOverrides = None,
+    structured_logging: dict = None,
+    components: dict = None,
 ) -> None:
     """Sets up the logging configuration based on the provided parameters.
 
-    This function initializes and configures logging for the application,
-    including file-based logging, console output, and optional email notifications.
-    It will skip configuration if automatic initialization is disabled.
+    Auto initialization is enabled by default in additive mode, which installs
+    package-owned file handlers without replacing application logging.
+    Global/root replacement requires explicit LOGGING_SETUP_MODE=replace_root.
+    Invalid configurations raise before handlers are installed.
 
     Args:
         log_levels (LogLevels): A list specifying the log levels for different handlers.
@@ -61,56 +64,52 @@ def set_config(
         log_email_notifier_log_format (FormatOption): Email log message format.
         log_rotation (LogRotationConfig): Global rotation defaults.
         log_rotation_overrides (LogRotationOverrides): Per-level rotation overrides.
+        structured_logging (dict): Structured serialization limits and redaction options.
+        components (dict): Explicit formatter, filter, handler, and logger extensions.
 
     Raises:
         ValueError: If invalid log configuration parameters are provided.
-        ImproperlyConfigured: If the configuration is not set up correctly.
-        AttributeError: If an attribute-related error occurs during setup.
+        ImproperlyConfigured: If the setup mode is invalid.
 
     """
-    if not is_auto_initialization_enabled():
+    enabled = is_auto_initialization_enabled()
+    if not isinstance(enabled, bool):
+        raise ImproperlyConfigured(
+            "DJANGO_LOGGING['AUTO_INITIALIZATION_ENABLE'] must be a boolean."
+        )
+    if not enabled:
         return
 
-    try:
-        log_config = LogConfig(
-            log_levels,
-            log_dir,
-            log_file_formats,
-            log_file_format_types,
-            extra_log_files,
-            console_level,
-            console_format,
-            colorize_console,
-            log_date_format,
-            log_email_notifier_enable,
-            log_email_notifier_log_levels,
-            log_email_notifier_log_format,
-            log_rotation=log_rotation,
-            log_rotation_overrides=log_rotation_overrides,
+    # Validate before any filesystem or process-global logging mutation.
+    mode = get_logging_setup_mode()
+    if mode not in {"additive", "isolated", "replace_root"}:
+        raise ImproperlyConfigured(
+            "DJANGO_LOGGING['LOGGING_SETUP_MODE'] must be 'additive', 'isolated', or 'replace_root'."
         )
-
-        log_manager = LogManager(log_config)
-        log_manager.create_log_files()
-        log_manager.set_conf()
-    except (ValueError, ImproperlyConfigured, AttributeError, FileNotFoundError):
-        import logging
-
-        colors = AnsiColors()
-
-        logging.warning(
-            "\n"
-            "========================%sDJANGO LOGGING%s"
-            "========================\n"
-            "%s[CONFIGURATION ERROR]%s"
-            " A configuration issue has been detected.\n"
-            "System checks will be run to provide more detailed information.\n"
-            "==============================================================\n",
-            colors.RED_BACKGROUND,
-            colors.RESET,
-            colors.RED,
-            colors.RESET,
-        )
-        return
+    log_config = LogConfig(
+        log_levels,
+        log_dir,
+        log_file_formats,
+        log_file_format_types,
+        extra_log_files,
+        console_level,
+        console_format,
+        colorize_console,
+        log_date_format,
+        log_email_notifier_enable,
+        log_email_notifier_log_levels,
+        log_email_notifier_log_format,
+        log_rotation=log_rotation,
+        log_rotation_overrides=log_rotation_overrides,
+        structured_logging=structured_logging,
+        components=components,
+    )
+    log_manager = LogManager(log_config)
+    # Validate the entire component graph before touching the filesystem.
+    log_manager.build_logging_dict()
+    log_manager.create_log_files()
+    # 'replace_root' retains the old behavior only on explicit request.
+    log_manager.set_conf(mode=mode)
 
     if os.environ.get("RUN_MAIN") == "true":
         if is_initialization_message_enabled():
