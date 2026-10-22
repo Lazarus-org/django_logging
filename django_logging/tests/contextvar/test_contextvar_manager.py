@@ -104,3 +104,29 @@ class TestContextVarManager:
 
         context_vars = self.manager.get_contextvars()
         assert "user_id" not in context_vars
+
+
+def test_lookup_ignores_unrelated_context_variables(monkeypatch) -> None:
+    """Retrieval must inspect only keys registered by this manager."""
+    import contextvars
+
+    manager = ContextVarManager()
+    manager.bind(request_id="req-1", tenant_id="tenant-1")
+    unrelated = contextvars.ContextVar("tracing_context", default=None)
+    unrelated.set({"trace_id": "trace-1"})
+
+    def forbidden_copy_context():
+        raise AssertionError("get_contextvars must not copy the whole context")
+
+    monkeypatch.setattr(contextvars, "copy_context", forbidden_copy_context)
+    assert manager.get_contextvars() == {
+        "request_id": "req-1",
+        "tenant_id": "tenant-1",
+    }
+
+
+def test_lookup_skips_registered_but_unbound_variables() -> None:
+    manager = ContextVarManager()
+    tokens = manager.batch_bind(request_id="req-1", tenant_id="tenant-1")
+    manager.reset(tokens)
+    assert manager.get_contextvars() == {}

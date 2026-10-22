@@ -2,6 +2,8 @@ import contextvars
 from contextlib import contextmanager
 from typing import Any, Dict, Generator
 
+_UNSET = object()
+
 
 class ContextVarManager:
     """A manager for handling context variables in a Django logging
@@ -107,10 +109,17 @@ class ContextVarManager:
 
         """
         rv = {}
-        ctx = contextvars.copy_context()
-        for k in ctx:
-            if k.name.startswith(self.DJANGO_LOGGING_PREFIX) and ctx[k] is not Ellipsis:
-                rv[k.name[len(self.DJANGO_LOGGING_PREFIX) :]] = ctx[k]
+        prefix_length = len(self.DJANGO_LOGGING_PREFIX)
+        # Read only variables owned by this manager. Iterating copy_context()
+        # walks every ContextVar active in the execution context, including
+        # variables registered by unrelated libraries (tracing, telemetry,
+        # database drivers, etc.). Direct reads make the cost proportional to
+        # dj-logging's registered keys instead of the whole application context.
+        for full_key, var in self._context_vars.items():
+            value = var.get(_UNSET)
+            if value is _UNSET or value is Ellipsis:
+                continue
+            rv[full_key[prefix_length:]] = value
         return rv
 
     def merge_contexts(
