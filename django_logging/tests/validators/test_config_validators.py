@@ -94,9 +94,11 @@ class TestConfigValidator:
         """
         file_path = "path/to/file.txt"
 
-        with patch("os.path.isdir") as mock_isdir, patch(
-            "os.path.isfile"
-        ) as mock_isfile, patch("os.path.exists") as mock_exists:
+        with (
+            patch("os.path.isdir") as mock_isdir,
+            patch("os.path.isfile") as mock_isfile,
+            patch("os.path.exists") as mock_exists,
+        ):
             # Simulate that the path is a file, not a directory
             mock_isdir.return_value = False
             mock_isfile.return_value = True
@@ -398,8 +400,10 @@ class TestConfigValidator:
             - Errors are returned when format types are not a dictionary.
         """
         errors = validate_log_file_format_types(
-            "INVALID_TYPE", "log_file_format_types",  # type: ignore
-            ["DEBUG", "INFO"], ["JSON", "XML"]
+            "INVALID_TYPE",
+            "log_file_format_types",  # type: ignore
+            ["DEBUG", "INFO"],
+            ["JSON", "XML"],
         )
         assert len(errors) == 1
         assert errors[0].id == "django_logging.E022_log_file_format_types"

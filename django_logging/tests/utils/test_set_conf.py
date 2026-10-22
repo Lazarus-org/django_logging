@@ -4,7 +4,6 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from django_logging.constants.ansi_colors import AnsiColors
 from django_logging.tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
 from django_logging.utils.set_conf import set_config
 
@@ -108,6 +107,8 @@ class TestSetConf:
             1,
             log_rotation=None,
             log_rotation_overrides=None,
+            structured_logging=None,
+            components=None,
         )
         mock_LogManager.assert_called_once_with(mock_LogConfig.return_value)
 
@@ -190,27 +191,11 @@ class TestSetConf:
         mock_LogManager: MagicMock,
         mock_LogConfig: MagicMock,
     ) -> None:
-        """
-        Test that set_config handles exceptions and logs a warning message.
-
-        This test verifies that if an exception occurs during the instantiation of
-        `LogManager`, a warning message is logged indicating a configuration error.
-
-        Mocks:
-        ------
-        - `django_logging.utils.set_conf.is_auto_initialization_enabled` to return True.
-        - `django_logging.utils.set_conf.LogManager` to raise a ValueError.
-        - `logging.warning` to capture the warning message.
-
-        Asserts:
-        -------
-        - A warning message indicating a configuration error is logged.
-        """
-        colors = AnsiColors()
+        """Startup must not disguise an invalid configuration as a warning."""
         mock_is_auto_initialization_enabled.return_value = True
         mock_LogManager.side_effect = ValueError("Invalid configuration")
 
-        with patch("logging.warning") as mock_warning:
+        with pytest.raises(ValueError, match="Invalid configuration"):
             set_config(
                 ["DEBUG", "INFO"],
                 "/path/to/logs",
@@ -224,19 +209,6 @@ class TestSetConf:
                 False,
                 ["ERROR"],
                 1,
-            )
-            mock_warning.assert_called_once_with(
-                "\n"
-                "========================%sDJANGO LOGGING%s"
-                "========================\n"
-                "%s[CONFIGURATION ERROR]%s"
-                " A configuration issue has been detected.\n"
-                "System checks will be run to provide more detailed information.\n"
-                "==============================================================\n",
-                colors.RED_BACKGROUND,
-                colors.RESET,
-                colors.RED,
-                colors.RESET,
             )
 
 

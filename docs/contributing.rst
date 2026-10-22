@@ -57,6 +57,14 @@ We use ``pytest`` for running tests. Before submitting your changes, ensure that
 
 If you’re adding a new feature or fixing a bug, don’t forget to write tests to cover your changes.
 
+Build the Sphinx documentation before submitting documentation changes:
+
+.. code-block:: bash
+
+    poetry run sphinx-build -b html -W --keep-going docs docs/_build/html
+
+The documentation build is also checked in CI.
+
 Code Style Guidelines
 ----------------------
 

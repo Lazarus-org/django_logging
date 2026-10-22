@@ -1,174 +1,100 @@
+"""Regression tests for temporary isolated package-logger setup."""
+
 import logging
-import sys
 from unittest import mock
 
 import pytest
 
-from django_logging.tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
-from django_logging.utils.context_manager import _restore_logging_config, config_setup
-
-pytestmark = [
-    pytest.mark.utils,
-    pytest.mark.utils_context_manager,
-    pytest.mark.skipif(sys.version_info < PYTHON_VERSION, reason=PYTHON_VERSION_REASON),
-]
+from django_logging.utils.context_manager import config_setup
 
 
-class TestContextManager:
+@pytest.fixture
+def saved_logging():
+    root = logging.getLogger()
+    package = logging.getLogger("django_logging")
+    old_root = (list(root.handlers), root.level, root.propagate)
+    old_package = (list(package.handlers), package.level, package.propagate)
+    for handler in list(package.handlers):
+        if getattr(handler, "_dj_logging_owned", False):
+            package.removeHandler(handler)
+    yield root, package
+    for handler in list(package.handlers):
+        if handler not in old_package[0]:
+            package.removeHandler(handler)
+            handler.close()
+    for handler in old_package[0]:
+        if handler not in package.handlers:
+            package.addHandler(handler)
+    package.setLevel(old_package[1])
+    package.propagate = old_package[2]
+    for handler in list(root.handlers):
+        if handler not in old_root[0]:
+            root.removeHandler(handler)
+    for handler in old_root[0]:
+        if handler not in root.handlers:
+            root.addHandler(handler)
+    root.setLevel(old_root[1])
+    root.propagate = old_root[2]
 
-    def test_config_setup_auto_initialization_enabled(self) -> None:
-        """
-        Test that ValueError is raised when auto-initialization is enabled.
 
-        This test verifies that if auto-initialization is enabled in the configuration,
-        the `config_setup` context manager raises a ValueError with the appropriate message.
+def test_config_setup_requires_auto_init_disabled():
+    with mock.patch(
+        "django_logging.utils.context_manager.is_auto_initialization_enabled",
+        return_value=True,
+    ):
+        with pytest.raises(ValueError, match="AUTO_INITIALIZATION_ENABLE"):
+            with config_setup():
+                pass
 
-        Asserts:
-        -------
-        - A ValueError is raised with the message indicating that `AUTO_INITIALIZATION_ENABLE`
-          must be set to False.
-        """
-        with mock.patch(
-            "django_logging.utils.context_manager.is_auto_initialization_enabled",
-            return_value=True,
-        ):
-            with pytest.raises(ValueError) as excinfo:
-                # fmt: off
-                with config_setup(): ""
-                # fmt: on
 
-            assert (
-                str(excinfo.value)
-                == "you most set 'AUTO_INITIALIZATION_ENABLE' to False in DJANGO_LOGGING in your settings"
-            )
+def test_config_setup_restores_only_package_logger(saved_logging, tmp_path):
+    root, package = saved_logging
+    sentinel = logging.NullHandler()
+    root.addHandler(sentinel)
+    pkg_sentinel = logging.NullHandler()
+    package.addHandler(pkg_sentinel)
+    root_before = list(root.handlers)
+    package_before = list(package.handlers)
+    level_before, propagate_before = package.level, package.propagate
+    from django_logging.tests.settings.test_logging_isolation import config_for
 
-    def test_config_setup_applies_custom_config(
-        self, mock_logger: logging.Logger
-    ) -> None:
-        """
-        Test that the custom logging configuration is applied.
-
-        This test checks that when auto-initialization is disabled, the `config_setup` context manager
-        correctly applies custom logging configurations obtained from `get_config`. It verifies that
-        the `LogManager` is used, and its methods for creating log files and setting the configuration
-        are called.
-
-        Mocks:
-        ------
-        - `django_logging.utils.context_manager.is_auto_initialization_enabled` to simulate disabled auto-initialization.
-        - `django_logging.utils.context_manager.get_config` to provide custom configuration values.
-        - `django_logging.utils.context_manager.LogManager` to check interaction with the log manager.
-
-        Asserts:
-        -------
-        - The `LogManager` instance returned by `config_setup` matches the mocked instance.
-        - The `create_log_files` and `set_conf` methods of the `LogManager` are called.
-        """
-        with mock.patch(
+    conf = config_for(tmp_path)
+    with (
+        mock.patch(
             "django_logging.utils.context_manager.is_auto_initialization_enabled",
             return_value=False,
-        ):
-            with mock.patch(
-                "django_logging.utils.context_manager.get_config",
-                return_value={
-                    "log_levels": ["INFO"],
-                    "log_dir": "/tmp/logs",
-                    "log_file_formats": {"INFO": 1},
-                    "log_file_format_types": {"INFO": "normal"},
-                    "extra_log_files": {"INFO": False},
-                    "console_level": "DEBUG",
-                    "console_format": 2,
-                    "colorize_console": False,
-                    "log_date_format": "",
-                    "log_email_notifier_enable": False,
-                    "log_email_notifier_log_levels": [],
-                    "log_email_notifier_log_format": 1,
-                },
-            ):
-                with mock.patch(
-                    "django_logging.utils.context_manager.LogManager"
-                ) as MockLogManager:
-                    mock_log_manager = MockLogManager.return_value
+        ),
+        mock.patch(
+            "django_logging.utils.context_manager.get_config", return_value=conf
+        ),
+    ):
+        with config_setup() as manager:
+            assert manager is not None
+            assert len(package.handlers) > len(package_before)
+            assert list(root.handlers) == root_before
+            assert package.propagate is False
+        assert list(root.handlers) == root_before
+        assert list(package.handlers) == package_before
+        assert package.level == level_before
+        assert package.propagate == propagate_before
 
-                    with config_setup() as log_manager:
-                        assert log_manager is mock_log_manager
-                        mock_log_manager.create_log_files.assert_called_once()
-                        mock_log_manager.set_conf.assert_called_once()
 
-    def test_config_context_restores_original_config(
-        self, mock_logger: logging.Logger
-    ) -> None:
-        """
-        Test that the original logging configuration is restored after context exit.
+def test_config_setup_restores_after_error(saved_logging, tmp_path):
+    root, package = saved_logging
+    before = list(package.handlers), package.level, package.propagate
+    from django_logging.tests.settings.test_logging_isolation import config_for
 
-        This test verifies that the `config_setup` context manager correctly restores the original
-        logging configuration after exiting the context. It checks that the logger's original settings
-        (config, level, handlers) are restored as they were before the context was entered.
-
-        Mocks:
-        ------
-        - `django_logging.utils.context_manager.is_auto_initialization_enabled` to simulate disabled auto-initialization.
-        - `django_logging.utils.context_manager.get_config` to provide custom configuration values.
-        - `django_logging.utils.context_manager.LogManager` to avoid actual log manager interaction.
-
-        Asserts:
-        -------
-        - The logger's configuration, level, and handlers are restored to their original state.
-        """
-        original_config = mock_logger.manager.loggerDict
-        original_level = mock_logger.level
-        original_handlers = mock_logger.handlers
-
-        with mock.patch(
+    with (
+        mock.patch(
             "django_logging.utils.context_manager.is_auto_initialization_enabled",
             return_value=False,
-        ):
-            with mock.patch(
-                "django_logging.utils.context_manager.get_config",
-                return_value={
-                    "log_levels": ["INFO"],
-                    "log_dir": "/tmp/logs",
-                    "log_file_formats": {"INFO": 1},
-                    "log_file_format_types": {"INFO": "normal"},
-                    "extra_log_files": {"INFO": False},
-                    "console_level": "DEBUG",
-                    "console_format": 2,
-                    "colorize_console": False,
-                    "log_date_format": "",
-                    "log_email_notifier_enable": False,
-                    "log_email_notifier_log_levels": [],
-                    "log_email_notifier_log_format": 1,
-                },
-            ):
-                with mock.patch("django_logging.utils.context_manager.LogManager"):
-                    with config_setup():
-                        mock_logger.level = logging.ERROR
-                        mock_logger.handlers.append(logging.NullHandler())
-
-                    assert mock_logger.manager.loggerDict == original_config
-                    assert mock_logger.level == original_level
-                    assert mock_logger.handlers == original_handlers
-
-    def test_restore_logging_config(self, mock_logger: logging.Logger) -> None:
-        """
-        Test the _restore_logging_config helper function.
-
-        This test checks that the `_restore_logging_config` function correctly restores the logger's
-        original configuration, level, and handlers. It verifies that after calling `_restore_logging_config`,
-        the logger is returned to its initial state.
-
-        Asserts:
-        -------
-        - The logger's configuration, level, and handlers match the original values provided to the function.
-        """
-        original_config = mock_logger.manager.loggerDict
-        original_level = mock_logger.level
-        original_handlers = mock_logger.handlers
-
-        _restore_logging_config(
-            mock_logger, original_config, original_level, original_handlers
-        )
-
-        assert mock_logger.manager.loggerDict == original_config
-        assert mock_logger.level == original_level
-        assert mock_logger.handlers == original_handlers
+        ),
+        mock.patch(
+            "django_logging.utils.context_manager.get_config",
+            return_value=config_for(tmp_path),
+        ),
+    ):
+        with pytest.raises(RuntimeError, match="simulated"):
+            with config_setup():
+                raise RuntimeError("simulated")
+    assert (list(package.handlers), package.level, package.propagate) == before

@@ -79,4 +79,3 @@ def log_dir_with_rotated_files(tmp_path):
     (log_dir / "error.log.1.gz").write_bytes(b"\x1f\x8b" + b"\x00" * 10)  # fake gzip
 
     return str(log_dir)
-

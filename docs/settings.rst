@@ -1,18 +1,50 @@
 Settings
 ========
 
-By default, `django_logging` uses a built-in configuration that requires no additional setup. However, you can customize the logging settings by adding the ``DJANGO_LOGGING`` dictionary configuration to your Django ``settings`` file.
+All package configuration lives in Django's ``DJANGO_LOGGING`` dictionary.
+``dj-logging`` automatically initializes when ``django_logging`` is in
+``INSTALLED_APPS`` unless ``AUTO_INITIALIZATION_ENABLE`` is set to ``False``.
+
+Initialization modes
+--------------------
+
+``AUTO_INITIALIZATION_ENABLE`` defaults to ``True``. ``LOGGING_SETUP_MODE``
+selects how package-owned handlers are attached:
+
+* ``"additive"`` (default): attaches package-owned file and enabled email
+  handlers to the root logger while preserving existing root handlers, the root
+  level, and unrelated logger configuration. The package's own
+  ``django_logging`` namespace also receives package handlers. The built-in
+  console handler is not added to root automatically, avoiding a duplicate
+  console stream.
+* ``"isolated"``: configures the ``django_logging`` namespace only. Other
+  application loggers do not automatically write to the package's files.
+* ``"replace_root"``: explicitly opts into the legacy global
+  ``logging.config.dictConfig`` setup. Use this only when you intend the package
+  to manage the root logging configuration.
+
+With ``"additive"``, an application record must reach the root logger to be
+handled by the package's root-attached handlers. Logger levels, filters, and
+``propagate=False`` routes still apply. For example, an application logger that
+inherits a root ``WARNING`` level will not create an ``INFO`` record unless its
+own effective level is configured accordingly. ``AUTO_INITIALIZATION_ENABLE=False``
+leaves logging setup to the application or to explicit manual setup.
 
 Default configuration
 ---------------------
+
+The following shows the main options. Nested dictionaries can be omitted; their
+defaults are applied by the package.
 
 .. code-block:: python
 
     DJANGO_LOGGING = {
         "AUTO_INITIALIZATION_ENABLE": True,
+        "LOGGING_SETUP_MODE": "additive",
         "INITIALIZATION_MESSAGE_ENABLE": True,
         "INCLUDE_LOG_iBOARD": False,
         "LOG_SQL_QUERIES_ENABLE": False,
+        "LOG_SIZE_AUDIT_IN_REQUEST": False,
         "LOG_FILE_LEVELS": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
         "LOG_DIR": "logs",
         "LOG_DIR_SIZE_LIMIT": 1024,  # MB
@@ -30,7 +62,7 @@ Default configuration
             "ERROR": "normal",
             "CRITICAL": "normal",
         },
-        "EXTRA_LOG_FILES": {  # for extra formats (JSON, XML)
+        "EXTRA_LOG_FILES": {
             "DEBUG": False,
             "INFO": False,
             "WARNING": False,
@@ -47,249 +79,288 @@ Default configuration
             "NOTIFY_CRITICAL": False,
             "LOG_FORMAT": 1,
             "USE_TEMPLATE": True,
+            "MAX_CONCURRENT": 4,
+            "SMTP_TIMEOUT": 10,
         },
-        # Rotation — all keys are optional; defaults shown below
         "LOG_ROTATION": {
-            "TYPE": "none",  # "none" | "size" | "time"
-            "MAX_BYTES": 10485760,  # 10 MB, used when TYPE="size"
+            "TYPE": "none",
+            "MAX_BYTES": 10485760,
             "BACKUP_COUNT": 5,
-            "WHEN": "midnight",  # used when TYPE="time"
+            "WHEN": "midnight",
             "INTERVAL": 1,
             "COMPRESS": False,
         },
         "LOG_ROTATION_OVERRIDES": {},
+        "REQUEST_LOGGING": {},
+        "STRUCTURED_LOGGING": {},
+        "COMPONENTS": {},
     }
 
-Configuration Options
----------------------
-Here's a breakdown of the available configuration options:
+Core settings
+-------------
 
 ``AUTO_INITIALIZATION_ENABLE``
-------------------------------
+    Boolean, default ``True``. Enable or disable automatic initialization from
+    the Django app configuration.
 
-- **Type**: ``bool``
-- **Description**: Enables automatic initialization of logging configurations. Defaults to ``True``.
+``LOGGING_SETUP_MODE``
+    String, default ``"additive"``. Choices are ``"additive"``, ``"isolated"``
+    and ``"replace_root"``. See `Initialization modes`_ above.
 
 ``INITIALIZATION_MESSAGE_ENABLE``
----------------------------------
-
-- **Type**: ``bool``
-- **Description**: Enables logging of the initialization message when logging starts. Defaults to ``True``.
-
-``INCLUDE_LOG_iBOARD``
-----------------------
-
-- **Type**: ``bool``
-- **Description**: Makes LogiBoard url accessible in the project. Defaults to ``False``. For setting up the LogiBoard, please refer to the :doc:`LogiBoard Integration <log_iboard>`.
-
-``LOG_SQL_QUERIES_ENABLE``
---------------------------
-
-- **Type**: ``bool``
-- **Description**: Enables logging of SQL queries within ``RequestLogMiddleware`` logs. Defaults to ``False``. When enabled, SQL queries executed in each request will be included in the log output.
-
-``LOG_FILE_LEVELS``
--------------------
-
-- **Type**: ``list[str]``
-- **Description**: Specifies which log levels should be captured in log files. Defaults to ``["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]``.
+    Boolean, default ``True``. Emit the package's startup summary.
 
 ``LOG_DIR``
------------
+    String, default ``"logs"``. Directory where the package's log files are
+    created. Ensure the process has permission to write to it.
 
-- **Type**: ``str``
-- **Description**: Specifies the directory where log files will be stored. Defaults to ``"logs"``.
-
-``LOG_DIR_SIZE_LIMIT``
-----------------------
-
-- **Type**: ``int``
-- **Description**: Specifies the maximum allowed size of the log directory in megabytes (MB). If the directory exceeds this limit and ``MonitorLogSizeMiddleware`` is enabled, a warning email will be sent to the admin weekly. Defaults to ``1024 MB`` (1 GB).
+``LOG_FILE_LEVELS``
+    List of logging levels. Defaults to ``DEBUG``, ``INFO``, ``WARNING``,
+    ``ERROR`` and ``CRITICAL``. Each enabled level receives a file handler.
 
 ``LOG_FILE_FORMATS``
---------------------
-
-- **Type**: ``dict[str, int | str]``
-- **Description**: Maps each log level to its corresponding log format. The format can be an ``int`` representing predefined formats or a custom ``str`` format.
-- **Default**: Format ``1`` for all levels.
+    Mapping of level names to either one of the integer format choices listed in
+    `Available format options`_ or a custom standard logging format string.
 
 ``LOG_FILE_FORMAT_TYPES``
--------------------------
-
-- **Type**: ``dict[str, str]``
-- **Description**: Defines the format type (e.g., ``normal``, ``JSON``, ``XML``, ``FLAT``) for each log level. The keys are log levels, and the values are the format types.
-
-    - **Format Types**:
-
-      - ``normal``: Standard text log.
-      - ``JSON``: Structured logs in JSON format.
-      - ``XML``: Structured logs in XML format.
-      - ``FLAT``: Logs with flat format.
+    Mapping of levels to ``normal``, ``JSON``, ``XML`` or ``FLAT``. The default
+    is ``normal`` for every level. JSON/XML/FLAT use the package's structured
+    formatters and ``STRUCTURED_LOGGING`` settings.
 
 ``EXTRA_LOG_FILES``
--------------------
-
-- **Type**: ``dict[str, bool]``
-- **Description**: Determines whether separate log files for ``JSON`` or ``XML`` formats should be created for each log level. When set to ``True`` for a specific level, a dedicated directory (e.g., ``logs/json`` or ``logs/xml``) will be created with files like ``info.json`` or ``info.xml``. If ``False``, JSON and XML logs will be written to ``.log`` files.
-- **Default**: ``False`` for all levels.
+    Mapping of levels to booleans, default ``False``. For JSON and XML levels,
+    ``True`` writes to a dedicated ``logs/json`` or ``logs/xml`` subdirectory
+    instead of a ``.log`` file. This option does not create a separate FLAT
+    directory.
 
 ``LOG_CONSOLE_LEVEL``
----------------------
-
-- **Type**: ``str``
-- **Description**: Specifies the log level for console output. Defaults to ``"DEBUG"``.
+    Console handler level, default ``"DEBUG"``. The package's console handler
+    belongs to the ``django_logging`` namespace by default; additive setup does
+    not add another console handler to root.
 
 ``LOG_CONSOLE_FORMAT``
-----------------------
-
-- **Type**: ``int | str``
-- **Description**: Specifies the format for console logs, similar to ``LOG_FILE_FORMATS``. Defaults to format ``1``.
+    Integer format choice or custom logging format string, default ``1``.
 
 ``LOG_CONSOLE_COLORIZE``
-------------------------
-
-- **Type**: ``bool``
-- **Description**: Determines whether console output should be colorized. Defaults to ``True``.
+    Boolean, default ``True``. Enables the package's colored console formatter.
 
 ``LOG_DATE_FORMAT``
+    Date format passed to standard logging formatters, default
+    ``"%Y-%m-%d %H:%M:%S"``.
+
+``LOG_DIR_SIZE_LIMIT``
+    Integer megabyte threshold used by the ``logs_size_audit`` management
+    command, default ``1024`` (1 GiB when interpreted in binary units). Schedule
+    the command outside HTTP requests; see :doc:`usage`.
+
+``LOG_SQL_QUERIES_ENABLE``
+    Boolean, default ``False``. Allows ``RequestLogMiddleware`` to include
+    bounded SQL diagnostics when request logging is enabled. SQL capture follows
+    Django's own query-capture behavior; this option does not enable ``DEBUG``
+    or force database query capture on.
+
+``LOG_SIZE_AUDIT_IN_REQUEST``
+    Boolean, default ``False``. Explicitly opts into the legacy behavior where
+    ``MonitorLogSizeMiddleware`` may run the filesystem audit during a request.
+    Prefer scheduling ``python manage.py logs_size_audit`` externally.
+
+``INCLUDE_LOG_iBOARD``
+    Boolean, default ``False``. Enables the optional LogiBoard URL integration;
+    see :doc:`log_iboard`.
+
+.. _structured-logging:
+
+Structured logging
+------------------
+
+``STRUCTURED_LOGGING`` controls the JSON, XML and FLAT formatters. All options
+are optional and validated; unknown keys or invalid values fail configuration
+validation.
+
+* ``REDACT_FIELDS``: extra field names to redact, case-insensitively; default
+  empty. Built-in sensitive-name matching is always applied to structured
+  values (for example password, token, authorization, cookie, session, API key,
+  email and phone fields).
+* ``MAX_DEPTH``: maximum nested collection depth; default ``8``, allowed
+  ``1``–``32``.
+* ``MAX_ITEMS``: maximum items per collection; default ``100``, allowed
+  ``1``–``1000``.
+* ``MAX_STRING_LENGTH``: maximum string length; default ``4096``, allowed
+  ``1``–``1048576``.
+* ``MAX_EVENT_BYTES``: maximum serialized event size; default ``65536``,
+  allowed ``96``–``1048576`` bytes.
+* ``MAX_EXCEPTION_FRAMES``: maximum traceback frames to include; default ``32``,
+  allowed ``1``–``128``.
+* ``INCLUDE_EXTRA``: include structured fields supplied through Python logging's
+  ``extra={...}``; default ``True``.
+* ``EXCEPTION_MODE``: ``"traceback"`` (default), ``"type"`` or ``"omit"``.
+* ``JSON_COMPACT``: compact one-event-per-line JSON when ``True``; default
+  ``True``.
+* ``XML_PRETTY``: pretty-print XML when ``True``; default ``True``.
+
+Example:
+
+.. code-block:: python
+
+    DJANGO_LOGGING = {
+        "LOG_FILE_FORMAT_TYPES": {"INFO": "JSON", "ERROR": "JSON"},
+        "STRUCTURED_LOGGING": {
+            "REDACT_FIELDS": ["customer_reference"],
+            "MAX_DEPTH": 8,
+            "MAX_ITEMS": 100,
+            "MAX_STRING_LENGTH": 4096,
+            "MAX_EVENT_BYTES": 65536,
+            "MAX_EXCEPTION_FRAMES": 32,
+            "INCLUDE_EXTRA": True,
+            "EXCEPTION_MODE": "traceback",
+            "JSON_COMPACT": True,
+            "XML_PRETTY": True,
+        },
+    }
+
+Use ``logger.info("Order processed", extra={"order_id": 42})`` to emit
+structured attributes. JSON no longer parses or removes ``key=value`` fragments
+from the original message. Redaction applies to structured fields, not
+arbitrary secrets embedded in message strings, SQL text or tracebacks. Avoid
+logging credentials and raw request data.
+
+.. _request-logging:
+
+Request logging
+---------------
+
+``REQUEST_LOGGING`` configures ``django_logging.middleware.RequestLogMiddleware``.
+All options are optional; defaults are merged automatically. The middleware
+supports sync/async views, isolates request-local state, and normally emits one
+completion event at INFO level. It does not inspect ordinary response bodies.
+
+* ``LOG_REQUEST_STARTED``: boolean, default ``False``.
+* ``LOG_REQUEST_FINISHED``: boolean, default ``True``; completion event includes
+  method, bounded path, already-resolved user ID (or ``Anonymous``), status,
+  content type and response-object latency in milliseconds.
+* ``LOG_USER_AGENT``: boolean, default ``True``; adds a sanitized, bounded user
+  agent to request context.
+* ``LOG_QUERY_PARAMS``: boolean, default ``False``; opt-in query-value diagnostics.
+* ``LOG_REQUEST_BODY``: boolean, default ``False``; opt-in JSON request-body
+  diagnostics for POST/PUT/PATCH requests with a declared bounded content length.
+* ``LOG_ERROR_RESPONSE``: boolean, default ``False``; opt-in bounded JSON error
+  response diagnostics for status codes >= 400.
+* ``LOG_STREAMING_EVENTS``: boolean, default ``False``; controls additional
+  stream started/finished/closed/cancelled messages. Context is still propagated
+  during iteration, and stream errors are still logged when this is disabled.
+* ``EXCLUDED_PATHS``: exact absolute paths excluded from value diagnostics.
+* ``EXCLUDED_PATH_PREFIXES``: absolute path prefixes excluded from value
+  diagnostics. Use these for credential-handling endpoints.
+* ``EXCLUDED_FIELDS``: extra sensitive field names to redact globally.
+* ``EXCLUDED_FIELDS_BY_PATH``: mapping of an exact absolute path to additional
+  field names to redact on that path.
+* ``MAX_QUERY_BYTES``: query-string byte limit, default ``4096``.
+* ``MAX_BODY_BYTES``: request-body byte limit, default ``2048``.
+* ``MAX_ERROR_BYTES``: error-response byte limit, default ``2048``.
+* ``MAX_SQL_BYTES``: SQL diagnostic byte limit, default ``4096``.
+* ``MAX_DIAGNOSTIC_DEPTH``: nested diagnostic depth, default ``8``, allowed
+  ``1``–``32``.
+* ``TRUSTED_PROXY_CIDRS``: list of trusted reverse-proxy peer CIDRs, default
+  empty. Only a valid ``X-Real-IP`` is considered when ``REMOTE_ADDR`` belongs
+  to one of these networks. ``X-Forwarded-For`` is never trusted by this helper.
+* ``MAX_REQUEST_ID_LENGTH``: maximum accepted incoming request ID length,
+  default ``80``, allowed ``1``–``128``. IDs must be ASCII alphanumeric or
+  contain ``-``, ``_`` or ``.``; invalid values are replaced by a UUID.
+
+The four byte limits accept integers from ``0`` to ``1048576``. A value of zero
+effectively prevents capture for that diagnostic. Boolean options must be actual
+booleans, and unknown keys fail Django system checks with
+``django_logging.E040_REQUEST_LOGGING``. Invalid middleware configuration raises
+``ImproperlyConfigured`` when the middleware is instantiated.
+
+Privacy notes: query/body/error/SQL value diagnostics are disabled by default,
+regardless of ``DEBUG``. Field-name redaction is best-effort; secrets can appear
+under unexpected names or in path segments. Excluded paths suppress value
+diagnostics but do not suppress the basic completion event. Do not enable raw SQL
+diagnostics for production traffic containing sensitive query values.
+
+Extensible components
+---------------------
+
+``COMPONENTS`` extends the built-in configuration with standard Python logging
+components. See :doc:`extensibility` for the full guide.
+
+* ``formatters``, ``filters``, ``handlers`` and ``loggers`` add named components.
+* ``replace`` replaces a named built-in preset, organized by component type.
+* ``disable`` removes named components, organized by component type.
+* ``root_handlers`` explicitly attaches listed handlers to root in additive mode.
+* ``package_handlers`` attaches listed handlers to the ``django_logging`` logger.
+
+Additions cannot silently reuse existing names. Use ``replace`` or ``disable``
+explicitly. Missing handler/formatter/filter references are configuration errors.
+Unattached custom components are not instantiated in additive/isolated modes;
+only components reachable from active routes and their handler dependencies are
+constructed. Import or constructor errors can still occur during activation.
+
+Rotation
+--------
+
+``LOG_ROTATION`` configures the built-in per-level file handlers. It does not
+restrict the handler types available through ``COMPONENTS``.
+
+* ``TYPE``: ``"none"`` (default), ``"size"``, ``"time"`` or ``"external"``.
+* ``MAX_BYTES``: positive integer, default ``10485760`` (10 MiB); used for
+  size-based rotation.
+* ``BACKUP_COUNT``: non-negative integer, default ``5``; zero keeps all backups.
+* ``WHEN``: timed rotation unit, default ``"midnight"``; accepted values are
+  ``"s"``, ``"m"``, ``"h"``, ``"d"``, ``"midnight"`` and ``"W0"``–``"W6"``.
+* ``INTERVAL``: positive integer, default ``1``.
+* ``COMPRESS``: boolean, default ``False``. When enabled for size/time rotation,
+  rotated files are gzip-compressed synchronously in the emitting process.
+
+``TYPE="external"`` uses POSIX ``WatchedFileHandler`` for an external rename/create
+rotator such as logrotate. ``COMPRESS`` must be ``False`` in this mode; let the
+external rotator handle compression. ``LOG_ROTATION_OVERRIDES`` maps individual
+levels to partial rotation dictionaries that override the global settings.
+
+**Gunicorn warning:** Standard size/time rotating handlers are not safe when
+multiple independent worker processes rotate the same file. ``WatchedFileHandler``
+detects file replacement but does not provide inter-process record locking. For
+multiprocess/container deployments, consider stdout/stderr collection or a
+carefully configured external rotator. The ``rotate_logs`` command operates on
+handlers in the current process only.
+
+.. _email-notifications:
+
+Email notifications
 -------------------
 
-- **Type**: ``str``
-- **Description**: Specifies the date format for log messages. Defaults to ``"%Y-%m-%d %H:%M:%S"``.
+``LOG_EMAIL_NOTIFIER`` defaults to disabled. Options:
 
-``LOG_EMAIL_NOTIFIER``
-----------------------
+* ``ENABLE``: boolean, default ``False``.
+* ``NOTIFY_ERROR``: boolean, default ``False``; enable the ERROR email handler.
+* ``NOTIFY_CRITICAL``: boolean, default ``False``; enable the CRITICAL email handler.
+* ``LOG_FORMAT``: integer format choice or custom format string, default ``1``.
+* ``USE_TEMPLATE``: boolean, default ``True``.
+* ``MAX_CONCURRENT``: integer ``1``–``64``, default ``4``; maximum in-flight SMTP
+  notification threads per process. Notifications over capacity are dropped
+  with a warning, not queued; delivery is not guaranteed.
+* ``SMTP_TIMEOUT``: integer seconds ``1``–``120``, default ``10``.
 
-- **Type**: ``dict``
-- **Description**: Configures the email notifier for sending log-related alerts.
+When email notifications are enabled, configure Django's ``EMAIL_HOST``,
+``EMAIL_PORT``, ``EMAIL_HOST_USER``, ``EMAIL_HOST_PASSWORD``, ``EMAIL_USE_TLS``,
+``DEFAULT_FROM_EMAIL`` and the package's ``ADMIN_EMAIL`` recipient setting.
 
-    - ``ENABLE``:
-      - **Type**: ``bool``
-      - **Description**: Enables or disables the email notifier. Defaults to ``False``.
-
-    - ``NOTIFY_ERROR``:
-      - **Type**: ``bool``
-      - **Description**: Sends an email notification for ``ERROR`` log level events. Defaults to ``False``.
-
-    - ``NOTIFY_CRITICAL``:
-      - **Type**: ``bool``
-      - **Description**: Sends an email notification for ``CRITICAL`` log level events. Defaults to ``False``.
-
-    - ``LOG_FORMAT``:
-      - **Type**: ``int | str``
-      - **Description**: Specifies the log format for email notifications. Defaults to format ``1``.
-
-    - ``USE_TEMPLATE``:
-      - **Type**: ``bool``
-      - **Description**: Determines whether the email should include an HTML template. Defaults to ``True``.
-
-``LOG_ROTATION``
-----------------
-
-- **Type**: ``dict``
-- **Description**: Controls how log files are rotated. By default no rotation is applied and a plain ``FileHandler`` is used. Setting ``TYPE`` to ``"size"`` or ``"time"`` switches the underlying handler automatically for every log level, with no other code changes required.
-
-    - ``TYPE``:
-      - **Type**: ``str``
-      - **Choices**: ``"none"``, ``"size"``, ``"time"``
-      - **Description**:
-
-        - ``"none"`` — No rotation. Plain ``logging.FileHandler`` (default).
-        - ``"size"`` — Rotate when a file reaches ``MAX_BYTES``. Uses ``RotatingFileHandler``.
-        - ``"time"`` — Rotate on a time schedule. Uses ``TimedRotatingFileHandler``.
-
-      - **Default**: ``"none"``
-
-    - ``MAX_BYTES``:
-      - **Type**: ``int``
-      - **Description**: Maximum file size in bytes before rotation. Only used when ``TYPE="size"``.
-      - **Default**: ``10485760`` (10 MB)
-
-    - ``BACKUP_COUNT``:
-      - **Type**: ``int``
-      - **Description**: Number of rotated backup files to keep. ``0`` means keep all rotated files indefinitely.
-      - **Default**: ``5``
-
-    - ``WHEN``:
-      - **Type**: ``str``
-      - **Description**: Time unit for timed rotation. Only used when ``TYPE="time"``. Accepted values: ``"s"``, ``"m"``, ``"h"``, ``"d"``, ``"midnight"``, ``"W0"``–``"W6"`` (Monday–Sunday).
-      - **Default**: ``"midnight"``
-
-    - ``INTERVAL``:
-      - **Type**: ``int``
-      - **Description**: Number of ``WHEN`` units between rotations. Only used when ``TYPE="time"``.
-      - **Default**: ``1``
-
-    - ``COMPRESS``:
-      - **Type**: ``bool``
-      - **Description**: When ``True``, each rotated file is gzip-compressed automatically (e.g., ``debug.log.1.gz``). Works with both ``"size"`` and ``"time"`` rotation types.
-      - **Default**: ``False``
-
-  **Example — size-based rotation with compression:**
-
-  .. code-block:: python
-
-   DJANGO_LOGGING = {
-       "LOG_ROTATION": {
-           "TYPE": "size",
-           "MAX_BYTES": 5_000_000,
-           "BACKUP_COUNT": 10,
-           "COMPRESS": True,
-       }
-   }
-
-  **Example — daily time-based rotation:**
-
-  .. code-block:: python
-
-    DJANGO_LOGGING = {
-        "LOG_ROTATION": {
-            "TYPE": "time",
-            "WHEN": "midnight",
-            "INTERVAL": 1,
-            "BACKUP_COUNT": 30,
-        }
-    }
-
-``LOG_ROTATION_OVERRIDES``
---------------------------
-
-- **Type**: ``dict[str, dict]``
-- **Description**: Per-level rotation overrides. Each key must be a valid log level (``"DEBUG"``, ``"INFO"``, ``"WARNING"``, ``"ERROR"``, ``"CRITICAL"``). The value is a partial ``LOG_ROTATION`` dict — only the keys you supply are changed; all other keys are inherited from the global ``LOG_ROTATION`` config.
-- **Default**: ``{}`` (no overrides)
-
-  **Example — ERROR and CRITICAL rotate daily while all other levels rotate by size:**
-
-  .. code-block:: python
-
-    DJANGO_LOGGING = {
-        "LOG_ROTATION": {
-            "TYPE": "size",
-            "MAX_BYTES": 5_000_000,
-            "BACKUP_COUNT": 5,
-        },
-        "LOG_ROTATION_OVERRIDES": {
-            "ERROR": {"TYPE": "time", "WHEN": "midnight", "BACKUP_COUNT": 30},
-            "CRITICAL": {"TYPE": "time", "WHEN": "midnight", "BACKUP_COUNT": 90},
-        },
-    }
-
-.. _available_format_options:
-
-Available Format Options
+Available format options
 ------------------------
 
-The `django_logging` package provides predefined log format options that you can use in configuration. These options can be applied to log formats. Below are the available format options:
+The integer values for ``LOG_FILE_FORMATS``, ``LOG_CONSOLE_FORMAT`` and
+``LOG_EMAIL_NOTIFIER["LOG_FORMAT"]`` refer to the following format strings.
 
 .. code-block:: python
 
     FORMAT_OPTIONS = {
         1: "%(levelname)s | %(asctime)s | %(module)s | %(message)s | %(context)s",
-        2: "%(levelname)s | %(asctime)s | %(context)s | %(message)s",
-        3: "%(levelname)s | %(context)s | %(message)s",
+        2: "%(levelname)s | %(asctime)s | %(context)s | %(message)s | %(exc_text)s",
+        3: "%(levelname)s | %(context)s | %(message)s | %(stack_info)s",
         4: "%(context)s | %(asctime)s - %(name)s - %(levelname)s - %(message)s",
         5: "%(levelname)s | %(message)s | %(context)s | [in %(pathname)s:%(lineno)d]",
-        6: "%(asctime)s | %(context)s | %(levelname)s | %(message)s",
+        6: "%(asctime)s | %(context)s | %(levelname)s | %(message)s | %(exc_info)s",
         7: "%(levelname)s | %(asctime)s | %(context)s | in %(module)s: %(message)s",
         8: "%(levelname)s | %(context)s | %(message)s | [%(filename)s:%(lineno)d]",
         9: "[%(asctime)s] | %(levelname)s | %(context)s | in %(module)s: %(message)s",
@@ -306,35 +377,11 @@ The `django_logging` package provides predefined log format options that you can
         20: "[%(asctime)s] | %(levelname)s | %(context)s | %(thread)d | %(message)s",
     }
 
-You can reference these formats by their corresponding **integer keys** in your logging configuration settings.
+Required Django email settings
+------------------------------
 
-
-Required Email Settings
------------------------
-
-To use the email notifier, the following email settings must be configured in your ``settings.py``:
-
-- ``EMAIL_HOST``: The host to use for sending emails.
-- ``EMAIL_PORT``: The port to use for the email server.
-- ``EMAIL_HOST_USER``: The username to use for the email server.
-- ``EMAIL_HOST_PASSWORD``: The password to use for the email server.
-- ``EMAIL_USE_TLS``: Whether to use a TLS (secure) connection when talking to the email server.
-- ``DEFAULT_FROM_EMAIL``: The default email address to use for sending emails.
-- ``ADMIN_EMAIL``: The email address where log notifications will be sent. This is the recipient address used by the email notifier to deliver the logs.
-
-Example Email Settings
-----------------------
-
-Below is an example configuration for the email settings in your ``settings.py``:
-
-.. code-block:: python
-
-   EMAIL_HOST = "smtp.example.com"
-   EMAIL_PORT = 587
-   EMAIL_HOST_USER = "your-email@example.com"
-   EMAIL_HOST_PASSWORD = "your-password"
-   EMAIL_USE_TLS = True
-   DEFAULT_FROM_EMAIL = "your-email@example.com"
-   ADMIN_EMAIL = "admin@example.com"
-
-These settings ensure that the email notifier is correctly configured to send log notifications to the specified ``ADMIN_EMAIL`` address.
+For the built-in email notifier, configure ``EMAIL_HOST``, ``EMAIL_PORT``,
+``EMAIL_HOST_USER``, ``EMAIL_HOST_PASSWORD``, ``EMAIL_USE_TLS`` and
+``DEFAULT_FROM_EMAIL``. The package also reads ``ADMIN_EMAIL`` as the recipient.
+Use environment variables or a secrets manager for credentials; do not commit
+SMTP passwords to source control.

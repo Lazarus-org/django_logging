@@ -7,8 +7,10 @@ from django.template import engines
 from django.utils.timezone import localtime
 
 from django_logging.middleware import RequestLogMiddleware
+from django_logging.settings.manager import SettingsManager
 from django_logging.utils.get_conf import use_email_notifier_template
 from django_logging.utils.log_email_notifier.notifier import send_email_async
+from django_logging.utils.request import get_ip_address as resolve_client_ip
 
 
 class EmailHandler(Handler):
@@ -89,9 +91,19 @@ class EmailHandler(Handler):
         django_engine = engines["django"]
         template = django_engine.get_template(template_path)
 
-        # Fetch IP address and user agent using middleware methods
+        # Fetch the verified client IP and browser metadata
         ip_address = (
-            RequestLogMiddleware.get_ip_address(request) if request else "Unknown"
+            (
+                resolve_client_ip(
+                    request,
+                    tuple(
+                        SettingsManager().request_logging.get("TRUSTED_PROXY_CIDRS", ())
+                    ),
+                )
+                or "Unknown"
+            )
+            if request
+            else "Unknown"
         )
         user_agent = (
             RequestLogMiddleware.get_user_agent(request) if request else "Unknown"

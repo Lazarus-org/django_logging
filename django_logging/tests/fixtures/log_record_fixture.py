@@ -43,6 +43,7 @@ def error_log_record() -> LogRecord:
         exc_info=None,
     )
 
+
 @pytest.fixture
 def error_with_exc_log_record() -> LogRecord:
     """

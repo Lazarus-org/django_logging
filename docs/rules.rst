@@ -1,80 +1,70 @@
-Roles
-=====
+Feature guide
+=============
 
-The `django_logging` package provides several logging roles to cater to different logging needs and contexts. These roles define specific behaviors and configurations, making it easier to manage logging in a Django application.
+This page summarizes the main parts of ``dj-logging``. For full configuration
+syntax, defaults and caveats, follow the linked reference pages.
 
-Available Roles
+Basic logging
+-------------
+
+Use the standard Python logging API throughout the application:
+
+.. code-block:: python
+
+    import logging
+
+    logger = logging.getLogger(__name__)
+    logger.info("Job accepted", extra={"job_id": 123})
+
+The handler routing depends on ``DJANGO_LOGGING["LOGGING_SETUP_MODE"]`` and the
+application's existing logger levels and propagation. See :doc:`settings`.
+
+Request logging
 ---------------
 
-1. **Basic Logger Role**
+Add ``django_logging.middleware.RequestLogMiddleware`` to Django's
+``MIDDLEWARE`` to enable request correlation and bounded completion logs. Query
+values, request bodies, error response bodies and SQL diagnostics are opt-in.
+See the :ref:`request-logging` section in :doc:`settings` for the options and
+security limitations.
 
-   The Basic Logger Role is designed for standard logging use cases. It handles logging messages of different severity levels (DEBUG, INFO, WARNING, ERROR, CRITICAL) and outputs them to both the console and log files, depending on the settings.
+Email notifications
+-------------------
 
-   **Key Features:**
-   - Supports all standard logging levels.
-   - Configurable to write logs to a file, the console, or both.
-   - Can be integrated easily across different modules in your Django project.
+The built-in email handler is disabled by default. Configure
+``LOG_EMAIL_NOTIFIER`` and Django's email settings before enabling it. Delivery
+uses a bounded number of concurrent per-process attempts; excess notifications
+may be dropped instead of queued. See :ref:`email-notifications` in :doc:`settings`.
 
-2. **Request Logging Role**
+Context variables
+-----------------
 
-   The Request Logging Role is specifically designed to log HTTP request details. This role captures information such as the ``request path``, ``user``, ``IP address``, and ``user agent``.
+``ContextVarManager`` supports binding context values to the current execution
+context. ``ContextVarFilter`` merges them into the ``context`` record attribute,
+which can be rendered with ``%(context)s`` in a standard logging format. Use
+``scoped_context()`` or the tokens returned by ``batch_bind()``/``reset()`` to
+restore prior values safely. See :doc:`usage`.
 
-   **Key Features:**
-   - Logs details of incoming requests.
-   - Can be customized to include additional request metadata.
-   - Useful for monitoring and debugging purposes.
+Execution tracking
+------------------
 
-   **Example Configuration:**
+``django_logging.decorators.execution_tracker`` measures sync function duration
+and can optionally count synchronous Django debug queries. It does not clear
+existing query history. Async functions are timed through awaited completion;
+SQL query counting is rejected for async functions because the synchronous
+connection history cannot reliably represent async database activity. See
+:doc:`usage`.
 
-   .. code-block::
+Custom components
+-----------------
 
-      MIDDLEWARE = [
-          ...
-          'django_logging.middleware.RequestLogMiddleware',
-          ...
-      ]
+Use ``DJANGO_LOGGING["COMPONENTS"]`` to add, replace or disable handlers,
+formatters, filters and named logger routes without modifying the package. See
+:doc:`extensibility`.
 
-3. **Email Notifier Role**
+Production performance
+----------------------
 
-   The Email Notifier Role enables sending logs via email. This is particularly useful for critical errors that require immediate attention.
-
-   **Key Features:**
-   - Sends log messages via email to designated recipients.
-   - Supports customizable log levels for triggering email notifications.
-   - Requires proper email configuration in the Django settings.
-
-   **Example Usage:**
-
-   .. code-block:: python
-
-      from django_logging.utils.log_email_notifier.log_and_notify import log_and_notify_admin
-      import logging
-
-      logger = logging.getLogger(__name__)
-
-      log_and_notify_admin(logger, logging.CRITICAL, "Critical error occurred!")
-
-   **Note:** To use this role, ensure that ``ENABLE`` option of ``LOG_EMAIL_NOTIFIER`` is set to ``True``.
-
-4. **Context Manager Role**
-
-   The Context Manager Role provides a way to temporarily apply different logging configurations within a specific block of code. This is useful when you need to adjust logging behavior for certain operations without affecting the global configuration.
-
-   **Key Features:**
-   - Allows temporary configuration changes within a context.
-   - Automatically reverts to the original configuration after exiting the context.
-   - Useful for testing or handling specific scenarios where different logging behavior is required.
-
-   **Example Usage:**
-
-   .. code-block:: python
-
-      from django_logging.utils.context_manager import config_setup
-      import logging
-
-      logger = logging.getLogger(__name__)
-
-      with config_setup():
-          logger.info("This log uses temporary configurations")
-
-
+Structured payload limits, synchronous file I/O, compression, and multiprocess
+rotation all affect runtime behavior. See :doc:`performance` before choosing a
+handler strategy for high-volume or Gunicorn deployments.

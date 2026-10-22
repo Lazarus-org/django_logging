@@ -25,7 +25,7 @@ imagine you have a Django package that was developed a few years ago and already
 ## Project Detail
 
 - Language: Python >= 3.10
-- Framework: Django >= 5.2
+- Framework: Django 5.2 on Python 3.10–3.14; Django 6.0 and 6.1 on Python 3.12–3.14 (CI compatibility targets)
 
 
 ## Documentation
@@ -37,6 +37,9 @@ The documentation is organized into the following sections:
 - [LogiBoard Integration](#logiboard-integration)
 - [Settings](#settings)
 - [Log Rotation](#log-rotation)
+- [Custom handlers, formatters, and loggers](#custom-handlers-formatters-and-loggers)
+- [Performance and production deployment](https://django-logging.readthedocs.io/en/latest/performance.html)
+- [Extensible components](https://django-logging.readthedocs.io/en/latest/extensibility.html)
 - [Management Commands](#management-commands)
 - [Available Format Options](#available-format-options)
 - [Required Email Settings](#required-email-settings)
@@ -67,34 +70,27 @@ INSTALLED_APPS = [
 ```
 
 
-3. **Run Your Server**
+3. **Choose how logging is configured**
 
-Start your Django Development server to verify the installation:
+Adding `django_logging` to `INSTALLED_APPS` automatically installs package-managed file handlers in additive mode. Existing application logging handlers and levels are preserved. For an application-managed setup, set `AUTO_INITIALIZATION_ENABLE` to `False`.
+
+To enable dj-logging's own handlers only for the `django_logging` logger hierarchy, add:
+
+```python
+# Optional: automatic initialization is already enabled in additive mode.
+DJANGO_LOGGING = {
+    "AUTO_INITIALIZATION_ENABLE": True,
+    "LOGGING_SETUP_MODE": "additive",
+}
+```
+
+Then run your application normally:
+
 ```shell
 python manage.py runserver
 ```
 
-when the server starts, you'll see an initialization message like this in your *console*:
-```shell
-INFO | 'datetime' | django_logging | Logging initialized with the following configurations:
-Log File levels: ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'].
-Log files are being written to: logs.
-Console output level: DEBUG.
-Colorize console: True.
-Log date format: %Y-%m-%d %H:%M:%S.
-Email notifier enabled: False.
-Log rotation type: none.
-```
-By default, django_logging will log each level to its own file:
-- DEBUG : `logs/debug.log`
-- INFO : `logs/info.log`
-- WARNING : `logs/warning.log`
-- ERROR : `logs/error.log`
-- CRITICAL : `logs/critical.log`
-
-In addition, logs will be displayed in ***colorized*** mode in the `console`, making it easier to distinguish between different log levels.
-
-That's it! `django_logging` is ready to use. For further customization, refer to the [Settings](#settings) section
+Automatic setup installs package-owned file destinations without replacing your existing root handlers or logging levels. For projects that deliberately want the older root-logger takeover behavior, choose `"LOGGING_SETUP_MODE": "replace_root"` explicitly. See [Settings](#settings) for complete configuration and migration guidance.
 
 
 ## Usage
@@ -114,31 +110,21 @@ logger.warning("This is a warning message")
 logger.error("This is an error message")
 logger.critical("This is a critical message")
 ```
-These logs will be handled according to the configurations set up by `django_logging`, using either the default settings or any custom settings you've provided.
+These records are handled by the application's standard Django `LOGGING` configuration. With explicit isolated setup, records emitted under `django_logging.*` are also handled by the package's isolated handlers. To route other application loggers into package files, use Django `LOGGING` or explicitly opt into the legacy root setup.
 
-### Context Manager:
+### Temporary package logging configuration
 
-You can use the `config_setup` context manager to temporarily apply `django_logging` configurations within a specific block of code.
-Example usage:
+`config_setup()` temporarily installs the package's own handlers on the `django_logging` logger namespace. It does **not** replace the root logger and does not redirect unrelated application loggers. Disable automatic initialization before using it.
+
 ```python
-from django_logging.utils.context_manager import config_setup
 import logging
-
-logger = logging.getLogger(__name__)
-
-def foo():
-  logger.info("This log will use the configuration set in the context manager!")
+from django_logging.utils.context_manager import config_setup
 
 with config_setup():
-    """ Your logging configuration changes here"""
-    foo()
+    logging.getLogger("django_logging.example").info("Hello from the scoped setup")
+```
 
-# the logging configuration will restore to what it was before, in here outside of with block
-```
-- Note: `AUTO_INITIALIZATION_ENABLE` must be set to `False` in the settings to use the context manager. If it is `True`, attempting to use the context manager will raise a `ValueError` with the message:
-```
-"You must set 'AUTO_INITIALIZATION_ENABLE' to False in DJANGO_LOGGING in your settings to use the context manager."
-```
+This context changes a process-global package logger for the duration of the block; it is suitable for controlled startup or standalone tooling, **not** for request-scoped configuration or concurrent use where other threads may log under `django_logging`. It restores the previous package logger configuration after exit, even on an exception. If another dj-logging-managed configuration is already installed, `config_setup()` rejects overriding it.
 
 ### Log and Notify Utility:
 
@@ -216,87 +202,101 @@ WARNING | 'datetime' | execution_tracking | DEBUG mode is disabled, so database 
 
 ### Request Logging Middleware:
 
-The `django_logging.middleware.RequestLogMiddleware` is a middleware that logs detailed information about each incoming request to the server. It is capable of handling both synchronous and asynchronous requests.
+`django_logging.middleware.RequestLogMiddleware` works with synchronous and
+asynchronous Django request handlers. By default it writes **one completion
+log entry at INFO level** with method, bounded path, status, content type,
+response latency in milliseconds, and an already-resolved user ID (or
+`Anonymous`). It does not resolve lazy Django session users to generate logs.
 
-To enable this middleware, add it to your Django project's ``MIDDLEWARE`` setting:
+Enable it through Django's normal middleware setting:
 
 ```python
 MIDDLEWARE = [
-   #...
-   'django_logging.middleware.RequestLogMiddleware',
-   #...
+    # ...
+    "django_logging.middleware.RequestLogMiddleware",
+    # ...
 ]
 ```
 
-#### Key Features
+The request ID is exposed as `request.request_id` and is available as the
+`request_id` logging context variable. Incoming `X-Request-ID` values must
+be short ASCII strings containing only letters, digits, `_`, `-`, or `.`;
+other values are replaced with a generated UUID. Context is scoped to the
+request and restored on exceptions or cancellations. When streaming content
+is consumed after the view returns, the request's logging context is restored
+for that iteration. **The completion event measures time to the response
+object, not the total streaming time**. Additional streaming lifecycle events are
+disabled by default and can be enabled with `REQUEST_LOGGING["LOG_STREAMING_EVENTS"]`;
+stream context propagation and error logging remain active when disabled.
 
-1. **Request Information Logging**:
-   - Logs the following details at the start of each request:
+#### Request-specific configuration
 
-     - Request method
-     - Request path
-     - Query parameters
-     - Referrer (if available)
+All options live inside the existing `DJANGO_LOGGING` setting (no separate
+Django settings namespace or policy module):
 
-   - Example log at request start:
+```python
+DJANGO_LOGGING = {
+    # Your existing dj-logging settings remain available.
+    "LOG_SQL_QUERIES_ENABLE": False,
+    "REQUEST_LOGGING": {
+        "LOG_REQUEST_STARTED": False,
+        "LOG_REQUEST_FINISHED": True,
+        "LOG_USER_AGENT": True,
+        "LOG_QUERY_PARAMS": False,
+        "LOG_REQUEST_BODY": False,
+        "LOG_ERROR_RESPONSE": False,
+        "LOG_STREAMING_EVENTS": False,
+        "EXCLUDED_PATHS": ["/auth/login"],
+        "EXCLUDED_PATH_PREFIXES": ["/admin", "/auth"],
+        "EXCLUDED_FIELDS": ["customer_identifier"],
+        "EXCLUDED_FIELDS_BY_PATH": {"/api/search": ["custom_secret"]},
+        "MAX_QUERY_BYTES": 4096,
+        "MAX_BODY_BYTES": 2048,
+        "MAX_ERROR_BYTES": 2048,
+        "MAX_SQL_BYTES": 4096,
+        "MAX_DIAGNOSTIC_DEPTH": 8,
+        "TRUSTED_PROXY_CIDRS": [],
+        "MAX_REQUEST_ID_LENGTH": 80,
+    },
+}
+```
 
-   ```shell
-   INFO | 2024-10-03 16:29:47 | request_middleware | REQUEST STARTED:
-   method=GET
-   path=/admin/
-   query_params=None
-   referrer=http://127.0.0.1:8000/admin/login/?next=/admin/
-   | {'ip_address': '127.0.0.1', 'request_id': '09580021-6bff-4b82-99b5-c52406b2cc91',
-      'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'}
-   ```
-2. **Response Information Logging**:
-   - Logs the following details after the request is processed:
+All `REQUEST_LOGGING` options are optional. Invalid or unknown options fail
+Django system checks (`django_logging.E040_REQUEST_LOGGING`) and raise
+`ImproperlyConfigured` if request middleware is instantiated.
 
-     - User (or 'Anonymous' if not authenticated)
-     - HTTP Status code
-     - Content type
-     - Time taken to process the request
-     - Optionally logs SQL queries executed during the request (if enabled)
+`LOG_STREAMING_EVENTS` defaults to `False`. It suppresses additional stream
+start/finish/close/cancellation messages; stream context propagation and streaming
+error logging remain enabled.
 
-   - Example log at request completion:
+**Privacy and performance:** Query values, JSON request bodies, JSON error
+response bodies, and SQL values are disabled by default (regardless of
+`settings.DEBUG`). Values are capped before parsing and after serialization.
+Sensitive field names are always redacted, with extra field exclusions
+configurable globally or per path. Entire excluded path families suppress all
+request value diagnostics. Logging user-agent metadata is sanitized and
+bounded. Regular response bodies are never accessed.
 
-    ```shell
-    INFO | 2024-10-03 16:29:47 | request_middleware | REQUEST FINISHED:
-    user=[mehrshad (ID:1)]
-    status_code=200
-    content_type=[text/html; charset=utf-8]
-    response_time=[0.08 second(s)]
-    3 SQL QUERIES EXECUTED
-    Query1={'Time': 0.000(s), 'Query':
-              [SELECT "django_session"."session_key", "django_session"."session_data", "django_session"."expire_date" FROM "django_session"
-              WHERE ("django_session"."expire_date" > '2024-10-03 12:59:47.812918' AND "django_session"."session_key" = 'uq0nrbglazfm4cy656w3451xydfirh45') LIMIT 21]}
+Redaction is best-effort: a secret may be sent under an unrecognized key or in
+a URL path; exclude endpoints that handle credentials rather than relying on
+field names. Do not enable SQL logging on production traffic that includes
+sensitive query parameters. SQL diagnostics reuse the existing top-level
+`LOG_SQL_QUERIES_ENABLE` flag and Django's own SQL query capture behavior;
+this package does not turn `DEBUG` or database query capture on automatically.
 
-    Query2={'Time': 0.001(s), 'Query':
-              [SELECT "auth_user"."id", "auth_user"."password", "auth_user"."last_login", "auth_user"."is_superuser", "auth_user".
-              "username", "auth_user"."first_name", "auth_user"."last_name", "auth_user"."email", "auth_user"."is_staff", "auth_user".
-              "is_active", "auth_user"."date_joined" FROM "auth_user" WHERE "auth_user"."id" = 1 LIMIT 21]}
+**Trusted client IPs:** By default only `REMOTE_ADDR` is used; an arbitrary
+`X-Forwarded-For` header is never trusted. If your deployment has a trusted
+reverse proxy, list its *peer* network in `TRUSTED_PROXY_CIDRS`. Only then
+will a syntactically valid single `X-Real-IP` value be considered. Ensure the
+trusted reverse proxy strips and overwrites client-provided `X-Real-IP`.
+Do not include client networks in `TRUSTED_PROXY_CIDRS`.
 
-    | {'ip_address': '127.0.0.1', 'request_id': '09580021-6bff-4b82-99b5-c52406b2cc91',
-      'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'}
-    ```
-
-3. **Request ID**:
-   - A unique request ID is generated for each request (or taken from the `X-Request-ID` header if provided). This request ID is included in logs and can help with tracing specific requests.
-
-4. **SQL Query Logging**:
-   - If SQL query logging is enabled, all queries executed during the request will be logged along with their execution time.
-
-    **Note**: to enable Query logging, you can set `LOG_SQL_QUERIES_ENABLE` to `True` in settings. for more details, refer to the [Settings](#settings).
-
-5. **Streaming Response Support**:
-   - The middleware supports both synchronous and asynchronous streaming responses, logging the start and end of the streaming process, as well as any errors during streaming.
-
-6. **User Information**:
-   - Logs the authenticated user's username and ID if available, or 'Anonymous' if the user is not authenticated.
-
-7. **IP Address and User-Agent**:
-   - The middleware logs the client's IP address and user agent for each request.
-
+**Behavior changes from previous releases:** The start event is now opt-in;
+query parameters and referrers are no longer logged automatically; the
+completion event uses `response_time_ms` and a resolved user ID instead of
+username; middleware-instance `.context` / `.initial_queries` state has been
+removed; and untrusted forwarding headers no longer override `REMOTE_ADDR`.
+These changes are intentional for concurrency correctness and safe defaults.
 
 #### Context Variables Usage
 
@@ -310,11 +310,17 @@ These context variables can be accessed and used in other parts of the logging s
 
 ### MonitorLogSizeMiddleware
 
-This middleware monitors the size of the log directory and checks it weekly.
-It triggers the `logs_size_audit` management command to assess the total size of the log files.
-If the log directory size exceeds a certain limit (`LOG_DIR_SIZE_LIMIT`), the middleware sends a warning email to the `ADMIN_EMAIL` asynchronously.
+**Schedule `python manage.py logs_size_audit` outside HTTP requests** (for example weekly using cron, systemd timers, or an existing scheduler). This command checks `LOG_DIR_SIZE_LIMIT` and requests a warning email when the configured threshold is reached. It does not require installing middleware.
 
-To enable this middleware, add it to your Django project's `MIDDLEWARE` setting:
+`MonitorLogSizeMiddleware` remains available for backward compatibility but is a **pass-through by default**. A synchronous filesystem scan/email request inside HTTP handling is undesirable on high-traffic applications.
+
+To explicitly restore the legacy request-time behavior, configure `DJANGO_LOGGING["LOG_SIZE_AUDIT_IN_REQUEST"] = True` **and** add the middleware. It uses a cache claim to avoid concurrent scans, but the triggering request still waits for the command to finish. Prefer a shared cache backend for multi-worker deployments; local-memory caches cannot coordinate across processes.
+
+```python
+DJANGO_LOGGING = {"LOG_SIZE_AUDIT_IN_REQUEST": True}  # legacy opt-in only
+```
+
+The optional legacy middleware is installed as follows:
 
 ```python
 MIDDLEWARE = [
@@ -715,10 +721,10 @@ This Django management command moves rotated log files into a timestamped subdir
 
 #### How It Works:
 
-1. Scans the log directory for files that do not match the active `<level>.log` naming pattern.
-2. Creates `<LOG_DIR>/archive/<YYYY-MM-DD_HHMMSS>/` and moves the rotated files into it.
-3. If `--compress` is set, uncompressed files are gzip-compressed during the move.
-4. If `--bundle` is set, the timestamped directory is compressed into a single file and then deleted.
+1. Scans for recognized configured-level rotated filenames (`info.log.1`, `error.log.2026-10-18`, optional `.gz`, and JSON/XML counterparts). Unrelated files, symlinks and already archived paths are excluded.
+2. Creates `<LOG_DIR>/archive/<YYYY-MM-DD_HHMMSS_microseconds>/` and preserves relative subdirectories to avoid filename collisions.
+3. If `--compress` is set, gzips into a temporary file, atomically installs the compressed result, then removes the source. An interrupted copy leaves the original intact.
+4. If `--bundle` is set, the timestamped directory is compressed into a single file and then deleted after bundling completes.
 
 #### Command Execution:
 
@@ -827,17 +833,88 @@ Logiboard is designed to help administrators easily review log files that have b
 LogiBoard makes it simple to manage and review logs, ensuring you can quickly access and analyze critical log data.
 
 
+
+## Custom handlers, formatters, and loggers
+
+`dj-logging` is plug-and-play by default, but it does **not** restrict you to its built-in handlers, formatters, or rotation strategies. All custom components are configured under the existing `DJANGO_LOGGING["COMPONENTS"]` dictionary. The definitions follow Python's standard `logging.config.dictConfig` conventions. No fork of this package is needed.
+
+For example, you can add an independent audit log with its own rotating file handler:
+
+```python
+DJANGO_LOGGING = {
+    "COMPONENTS": {
+        "formatters": {
+            "audit": {"format": "%(asctime)s %(levelname)s %(message)s"},
+        },
+        "handlers": {
+            "audit_file": {
+                "class": "logging.handlers.RotatingFileHandler",
+                "filename": "/var/log/myapp/audit.log",
+                "maxBytes": 10_485_760,
+                "backupCount": 5,
+                "formatter": "audit",
+                "level": "INFO",
+            },
+        },
+        "loggers": {
+            "myapp.audit": {
+                "handlers": ["audit_file"],
+                "level": "INFO",
+                "propagate": False,
+            },
+        },
+    },
+}
+```
+
+```python
+import logging
+logging.getLogger("myapp.audit").info("Audit event")
+```
+
+Custom formatters, filters and handlers can use dotted class paths or standard `()` factories. Use `COMPONENTS["replace"]` to replace a named built-in preset (such as the `info` handler), or `COMPONENTS["disable"]` to remove one. Each operation must be explicit; naming collisions and unresolved references raise configuration errors. `root_handlers` adds chosen custom handlers to the additive root route, while `package_handlers` adds them to the `django_logging` namespace. Other application loggers and handlers are preserved unless explicitly opted into changes.
+
+Declared but unattached custom components are not instantiated in `additive` or `isolated` mode; only components reachable through configured handlers and their dependencies are constructed. Dependent handlers are closed on reinitialization. An explicitly listed built-in `console` handler in `root_handlers` is installed on root as requested; this may create duplicate console output if your application already has a console handler.
+
+Existing `LOG_ROTATION` settings continue working; they are shortcuts for the built-in file handlers, not a limit on third-party handlers. Do not share a standard `RotatingFileHandler` across multiple Gunicorn workers writing to the same file. See [Checkpoint 06 — extensible components](CHECKPOINT_06_EXTENSIBLE_COMPONENTS.md) for advanced examples, compatibility semantics, and caveats.
+
 ## Settings
 
-By default, `django_logging` uses a built-in configuration that requires no additional setup. However, you can customize the logging settings by adding the `DJANGO_LOGGING` dictionary configuration to your Django `settings` file.
+`dj-logging` auto-initializes when `django_logging` is added to `INSTALLED_APPS`. By default, it adds package-owned file destinations **alongside** the handlers configured by Django. It does not change the root logger's level, replace existing handlers, or disable other loggers. You can customize the behavior with `DJANGO_LOGGING`.
+
+#### How logging is initialized
+
+- **Default: plug-and-play additive setup.** `AUTO_INITIALIZATION_ENABLE=True` and `LOGGING_SETUP_MODE="additive"` create the configured files, attach package-owned file/email handlers to root, and configure the `django_logging` logger. Existing root handlers and logger levels are preserved. No second root console handler is added.
+- **Isolated setup.** `LOGGING_SETUP_MODE="isolated"` configures only the `django_logging` namespace; application logs do not automatically reach its files.
+- **Opt out.** Set `AUTO_INITIALIZATION_ENABLE=False` to manage logging exclusively through standard Django `LOGGING` or initialize the package manually.
+- **Legacy root setup (explicit opt in).** `LOGGING_SETUP_MODE="replace_root"` performs the original `dictConfig()` root replacement; select it only when you intend to delegate root logging to the package.
+
+**Routing note:** Additive mode receives application records that reach the root logger. It respects logger levels, filters and `propagate=False` declarations: explicit app logger routes may bypass it. For example, the default Python root level is WARNING, so INFO messages from an otherwise unconfigured application logger need an appropriate level in Django's `LOGGING` settings. The `django_logging` namespace is configured to emit its own INFO request events. This is not a guarantee that every application log is collected.
+
+**Migration from v2.1.0:** the package remains automatic by default, but root logging is no longer replaced automatically. Console output and log routing can differ because existing application handlers and levels are preserved. To retain the old global setup exactly, select `"LOGGING_SETUP_MODE": "replace_root"`. Other existing package options continue to work.
+
+Example with explicit additive setup (optional; it is the default):
+
+```python
+DJANGO_LOGGING = {
+    "AUTO_INITIALIZATION_ENABLE": True,
+    "LOGGING_SETUP_MODE": "additive",
+    "LOG_FILE_LEVELS": ["INFO", "ERROR"],
+}
+```
+
+For package-only logging, use `isolated`. To disable setup entirely, set `AUTO_INITIALIZATION_ENABLE=False`. `django_logging.filters.ContextVarFilter` remains available for use in your own Django `LOGGING` handlers.
+
 
 #### Default configuration:
 
 ```python
 DJANGO_LOGGING = {
     "AUTO_INITIALIZATION_ENABLE": True,
+    "LOGGING_SETUP_MODE": "additive",
     "INITIALIZATION_MESSAGE_ENABLE": True,
     "LOG_SQL_QUERIES_ENABLE": False,
+    "REQUEST_LOGGING": {},  # See request middleware configuration above
     "LOG_FILE_LEVELS": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
     "LOG_DIR": "logs",
     "LOG_DIR_SIZE_LIMIT": 1024,  # MB
@@ -872,7 +949,10 @@ DJANGO_LOGGING = {
         "NOTIFY_CRITICAL": False,
         "LOG_FORMAT": 1,
         "USE_TEMPLATE": True,
+        "MAX_CONCURRENT": 4,
+        "SMTP_TIMEOUT": 10,
     },
+    "LOG_SIZE_AUDIT_IN_REQUEST": False,
     # Rotation (all optional — defaults to no rotation)
     "LOG_ROTATION": {
         "TYPE": "none",
@@ -895,6 +975,13 @@ Here's a breakdown of the available configuration options:
 - **Type**: `bool`
 - **Description**: Enables automatic initialization of logging configurations.
 - **Default**: `True`
+
+`LOGGING_SETUP_MODE`
+--------------------
+
+- **Type**: `str` (`"additive"`, `"isolated"` or `"replace_root"`)
+- **Default**: `"additive"`
+- **Description**: Chooses additive application logging, isolated package logging, or explicit legacy root replacement.
 
 `INITIALIZATION_MESSAGE_ENABLE`
 -------------------------------
@@ -1023,7 +1110,24 @@ Here's a breakdown of the available configuration options:
 
     - `USE_TEMPLATE`:
       - **Type**: `bool`
-      - **Description**: Determines whether the email should include `LAZARUS` email template.
+      - **Description**: Determines whether the email should include the packaged HTML template.
+
+    - `MAX_CONCURRENT`:
+      - **Type**: `int` (1–64)
+      - **Default**: `4`
+      - **Description**: Maximum in-flight SMTP notification threads **per worker process**. Additional notifications are dropped with a warning rather than queued. There is no delivery guarantee.
+
+    - `SMTP_TIMEOUT`:
+      - **Type**: `int` seconds (1–120)
+      - **Default**: `10`
+      - **Description**: Socket timeout for SMTP connections; failures are logged without changing application request outcomes.
+
+`LOG_SIZE_AUDIT_IN_REQUEST`
+---------------------------
+
+- **Type**: `bool`
+- **Default**: `False`
+- **Description**: Opt-in legacy behavior that runs filesystem log-size audits during an HTTP request. Use a scheduler and the `logs_size_audit` management command instead.
 
 `LOG_ROTATION`
 --------------
@@ -1034,7 +1138,7 @@ Here's a breakdown of the available configuration options:
   - `TYPE`:
     - **Type**: `str`
     - **Choices**: `"none"` | `"size"` | `"time"`
-    - **Description**: Selects the rotation strategy. `"none"` uses plain `FileHandler`, `"size"` uses `RotatingFileHandler`, `"time"` uses `TimedRotatingFileHandler`.
+    - **Description**: Selects the rotation strategy. `"none"` uses plain `FileHandler`, `"size"` uses `RotatingFileHandler`, `"time"` uses `TimedRotatingFileHandler`, and `"external"` uses POSIX `WatchedFileHandler` (for rotation by `logrotate` or a similar external process). `COMPRESS` must be false for `"external"`.
     - **Default**: `"none"`
 
   - `MAX_BYTES`:
@@ -1062,6 +1166,8 @@ Here's a breakdown of the available configuration options:
     - **Description**: When `True`, each rotated file is gzip-compressed automatically (e.g. `debug.log.1.gz`). Works with both `"size"` and `"time"` rotation types.
     - **Default**: `False`
 
+**Gunicorn / multiprocess warning:** Python's built-in size/time rotating file handlers are not safe when multiple independent worker processes rotate the same path. Use log collection through stdout/stderr in container environments, or `LOG_ROTATION={"TYPE": "external", "COMPRESS": False}` with an external rename/create rotation scheme on POSIX. `WatchedFileHandler` detects inode replacement but **does not provide inter-process record locking**. Avoid `copytruncate` if loss of logs is unacceptable. `rotate_logs` operates only on handlers in the current process; it cannot rotate other running workers' handlers. Neither SMTP notifications nor per-process counters are durable across crashes.
+
 `LOG_ROTATION_OVERRIDES`
 ------------------------
 
@@ -1073,13 +1179,73 @@ Here's a breakdown of the available configuration options:
 
 | Key | Type | Description | Default |
 |-----|------|-------------|---------|
-| `TYPE` | `str` | `"none"`, `"size"`, or `"time"` | `"none"` |
+| `TYPE` | `str` | `"none"`, `"size"`, `"time"`, or `"external"` | `"none"` |
 | `MAX_BYTES` | `int` | Max file size in bytes before rotation (size only) | `10485760` |
 | `BACKUP_COUNT` | `int` | Number of rotated files to keep; `0` keeps all | `5` |
 | `WHEN` | `str` | Timed rotation interval unit (time only) | `"midnight"` |
 | `INTERVAL` | `int` | Number of `WHEN` units between rotations (time only) | `1` |
 | `COMPRESS` | `bool` | Gzip-compress each rotated file | `False` |
 
+
+## Structured logging and redaction
+
+When a file level uses `"JSON"`, `"XML"` or `"FLAT"` in `LOG_FILE_FORMAT_TYPES`,
+its formatter also uses the optional `STRUCTURED_LOGGING` configuration under
+**the existing `DJANGO_LOGGING` dictionary**. No additional package or service is
+required. Automatic initialization stays enabled in additive mode by default.
+
+```python
+DJANGO_LOGGING = {
+    "LOG_FILE_FORMAT_TYPES": {"INFO": "JSON", "ERROR": "JSON"},
+    "STRUCTURED_LOGGING": {
+        "REDACT_FIELDS": ["customer_reference"],
+        "MAX_DEPTH": 8,
+        "MAX_ITEMS": 100,
+        "MAX_STRING_LENGTH": 4096,
+        "MAX_EVENT_BYTES": 65536,
+        "MAX_EXCEPTION_FRAMES": 32,
+        "INCLUDE_EXTRA": True,
+        "EXCEPTION_MODE": "traceback",  # 'traceback', 'type', 'omit'
+        "JSON_COMPACT": True,
+        "XML_PRETTY": True,
+    },
+}
+```
+
+```python
+logger.info("Order processed", extra={"order_id": 42, "customer_reference": "private"})
+# JSON includes: "message": "Order processed",
+# "extra": {"order_id": 42, "customer_reference": "[REDACTED]"}
+```
+
+Structured JSON uses **one JSON object per line** by default, preserving the
+original log message rather than extracting/removing `key=value` fragments.
+Extra fields appear under `extra` and context variables under `context` when
+those values are included in the format. The formatter supports standard
+Python logging specifiers in `LOG_FILE_FORMATS`. XML remains pretty-printed by
+default; invalid field names are represented as `<field name="...">`. FLAT
+values escape newlines and quotes to keep events on one line.
+
+Sensitive field names are redacted recursively using built-in security names
+(e.g. passwords, API keys, tokens, and email) and `REDACT_FIELDS`. Values,
+collection sizes, nesting depth, total event size, and traceback frame formatting
+are bounded; an oversized event is replaced with a small omission marker rather
+than malformed output. `MAX_EXCEPTION_FRAMES` defaults to `32` and accepts values
+from `1` to `128`.
+Unsupported Python objects are not stringified to avoid exposing secrets via
+`__repr__` or `__str__`.
+
+**Security limitation:** free-form log messages, SQL text, and traceback text
+can contain secrets even when structured fields are redacted. Automatic
+field-name redaction cannot reliably sanitize such strings. Avoid putting
+credentials, bodies, tokens, personal data, or raw SQL into log messages. For
+high-sensitivity deployments, set `EXCEPTION_MODE` to `"type"` or `"omit"`.
+
+**Compatibility note:** JSON formatters no longer automatically parse
+`key=value` fragments into top-level keys or remove them from messages.
+Applications relying on those inferred keys must switch to `extra={...}` or
+explicit context variables. Existing text formatters and standard Python
+logging APIs are otherwise retained.
 
 ## Available Format Options
 
@@ -1135,6 +1301,29 @@ ADMIN_EMAIL = 'admin@example.com'
 ```
 
 These settings ensure that the email notifier is correctly configured to send log notifications to the specified `ADMIN_EMAIL` address.
+
+## Python and Django compatibility
+
+The supported target matrix is Python **3.10–3.14** with Django **5.2**, and
+Python **3.12–3.14** with Django **6.0 or 6.1**. Each valid combination is tested
+individually using tox in GitHub Actions. Django 6.x does not support Python
+3.10 or 3.11.
+
+Developers can run one combination with, for example:
+
+```bash
+python -m pip install tox
+python -m tox -e py313-django61
+```
+
+Run `python scripts/check_release_matrix.py` (Python 3.11+ with PyYAML) to
+check that CI and tox declare the same supported matrix.
+
+`execution_tracker` supports awaited async functions for elapsed-time
+measurement. Query counting (`log_queries=True`) is supported only for
+synchronous functions in Django `DEBUG` mode; decorating an async function
+with SQL tracking enabled raises `ValueError`. It never clears accumulated
+Django SQL debug history.
 
 ## Conclusion
 

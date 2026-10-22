@@ -1,7 +1,8 @@
+import random
+import string
+
 import django
 from django.conf import settings
-import string
-import random
 
 
 def generate_secret_key(length: int = 50) -> str:
@@ -64,6 +65,7 @@ def configure_django_settings() -> None:
             DJANGO_LOGGING={
                 "INCLUDE_LOG_iBOARD": True,
                 "AUTO_INITIALIZATION_ENABLE": True,
+                "LOGGING_SETUP_MODE": "replace_root",
                 "INITIALIZATION_MESSAGE_ENABLE": True,
                 "LOG_FILE_LEVELS": ["DEBUG", "INFO"],
                 "LOG_DIR": "logs",
@@ -102,8 +104,9 @@ def configure_django_settings() -> None:
             USE_I18N=True,
             USE_TZ=True,
             ROOT_URLCONF="django_logging.urls",
-            STATIC_URL="static/"
+            STATIC_URL="static/",
         )
         django.setup()
+
 
 configure_django_settings()

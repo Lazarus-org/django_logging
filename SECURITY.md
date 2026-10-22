@@ -42,6 +42,16 @@ When a vulnerability is confirmed:
 - Ensure that your logging configuration is secure and does not expose sensitive information in log files.
 - When using log rotation with compression (`COMPRESS: True`), ensure your archive directory has appropriate filesystem permissions to prevent unauthorized access to rotated log files.
 
+## Structured Logging and Sensitive Data
+
+Structured formatter redaction applies to named fields (including nested `context`
+and `extra` mappings), but cannot reliably sanitize arbitrary text supplied to
+`logger.info(...)`, exception tracebacks, SQL statements, or third-party logger
+messages. Do not log credentials, authorization headers, personal information,
+request/response payloads, or raw SQL containing user data. Consider
+`DJANGO_LOGGING["STRUCTURED_LOGGING"]["EXCEPTION_MODE"] = "type"` for
+higher-confidentiality environments. Limit access to log storage and archives.
+
 ## Responsible Disclosure
 
 We strongly encourage responsible disclosure and will work to fix issues in a timely manner. We appreciate any effort to help make `django_logging` more secure for all users.

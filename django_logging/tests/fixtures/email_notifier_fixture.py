@@ -58,9 +58,12 @@ def notifier_mock_logger() -> Generator[Tuple[MagicMock, MagicMock], None, None]
     tuple
         A tuple containing mock objects for `logger.info` and `logger.warning`.
     """
-    with patch(
-        "django_logging.utils.log_email_notifier.notifier.logger.info"
-    ) as mock_info, patch(
-        "django_logging.utils.log_email_notifier.notifier.logger.warning"
-    ) as mock_warning:
+    with (
+        patch(
+            "django_logging.utils.log_email_notifier.notifier.logger.info"
+        ) as mock_info,
+        patch(
+            "django_logging.utils.log_email_notifier.notifier.logger.warning"
+        ) as mock_warning,
+    ):
         yield mock_info, mock_warning

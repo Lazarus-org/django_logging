@@ -1,10 +1,10 @@
 import sys
+from typing import Dict
 
 import pytest
-from django.urls import reverse
-from django.test import Client
 from django.contrib.auth.models import User
-from typing import Dict
+from django.test import Client
+from django.urls import reverse
 
 from django_logging.tests.constants import PYTHON_VERSION, PYTHON_VERSION_REASON
 
@@ -55,5 +55,5 @@ class TestLogiBoardView:
             response.status_code == 403
         ), "Non-superuser should not have access to the page."
         assert (
-             "text/html" in response["Content-Type"]
+            "text/html" in response["Content-Type"]
         ), "'text/html' should be in Content type for forbidden access."

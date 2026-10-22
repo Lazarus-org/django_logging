@@ -1,8 +1,8 @@
 from .commands_fixture import (
+    log_dir_with_rotated_files,
     temp_json_log_directory,
     temp_log_directory,
     temp_xml_log_directory,
-    log_dir_with_rotated_files,
 )
 from .conf_fixture import log_config, log_manager
 from .email_handler_fixture import email_handler
@@ -22,4 +22,4 @@ from .request_middleware_fixture import (
     request_middleware,
 )
 from .settings_fixture import mock_settings, reset_settings
-from .views_fixture import setup_users, client
+from .views_fixture import client, setup_users

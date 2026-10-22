@@ -17,10 +17,6 @@ Welcome to django_logging Documentation!
     :target: https://django-logging.readthedocs.io/en/latest/
     :alt: Documentation
 
-.. image:: https://img.shields.io/badge/pylint-10/10-brightgreen?logo=python&logoColor=blue
-   :target: https://www.pylint.org/
-   :alt: Pylint
-
 .. image:: https://img.shields.io/pypi/pyversions/dj-logging
     :target: https://pypi.org/project/dj-logging/
     :alt: Supported Python versions
@@ -28,10 +24,6 @@ Welcome to django_logging Documentation!
 .. image:: https://img.shields.io/pypi/djversions/dj-logging
     :target: https://pypi.org/project/dj-logging/
     :alt: Supported Django versions
-
-.. image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=yellow
-   :target: https://github.com/pre-commit/pre-commit
-   :alt: pre-commit
 
 .. image:: https://img.shields.io/github/issues/lazarus-org/django_logging
     :target: https://github.com/lazarus-org/django_logging/issues
@@ -41,57 +33,57 @@ Welcome to django_logging Documentation!
     :target: https://github.com/lazarus-org/django_logging/commits/main
     :alt: Last Commit
 
-.. image:: https://img.shields.io/github/languages/top/lazarus-org/django_logging
-    :target: https://github.com/lazarus-org/django_logging
-    :alt: Languages
+``dj-logging`` extends Python's built-in ``logging`` for Django applications. It
+provides plug-and-play file logging, request correlation, structured JSON/XML/FLAT
+formatters, optional email notifications, rotation helpers, and an extensible
+configuration layer for custom handlers, formatters, filters and logger routes.
 
-.. image:: https://img.shields.io/codecov/c/github/lazarus-org/django_logging/main
-   :target: https://codecov.io/gh/lazarus-org/django_logging
-   :alt: Coverage
+The package automatically initializes when ``django_logging`` is included in
+``INSTALLED_APPS``. The default ``additive`` mode preserves existing root
+handlers and logger levels; it does not silently replace a project's complete
+logging setup. See :doc:`quick_start` to begin, :doc:`settings` for all options,
+and :doc:`extensibility` to add custom logging components.
 
-
-
-|br|
-
-`django_logging` is a powerful yet simple Django package that extends and enhances Python's built-in ``logging`` without relying on any **third-party** libraries. Our goal is to keep things straightforward while providing flexible and customizable logging solutions that are specifically designed for Django applications.
-
-One of the key advantages of ``django_logging`` is its seamless integration. Get started with django_logging in your existing projects without refactoring any code. Even if you're already using the **default logging setup**, you can instantly upgrade to advanced features with just a simple installation. No extra changes or complicated setup required!
-
-imagine you have a Django package that was developed a few years ago and already uses Python's built-in ``logging``. Refactoring the entire codebase to use another logging package would be a daunting task. But with ``django_logging``, you don't have to worry about that. Simply install django_logging and enjoy all its advanced features with logging each ``LEVEL`` in separate files with three extra formats (``json``, ``xml``, ``flat``)  **without having to make any changes** to your existing code.
-
-Supported Versions
+Supported versions
 ------------------
 
-`django_logging` supports the following combinations of Django and Python versions:
+The package metadata declares the following Python/Django combinations. Actual
+compatibility should be confirmed by the project's CI matrix before a release.
 
-==========  ===========================
-  Django      Python
-==========  ===========================
-5.2         3.10, 3.11, 3.12, 3.13, 3.14
-6.0         3.12, 3.13, 3.14
-==========  ===========================
+.. list-table:: Supported version targets
+   :header-rows: 1
+   :widths: 20 80
+
+   * - Django
+     - Python
+   * - 5.2
+     - 3.10, 3.11, 3.12, 3.13, 3.14
+   * - 6.0
+     - 3.12, 3.13, 3.14
+   * - 6.1
+     - 3.12, 3.13, 3.14
 
 Documentation
 -------------
-
-The documentation is organized into the following sections:
 
 .. toctree::
    :maxdepth: 2
 
    quick_start
    usage
-   log_iboard
    settings
+   extensibility
+   performance
+   log_iboard
    contributing
    rules
 
 Issues
 ------
-If you have questions or have trouble using the app please file a bug report at:
+
+For questions or bug reports, visit:
 
 https://github.com/lazarus-org/django_logging/issues
-
 
 Indices and tables
 ==================

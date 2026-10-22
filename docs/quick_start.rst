@@ -1,56 +1,66 @@
-Quick Start
+Quick start
 ===========
 
-Getting Started with `django_logging` is simple. Follow these steps to get up and running quickly:
-
-1. **Install the Package**
-
-   first, Install `django_logging` via pip:
+Install ``dj-logging`` from PyPI:
 
 .. code-block:: shell
 
-  $ pip install dj-logging
+    python -m pip install dj-logging
 
-2. **Add to Installed Apps**
-
-   Add `django_logging` to your ``INSTALLED_APPS`` in your Django settings file:
+Add ``django_logging`` to ``INSTALLED_APPS``:
 
 .. code-block:: python
 
-  INSTALLED_APPS = [
-      # ...
-      "django_logging",
-      # ...
-  ]
+    INSTALLED_APPS = [
+        # ...
+        "django_logging",
+    ]
 
-3. **Run Your Server**
-
-   Start your Django Development server to verify the installation:
+Start Django normally:
 
 .. code-block:: shell
 
-   python manage.py runserver
+    python manage.py runserver
 
-when the server starts, you'll see an initialization message like this in your *console*:
+By default, ``dj-logging`` automatically creates files under ``logs/`` for the
+configured levels:
 
-.. code-block:: text
+* ``logs/debug.log``
+* ``logs/info.log``
+* ``logs/warning.log``
+* ``logs/error.log``
+* ``logs/critical.log``
 
-  INFO | django_logging | Logging initialized with the following configurations:
-  Log File levels: ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'].
-  Log files are being written to: logs.
-  Console output level: DEBUG.
-  Colorize console: True.
-  Log date format: %Y-%m-%d %H:%M:%S.
-  Email notifier enabled: False.
+The package also configures a console handler for the ``django_logging`` logger
+namespace. In the default ``additive`` mode, it does not add another console
+handler to root and does not replace the application's existing root handlers or
+levels. Your application's existing Django ``LOGGING`` configuration continues
+to control its own console routing. Application records that reach root and pass
+the applicable levels and filters can also be written to the package's level
+files.
 
-By default, django_logging will log each level to its own file:
+Use standard Python logging in application code:
 
-- DEBUG : ``logs/debug.log``
-- INFO : ``logs/info.log``
-- WARNING : ``logs/warning.log``
-- ERROR : ``logs/error.log``
-- CRITICAL : ``logs/critical.log``
+.. code-block:: python
 
-In addition, logs will be displayed in **colorized** mode in the ``console``, making it easier to distinguish between different log levels.
+    import logging
 
-That's it! `django_logging` is ready to use. For further customization, refer to the :doc:`Settings <settings>`.
+    logger = logging.getLogger(__name__)
+    logger.info("Application started")
+    logger.warning("A recoverable problem occurred")
+
+The optional minimal configuration below is equivalent to the default setup:
+
+.. code-block:: python
+
+    DJANGO_LOGGING = {
+        "AUTO_INITIALIZATION_ENABLE": True,
+        "LOGGING_SETUP_MODE": "additive",
+    }
+
+You can choose ``"isolated"`` to configure only the ``django_logging``
+namespace, or explicitly select ``"replace_root"`` if you want the legacy
+behavior that replaces the global root logging configuration. To manage all
+logging yourself, set ``AUTO_INITIALIZATION_ENABLE=False`` and configure Django's
+standard ``LOGGING`` setting. See :doc:`settings` and :doc:`extensibility` for
+customization.

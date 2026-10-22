@@ -3,54 +3,59 @@ Usage
 
 Once ``django_logging`` is installed and added to your ``INSTALLED_APPS``, you can start using it right away. The package provides several features to customize and enhance logging in your Django project. Below is a guide on how to use the various features provided by `django_logging`.
 
-Basic Logging Usage
+Basic logging usage
 -------------------
 
-   At its core, `django_logging` is built on top of Python’s built-in logging module. This means you can use the standard logging module to log messages across your Django project. Here’s a basic example of logging usage:
+``dj-logging`` uses Python's standard ``logging`` API, so existing application
+code does not need a package-specific logger class:
 
-   .. code-block:: python
+.. code-block:: python
 
-      import logging
+    import logging
 
-      logger = logging.getLogger(__name__)
+    logger = logging.getLogger(__name__)
+    logger.debug("Debug detail")
+    logger.info("Application event", extra={"job_id": 42})
+    logger.warning("A recoverable issue occurred")
+    logger.error("An operation failed")
 
-      logger.debug("This is a debug message")
-      logger.info("This is an info message")
-      logger.warning("This is a warning message")
-      logger.error("This is an error message")
-      logger.critical("This is a critical message")
+Routing depends on ``DJANGO_LOGGING["LOGGING_SETUP_MODE"]`` and your existing
+Django logging configuration. In the default ``additive`` mode, package-owned
+file handlers are attached alongside existing root handlers, but existing
+logger levels, filters and ``propagate=False`` routes remain in control. Records
+must reach root and pass its effective level to be handled by the package's root
+route. The ``django_logging`` namespace has its own package handlers. See
+:doc:`settings` for the differences between ``additive``, ``isolated`` and
+``replace_root``.
 
-   These logs will be handled according to the configurations set up by `django_logging`, using either the default settings or any custom settings you've provided.
-
-
-Context Manager
+Context manager
 ---------------
-   You can use the ``config_setup`` context manager to temporarily apply `django_logging` configurations within a specific block of code.
 
-   Example usage:
+``config_setup()`` temporarily installs the package's handlers on the
+``django_logging`` logger namespace only. It does not replace root logging or
+redirect unrelated application loggers. Automatic initialization must be
+explicitly disabled before using it:
 
-   .. code-block:: python
+.. code-block:: python
 
-      from django_logging.utils.context_manager import config_setup
-      import logging
+    import logging
+    from django_logging.utils.context_manager import config_setup
 
-      logger = logging.getLogger(__name__)
+    with config_setup():
+        logging.getLogger("django_logging.example").info("Inside package setup")
 
+This changes process-global package logger state for the duration of the block.
+Use it for controlled startup or standalone tooling, not as a request-scoped
+configuration mechanism or where other threads may log under ``django_logging``.
+The prior package logger configuration is restored when the block exits. If a
+managed ``dj-logging`` configuration is already active, ``config_setup()`` raises
+``RuntimeError`` rather than replacing it.
 
-      def foo():
-          logger.info("This log will use the configuration set in the context manager!")
+To use it, set:
 
+.. code-block:: python
 
-      with config_setup():
-          """Your logging configuration changes here"""
-          foo()
-
-
-   Note: ``AUTO_INITIALIZATION_ENABLE`` must be set to ``False`` in the settings to use the context manager. If it is ``True``, attempting to use the context manager will raise a ``ValueError`` with the message:
-
-   .. code-block:: text
-
-      "You must set 'AUTO_INITIALIZATION_ENABLE' to False in DJANGO_LOGGING in your settings to use the context manager."
+    DJANGO_LOGGING = {"AUTO_INITIALIZATION_ENABLE": False}
 
 Log and Notify Utility
 ----------------------
@@ -90,15 +95,15 @@ Log and Notify Utility
    Additionally, ensure that all required email settings are configured in your Django settings file.
     - **Note**: For more detailed configuration options, refer to the :doc:`Settings <settings>`.
 
-Execution Tracker
+Execution tracker
 -----------------
 
-The ``execution_tracker`` decorator is used to log the performance metrics of any function. It tracks execution time and the number of database queries for decorated function (if enabled).
-
-Example Usage:
+The ``execution_tracker`` decorator logs function execution time and can
+optionally count synchronous Django debug queries.
 
 .. code-block:: python
 
+    import logging
     from django_logging.decorators import execution_tracker
 
 
@@ -106,156 +111,102 @@ Example Usage:
         logging_level=logging.INFO,
         log_queries=True,
         query_threshold=10,
-        query_exceed_warning=False,
+        query_exceed_warning=True,
     )
-    def some_function():
-        # function code
-        pass
+    def load_dashboard():
+        # Perform synchronous application/database work.
+        ...
 
-**Arguments:**
+Arguments:
 
-- ``logging_level`` (``int``): The logging level at which performance details will be logged. Defaults to ``logging.INFO``.
+* ``logging_level``: logging level for the completion metric; default
+  ``logging.INFO``.
+* ``log_queries``: whether to count synchronous queries when Django's debug
+  query history is available; default ``False``.
+* ``query_threshold``: optional non-negative threshold for query counts.
+* ``query_exceed_warning``: emit a warning when the threshold is exceeded;
+  default ``False``.
 
-- ``log_queries`` (``bool``): Whether to log the number of database queries for decorated function(if ``DEBUG`` is ``True`` in your settings). If ``log_queries=True``, the number of queries will be included in the logs. Defaults to ``False``.
+The decorator no longer clears Django's existing SQL query history. Query counts
+are best-effort because Django's query history can be bounded and may be shared
+with other work. If ``log_queries=True`` while ``DEBUG=False``, query counts are
+not available and a warning is emitted. Asynchronous functions are timed through
+their awaited completion, but ``log_queries=True`` is rejected for async functions
+because a synchronous connection's history cannot reliably count queries across
+async execution contexts.
 
-- ``query_threshold`` (``int``): If provided, the number of database queries will be checked. If the number of queries exceeds the given threshold, a warning will be logged. Defaults to ``None``.
-
-- ``query_exceed_warning`` (``bool``): Whether to log a ``WARNING`` message if the number of queries exceeds the threshold. Defaults to ``False``.
-
-**Example Log Output:**
-
-.. code-block:: shell
-
-    INFO | 'datetime' | execution_tracking | Performance Metrics for Function: 'some_function'
-      Module: some_module
-      File: /path/to/file.py, Line: 123
-      Execution Time: 0.21 second(s)
-      Database Queries: 15 queries (exceeds threshold of 10)
-
-If `log_queries` is set to ``True`` but ``DEBUG`` is ``False``, a ``WARNING`` will be logged:
-
-.. code-block:: shell
-
-    WARNING | 'datetime' | execution_tracking | DEBUG mode is disabled, so database queries are not tracked.
-    To include the number of queries, set ``DEBUG`` to ``True`` in your Django settings.
-
-Request Logging Middleware
+Request logging middleware
 --------------------------
 
-The ``django_logging.middleware.RequestLogMiddleware`` is a middleware that logs detailed information about each incoming request to the server. It is capable of handling both synchronous and asynchronous requests.
-
-To enable this middleware, add it to your Django project's ``MIDDLEWARE`` setting:
-
-.. code-block:: python
-
-   MIDDLEWARE = [
-       # ...
-       "django_logging.middleware.RequestLogMiddleware",
-       # ...
-   ]
-
-Key Features
-^^^^^^^^^^^^
-
-1. **Request Information Logging**:
-   - Logs the following details at the start of each request:
-
-     - Request method
-     - Request path
-     - Query parameters
-     - Referrer (if available)
-
-   - Example log at request start:
-
-   .. code-block:: text
-
-      INFO | 2024-10-03 16:29:47 | request_middleware | REQUEST STARTED:
-      method=GET
-      path=/admin/
-      query_params=None
-      referrer=http://127.0.0.1:8000/admin/login/?next=/admin/
-      | {'ip_address': '127.0.0.1', 'request_id': '09580021-6bff-4b82-99b5-c52406b2cc91',
-        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'}
-
-2. **Response Information Logging**:
-   - Logs the following details after the request is processed:
-
-     - User (or 'Anonymous' if not authenticated)
-     - HTTP Status code
-     - Content type
-     - Time taken to process the request
-     - Optionally logs SQL queries executed during the request (if enabled)
-
-   - Example log at request completion:
-
-   .. code-block:: text
-
-      INFO | 2024-10-03 16:29:47 | request_middleware | REQUEST FINISHED:
-      user=[mehrshad (ID:1)]
-      status_code=200
-      content_type=[text/html; charset=utf-8]
-      response_time=[0.08 second(s)]
-      3 SQL QUERIES EXECUTED
-      Query1={'Time': 0.000(s), 'Query':
-                [SELECT "django_session"."session_key", "django_session"."session_data", "django_session"."expire_date" FROM "django_session"
-                WHERE ("django_session"."expire_date" > '2024-10-03 12:59:47.812918' AND "django_session"."session_key" = 'uq0nrbglazfm4cy656w3451xydfirh45') LIMIT 21]}
-
-      Query2={'Time': 0.001(s), 'Query':
-                [SELECT "auth_user"."id", "auth_user"."password", "auth_user"."last_login", "auth_user"."is_superuser", "auth_user".
-                "username", "auth_user"."first_name", "auth_user"."last_name", "auth_user"."email", "auth_user"."is_staff", "auth_user".
-                "is_active", "auth_user"."date_joined" FROM "auth_user" WHERE "auth_user"."id" = 1 LIMIT 21]}
-
-      | {'ip_address': '127.0.0.1', 'request_id': '09580021-6bff-4b82-99b5-c52406b2cc91',
-        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'}
-
-
-3. **Request ID**:
-   - A unique request ID is generated for each request (or taken from the ``X-Request-ID`` header if provided). This request ID is included in logs and can help with tracing specific requests.
-
-4. **SQL Query Logging**:
-   - If SQL query logging is enabled, all queries executed during the request will be logged along with their execution time.
-
-    **Note**: to enable Query logging, you can set ``LOG_SQL_QUERIES_ENABLE`` to ``True`` in settings. for more details, refer to the :doc:`Settings <settings>`.
-
-5. **Streaming Response Support**:
-   - The middleware supports both synchronous and asynchronous streaming responses, logging the start and end of the streaming process, as well as any errors during streaming.
-
-6. **User Information**:
-   - Logs the authenticated user's username and ID if available, or 'Anonymous' if the user is not authenticated.
-
-7. **IP Address and User-Agent**:
-   - The middleware logs the client's IP address and user agent for each request.
-
-
-Context Variables Usage
-^^^^^^^^^^^^^^^^^^^^^^^^
-
-We use context variables in ``RequestLogMiddleware`` to store the following information for each request:
-
-- **request_id**: A unique identifier for the request.
-- **ip_address**: The client’s IP address.
-- **user_agent**: The client's user agent string.
-
-These context variables can be accessed and used in other parts of the logging system or during the request processing lifecycle.
-
-MonitorLogSizeMiddleware
-------------------------
-
-This middleware monitors the size of the log directory and checks it weekly.
-It triggers the ``logs_size_audit`` management command to assess the total size of the log files.
-If the log directory size exceeds a certain limit (``LOG_DIR_SIZE_LIMIT``), the middleware sends a warning email to the ``ADMIN_EMAIL`` asynchronously.
-
-To enable this middleware, add it to your Django project's ``MIDDLEWARE`` setting:
+``django_logging.middleware.RequestLogMiddleware`` supports synchronous and
+asynchronous Django request handling. Enable it through the normal middleware
+setting:
 
 .. code-block:: python
 
-   MIDDLEWARE = [
-       # ...
-       "django_logging.middleware.MonitorLogSizeMiddleware",
-       # ...
-   ]
+    MIDDLEWARE = [
+        # ...
+        "django_logging.middleware.RequestLogMiddleware",
+        # ...
+    ]
 
+By default, the middleware emits one INFO completion event with the request
+method, bounded path, request ID, already-resolved user ID (or ``Anonymous``),
+status code, content type and response-object latency in milliseconds. It does
+not resolve a lazy session user solely for logging and does not read ordinary
+response bodies. The completion duration ends when the response object is
+returned; it does not measure the full time taken to consume a streaming body.
 
+Request IDs are exposed as ``request.request_id`` and included in logging
+context. A valid incoming ``X-Request-ID`` may be reused; values must be short
+ASCII identifiers containing letters, digits, ``-``, ``_`` or ``.``. Invalid
+values are replaced with a generated UUID. Request context is scoped and restored
+on exceptions/cancellation, and is re-established for each stream iteration.
+
+All request-specific options are nested inside the existing ``DJANGO_LOGGING``
+setting. See the :ref:`request-logging` reference for the complete list. For
+example, to enable query-value diagnostics while excluding authentication paths:
+
+.. code-block:: python
+
+    DJANGO_LOGGING = {
+        "REQUEST_LOGGING": {
+            "LOG_QUERY_PARAMS": True,
+            "EXCLUDED_PATH_PREFIXES": ["/auth", "/admin"],
+            "MAX_QUERY_BYTES": 4096,
+        },
+    }
+
+**Security defaults:** query values, JSON request bodies, JSON error response
+bodies and SQL diagnostics are disabled by default regardless of Django's
+``DEBUG`` setting. Sensitive field names are redacted, diagnostic data is
+bounded, and excluded paths suppress value diagnostics. Field-name redaction is
+best-effort; don't log secrets or enable raw SQL diagnostics on sensitive
+production traffic. ``X-Forwarded-For`` is not trusted. Configure
+``TRUSTED_PROXY_CIDRS`` only for proxy peer networks that overwrite
+``X-Real-IP``.
+
+Additional stream lifecycle messages are disabled by default. Set
+``REQUEST_LOGGING["LOG_STREAMING_EVENTS"]`` to ``True`` to log stream start,
+finish, close and cancellation events. Streaming failures are still logged when
+this option is disabled.
+
+Monitor log-size auditing
+-------------------------
+
+Prefer scheduling the management command outside HTTP request handling, for
+example weekly with cron, systemd timers or an existing task scheduler:
+
+.. code-block:: shell
+
+    python manage.py logs_size_audit
+
+The command checks ``LOG_DIR_SIZE_LIMIT`` and reports when the configured log
+directory exceeds the threshold. ``MonitorLogSizeMiddleware`` remains available
+for compatibility, but is a pass-through by default. To restore the legacy
+request-time audit, both add the middleware and explicitly set
+``DJANGO_LOGGING["LOG_SIZE_AUDIT_IN_REQUEST"] = True``. The triggering request
+waits for the audit to finish, so this behavior is discouraged in production.
 
 Context Variable Management
 ---------------------------
