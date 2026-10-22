@@ -13,21 +13,19 @@ authors = [
   { name = "ARYAN-NIKNEZHAD", email = "aryan513966@gmail.com" },
   { name = "MEHRSHAD-MIRSHEKARY", email = "mehrshad_mirshekary@email.com" },
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.10,<3.15"
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Environment :: Web Environment",
   "Framework :: Django",
-  "Framework :: Django :: 4.2",
-  "Framework :: Django :: 5.0",
-  "Framework :: Django :: 5.1",
   "Framework :: Django :: 5.2",
+  "Framework :: Django :: 6.0",
+  "Framework :: Django :: 6.1",
   "Intended Audience :: Developers",
   "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
@@ -40,10 +38,10 @@ classifiers = [
 packages = [
   { include = "django_logging" },
 ]
-dependencies.python = ">=3.10,<4.0"
+dependencies.python = ">=3.10,<3.15"
 dependencies.django = [
-  { version = ">=5.2,<5.3", python = ">=3.10,<3.12" },  # Django 5.2 only for Python 3.10, 3.11
-  { version = ">=5.2,<6.1", python = ">=3.12" },  # Django 5.2 and 6.0 for Python 3.12+
+  { version = ">=5.2,<5.3", python = ">=3.10,<3.12" }, # Django 5.2 only for Python 3.10, 3.11
+  { version = ">=5.2,<6.2", python = ">=3.12,<3.15" }, # Django 5.2, 6.0, 6.1
 ]
 group.dev.dependencies.bandit = { extras = [ "toml" ], version = "^1.7.9" }
 group.dev.dependencies.black = "^24.4.2"
@@ -71,6 +69,7 @@ urls.Issues = "https://github.com/lazarus-org/django_logging/issues"
 requires-plugins.poetry-plugin-export = ">=1.9"
 
 [tool.black]
+target-version = [ "py310" ]
 line-length = 88
 exclude = '''
 /(
@@ -138,7 +137,7 @@ disable = [
   "W0621",
   "W0622", # Redefining built-in names
 ]
-django-settings-module = "kernel.settings"
+django-settings-module = "scripts.pylint_settings"
 function-rgx = "[a-z_][a-z0-9_]{2,30}$"
 ignore = [
   "*.egg-info/*",
@@ -173,7 +172,7 @@ exclude_dirs = [
 targets = [ "./django_logging" ]
 confidence = "medium"
 exclude_tests = [ "B301", "B302" ]
-include = [ "B101", "B102" ]
+include = [ "*.py" ]
 max_lines = 500
 output_file = "bandit_report.txt"
 output_format = "screen"
@@ -198,7 +197,7 @@ disallow_untyped_defs = true
 
 [tool.pytest]
 ini_options.python_files = [ "test_*.py", "tests.py" ]
-ini_options.addopts = "--cov --cov-report=term-missing --cov-report=html --cov-fail-under=90"
+ini_options.addopts = "--cov --cov-report=term-missing --cov-report=html --cov-fail-under=100"
 ini_options.markers = [
   "base_formatter: Tests for the base class of formatters.",
   "base_middleware: Tests for the base class of middleware components.",
@@ -249,11 +248,11 @@ ini_options.asyncio_default_fixture_loop_scope = "function"
 ini_options.asyncio_mode = "auto"
 
 [tool.coverage]
+run.source = [ "django_logging" ]
 run.omit = [
   "*/migrations/*",
   "*/tests/*",
 ]
-run.source = [ "django_logging" ]
 report.exclude_lines = [
   "def __repr__",
   "if __name__ == .__main__.:",
@@ -273,6 +272,7 @@ settings.increment_types = [ "feat", "fix" ]
 tag_format = "v{version}"
 major_on_zero = true
 allow_zero_version = true
+# version_variables = [ "django_logging/version.py:__version__" ]
 build_command_env = []
 no_git_verify = false
 assets = []
@@ -297,7 +297,6 @@ commit_parser_options.default_bump_level = 0
 commit_parser_options.minor_tags = [ "feat" ]
 commit_parser_options.parse_emoji = true
 commit_parser_options.patch_tags = [ "fix", "perf" ]
-# version_variables = [ "django_logging/version.py:__version__" ]
 branches.main.match = "(main|master)"
 branches.main.prerelease = false
 branches.main.prerelease_token = "rc"
