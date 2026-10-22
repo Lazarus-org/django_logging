@@ -14,6 +14,9 @@ from django_logging.constants.request_logging import (
 def request_logging_errors(value: Any) -> list[str]:
     """Return all configuration errors; never silently coerce invalid security
     policies."""
+    # Exact built-in types intentionally reject bools and integer subclasses.
+    # The branches mirror the explicit security-policy schema.
+    # pylint: disable=unidiomatic-typecheck,too-many-branches
     if not isinstance(value, dict):
         return ["REQUEST_LOGGING must be a dictionary"]
     errors: list[str] = []
