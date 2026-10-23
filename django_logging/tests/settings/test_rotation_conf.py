@@ -3,7 +3,6 @@
 import logging
 import logging.handlers
 import sys
-from shutil import rmtree
 from unittest import mock
 
 import pytest
@@ -23,11 +22,11 @@ pytestmark = [
 # ---------------------------------------------------------------------------
 
 
-def make_log_config(**rotation_kwargs) -> LogConfig:
+def make_log_config(log_dir, **rotation_kwargs) -> LogConfig:
     """Return a minimal LogConfig, injecting rotation kwargs."""
     return LogConfig(
         log_levels=["INFO", "ERROR"],
-        log_dir="/tmp/logs",
+        log_dir=str(log_dir),
         log_file_formats={"INFO": 1, "ERROR": 1},
         log_file_format_types={"INFO": "NORMAL", "ERROR": "NORMAL"},
         extra_log_files={"INFO": False, "ERROR": False},
@@ -49,25 +48,28 @@ def make_log_config(**rotation_kwargs) -> LogConfig:
 
 class TestLogConfigRotation:
 
-    def test_default_rotation_type_is_none(self):
+    def test_default_rotation_type_is_none(self, tmp_path):
         """When no rotation is given the default TYPE is 'none'."""
-        config = make_log_config()
+        config = make_log_config(
+            tmp_path / "logs",
+        )
         assert config.log_rotation["TYPE"] == "none"
 
-    def test_custom_global_rotation_is_stored(self):
+    def test_custom_global_rotation_is_stored(self, tmp_path):
         """Global rotation config is stored and accessible."""
         rotation = {"TYPE": "size", "MAX_BYTES": 5_000_000, "BACKUP_COUNT": 10}
-        config = make_log_config(log_rotation=rotation)
+        config = make_log_config(tmp_path / "logs", log_rotation=rotation)
         assert config.log_rotation["TYPE"] == "size"
         assert config.log_rotation["MAX_BYTES"] == 5_000_000
 
-    def test_per_level_override_merges_over_global(self):
+    def test_per_level_override_merges_over_global(self, tmp_path):
         """Per-level override merges its keys on top of the global config."""
         global_rotation = {"TYPE": "size", "MAX_BYTES": 1_000_000, "BACKUP_COUNT": 5}
         overrides = {
             "ERROR": {"TYPE": "time", "WHEN": "midnight", "BACKUP_COUNT": 30},
         }
         config = make_log_config(
+            tmp_path / "logs",
             log_rotation=global_rotation,
             log_rotation_overrides=overrides,
         )
@@ -83,7 +85,7 @@ class TestLogConfigRotation:
         assert info_cfg["TYPE"] == "size"
         assert info_cfg["BACKUP_COUNT"] == 5
 
-    def test_override_partial_keys_inherits_rest_from_global(self):
+    def test_override_partial_keys_inherits_rest_from_global(self, tmp_path):
         """A partial override only changes the specified keys."""
         global_rotation = {
             "TYPE": "size",
@@ -94,6 +96,7 @@ class TestLogConfigRotation:
         # Override only BACKUP_COUNT for ERROR
         overrides = {"ERROR": {"BACKUP_COUNT": 90}}
         config = make_log_config(
+            tmp_path / "logs",
             log_rotation=global_rotation,
             log_rotation_overrides=overrides,
         )
@@ -104,9 +107,10 @@ class TestLogConfigRotation:
         assert error_cfg["BACKUP_COUNT"] == 90  # overridden
         assert error_cfg["COMPRESS"] is True  # inherited
 
-    def test_level_with_no_override_returns_global(self):
+    def test_level_with_no_override_returns_global(self, tmp_path):
         """Levels without an override entry return the unmodified global config."""
         config = make_log_config(
+            tmp_path / "logs",
             log_rotation={"TYPE": "time", "WHEN": "h", "BACKUP_COUNT": 24},
         )
         info_cfg = config.get_rotation_config_for_level("INFO")
@@ -121,79 +125,100 @@ class TestLogConfigRotation:
 
 class TestLogManagerHandlerFactory:
 
-    def _make_manager(self, **rotation_kwargs) -> LogManager:
-        return LogManager(make_log_config(**rotation_kwargs))
+    def _make_manager(self, log_dir, **rotation_kwargs) -> LogManager:
+        return LogManager(make_log_config(log_dir, **rotation_kwargs))
 
-    def test_no_rotation_yields_plain_file_handler(self):
+    def test_no_rotation_yields_plain_file_handler(self, tmp_path):
         """TYPE='none' → plain logging.FileHandler."""
-        manager = self._make_manager()
-        cfg = manager._build_file_handler_config("/tmp/logs/info.log", "INFO")
+        manager = self._make_manager(
+            tmp_path / "logs",
+        )
+        cfg = manager._build_file_handler_config(
+            str(tmp_path / "logs" / "info.log"), "INFO"
+        )
         assert cfg["class"] == "logging.FileHandler"
         assert "maxBytes" not in cfg
         assert "when" not in cfg
 
-    def test_size_rotation_yields_rotating_handler(self):
+    def test_size_rotation_yields_rotating_handler(self, tmp_path):
         """TYPE='size' → RotatingFileHandler."""
         manager = self._make_manager(
-            log_rotation={"TYPE": "size", "MAX_BYTES": 5_000_000, "BACKUP_COUNT": 3}
+            tmp_path / "logs",
+            log_rotation={"TYPE": "size", "MAX_BYTES": 5_000_000, "BACKUP_COUNT": 3},
         )
-        cfg = manager._build_file_handler_config("/tmp/logs/info.log", "INFO")
+        cfg = manager._build_file_handler_config(
+            str(tmp_path / "logs" / "info.log"), "INFO"
+        )
         assert "RotatingFileHandler" in cfg["class"]
         assert cfg["maxBytes"] == 5_000_000
         assert cfg["backupCount"] == 3
 
-    def test_size_rotation_compress_yields_compressed_handler(self):
+    def test_size_rotation_compress_yields_compressed_handler(self, tmp_path):
         """TYPE='size' + COMPRESS=True → CompressedRotatingFileHandler."""
         manager = self._make_manager(
+            tmp_path / "logs",
             log_rotation={
                 "TYPE": "size",
                 "MAX_BYTES": 1_000_000,
                 "BACKUP_COUNT": 5,
                 "COMPRESS": True,
-            }
+            },
         )
-        cfg = manager._build_file_handler_config("/tmp/logs/info.log", "INFO")
+        cfg = manager._build_file_handler_config(
+            str(tmp_path / "logs" / "info.log"), "INFO"
+        )
         assert "CompressedRotatingFileHandler" in cfg["class"]
 
-    def test_time_rotation_yields_timed_handler(self):
+    def test_time_rotation_yields_timed_handler(self, tmp_path):
         """TYPE='time' → TimedRotatingFileHandler."""
         manager = self._make_manager(
+            tmp_path / "logs",
             log_rotation={
                 "TYPE": "time",
                 "WHEN": "midnight",
                 "INTERVAL": 1,
                 "BACKUP_COUNT": 7,
-            }
+            },
         )
-        cfg = manager._build_file_handler_config("/tmp/logs/info.log", "INFO")
+        cfg = manager._build_file_handler_config(
+            str(tmp_path / "logs" / "info.log"), "INFO"
+        )
         assert "TimedRotatingFileHandler" in cfg["class"]
         assert cfg["when"] == "midnight"
         assert cfg["interval"] == 1
         assert cfg["backupCount"] == 7
 
-    def test_time_rotation_compress_yields_compressed_handler(self):
+    def test_time_rotation_compress_yields_compressed_handler(self, tmp_path):
         """TYPE='time' + COMPRESS=True → CompressedTimedRotatingFileHandler."""
         manager = self._make_manager(
+            tmp_path / "logs",
             log_rotation={
                 "TYPE": "time",
                 "WHEN": "midnight",
                 "COMPRESS": True,
                 "BACKUP_COUNT": 5,
-            }
+            },
         )
-        cfg = manager._build_file_handler_config("/tmp/logs/info.log", "INFO")
+        cfg = manager._build_file_handler_config(
+            str(tmp_path / "logs" / "info.log"), "INFO"
+        )
         assert "CompressedTimedRotatingFileHandler" in cfg["class"]
 
-    def test_per_level_override_used_in_handler_config(self):
+    def test_per_level_override_used_in_handler_config(self, tmp_path):
         """Per-level override is respected by the handler factory."""
         overrides = {"ERROR": {"TYPE": "time", "WHEN": "midnight", "BACKUP_COUNT": 30}}
         manager = self._make_manager(
+            tmp_path / "logs",
             log_rotation={"TYPE": "size", "MAX_BYTES": 1_000_000, "BACKUP_COUNT": 5},
             log_rotation_overrides=overrides,
         )
 
-        info_cfg = manager._build_file_handler_config("/tmp/logs/info.log", "INFO")
-        error_cfg = manager._build_file_handler_config("/tmp/logs/error.log", "ERROR")
+        info_cfg = manager._build_file_handler_config(
+            str(tmp_path / "logs" / "info.log"), "INFO"
+        )
+        error_cfg = manager._build_file_handler_config(
+            str(tmp_path / "logs" / "error.log"), "ERROR"
+        )
 
         assert "RotatingFileHandler" in info_cfg["class"]
         assert "TimedRotatingFileHandler" in error_cfg["class"]
@@ -203,10 +228,11 @@ class TestLogManagerHandlerFactory:
     # set_conf integration
     # ------------------------------------------------------------------
 
-    def test_set_conf_uses_rotating_handler_class_in_config(self):
+    def test_set_conf_uses_rotating_handler_class_in_config(self, tmp_path):
         """set_conf passes the correct rotating handler class to dictConfig."""
         manager = self._make_manager(
-            log_rotation={"TYPE": "size", "MAX_BYTES": 5_000_000, "BACKUP_COUNT": 3}
+            tmp_path / "logs",
+            log_rotation={"TYPE": "size", "MAX_BYTES": 5_000_000, "BACKUP_COUNT": 3},
         )
         with (
             mock.patch("os.makedirs"),
@@ -227,15 +253,18 @@ class TestLogManagerHandlerFactory:
             assert "maxBytes" in handler
             assert "backupCount" in handler
 
-    def test_set_conf_uses_timed_handler_class_in_config(self):
+    def test_set_conf_uses_timed_handler_class_in_config(self, tmp_path):
         """set_conf uses TimedRotatingFileHandler when TYPE='time'."""
+        unrelated = tmp_path / "unrelated.txt"
+        unrelated.write_text("preserve", encoding="utf-8")
         manager = self._make_manager(
+            tmp_path / "logs",
             log_rotation={
                 "TYPE": "time",
                 "WHEN": "midnight",
                 "INTERVAL": 1,
                 "BACKUP_COUNT": 5,
-            }
+            },
         )
         with (
             mock.patch("os.makedirs"),
@@ -253,7 +282,7 @@ class TestLogManagerHandlerFactory:
             assert "TimedRotatingFileHandler" in handler["class"]
             assert handler["when"] == "midnight"
 
-        rmtree("/tmp", ignore_errors=True)
+        assert unrelated.read_text(encoding="utf-8") == "preserve"
 
 
 def test_external_rotation_selects_watched_file_handler(log_manager):

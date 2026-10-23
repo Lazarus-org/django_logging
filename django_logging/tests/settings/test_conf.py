@@ -1,6 +1,5 @@
 import os
 import sys
-from shutil import rmtree
 from unittest import mock
 
 import pytest
@@ -91,19 +90,21 @@ class TestConf:
 
             log_manager.create_log_files()
 
-            makedirs_mock.assert_called_with("/tmp/logs", exist_ok=True)
+            makedirs_mock.assert_called_with(
+                log_manager.log_config.log_dir, exist_ok=True
+            )
 
             assert open_mock.call_count == len(log_manager.log_config.log_levels)
 
             for log_level in log_manager.log_config.log_levels:
                 expected_file_path = os.path.join(
-                    "/tmp/logs", f"{log_level.lower()}.log"
+                    log_manager.log_config.log_dir, f"{log_level.lower()}.log"
                 )
                 open_mock.assert_any_call(expected_file_path, "w", encoding="utf-8")
 
                 log_manager.log_files[log_level] = expected_file_path
 
-    def test_set_conf(self, log_manager: LogManager) -> None:
+    def test_set_conf(self, log_manager: LogManager, tmp_path) -> None:
         """
         Test setting up logging configuration.
 
@@ -120,6 +121,8 @@ class TestConf:
         - The `dictConfig` function is called.
         - The configuration dictionary contains expected keys and structures.
         """
+        unrelated = tmp_path / "unrelated.txt"
+        unrelated.write_text("preserve", encoding="utf-8")
         with mock.patch("logging.config.dictConfig") as dictConfig_mock:
             log_manager.create_log_files()
             log_manager.set_conf()
@@ -150,8 +153,8 @@ class TestConf:
             assert "handlers" in config["root"]
             assert "disable_existing_loggers" in config
 
-            # Remove the log dir created by test
-            rmtree("/tmp", ignore_errors=True)
+        # Pytest owns cleanup; setup must preserve unrelated temporary files.
+        assert unrelated.read_text(encoding="utf-8") == "preserve"
 
     def test_log_manager_get_log_file(self, log_manager: LogManager) -> None:
         """
@@ -173,8 +176,12 @@ class TestConf:
 
             log_manager.create_log_files()
 
-            expected_info_log_path = os.path.join("/tmp/logs", "info.log")
-            expected_error_log_path = os.path.join("/tmp/logs", "error.log")
+            expected_info_log_path = os.path.join(
+                log_manager.log_config.log_dir, "info.log"
+            )
+            expected_error_log_path = os.path.join(
+                log_manager.log_config.log_dir, "error.log"
+            )
 
             assert log_manager.get_log_file("INFO") == expected_info_log_path
             assert log_manager.get_log_file("ERROR") == expected_error_log_path

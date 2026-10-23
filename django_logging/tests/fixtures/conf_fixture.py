@@ -4,7 +4,7 @@ from django_logging.settings.conf import LogConfig, LogManager
 
 
 @pytest.fixture
-def log_config() -> LogConfig:
+def log_config(tmp_path) -> LogConfig:
     """
     Fixture to provide a default LogConfig instance.
 
@@ -18,7 +18,7 @@ def log_config() -> LogConfig:
     """
     return LogConfig(
         log_levels=["INFO", "WARNING", "ERROR"],
-        log_dir="/tmp/logs",
+        log_dir=str(tmp_path / "logs"),
         log_file_formats={"INFO": 1, "WARNING": None, "ERROR": "%(message)s"},  # type: ignore
         log_file_format_types={"INFO": "NORMAL"},
         extra_log_files={"INFO": False},

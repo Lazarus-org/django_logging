@@ -1,6 +1,7 @@
 """Django integration for structured formatter configuration."""
 
 import logging
+from pathlib import Path
 
 import pytest
 from django.test import override_settings
@@ -14,7 +15,7 @@ def test_log_manager_passes_structured_options(log_config):
     log_config.log_file_format_types["INFO"] = "JSON"
     log_config.structured_logging["EXCEPTION_MODE"] = "type"
     log_manager = LogManager(log_config)
-    log_manager.log_files = {"INFO": "/tmp/info.log"}
+    log_manager.log_files = {"INFO": str(Path(log_config.log_dir) / "info.log")}
     config = log_manager.build_logging_dict()
     args = config["formatters"]["info"]
     assert args["()"] == "django_logging.formatters.JSONFormatter"

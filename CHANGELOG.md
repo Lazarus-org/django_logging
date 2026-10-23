@@ -1,3 +1,75 @@
+## Unreleased — documentation synchronization checkpoint (09)
+
+- Reworked the Sphinx quick start and settings reference to match additive initialization, the three setup modes, request-logging safe defaults, structured serialization limits, external rotation, email concurrency limits, and custom components.
+- Added dedicated extensibility and performance/production deployment guides.
+- Corrected usage guidance for streaming events, lazy user resolution, async execution tracking, and scheduled log-size audits.
+- Added a strict Sphinx HTML build to CI and made missing optional static/template directories safe in the Sphinx configuration.
+- Documentation-only checkpoint; package runtime code and version remain unchanged.
+- **Validation status:** Sphinx/docutils are unavailable in the current execution environment, so the HTML build must be confirmed in CI.
+
+## Unreleased — performance hardening checkpoint (08)
+
+- Replaced whole-execution-context scans with direct reads of `dj-logging`-owned `ContextVar` objects; unrelated telemetry/tracing variables no longer increase lookup work.
+- Added node and conservative escaped-byte budgets during recursive structured serialization, early truncation, bounded integer/string handling, long-key value redaction, and bounded traceback frame formatting.
+- Added upper bounds for structured logging depth, item count, string size, event size, exception frames, and configured redaction field names.
+- Added an ASCII fast path for request path sanitization and `REQUEST_LOGGING.LOG_STREAMING_EVENTS` (disabled by default) to suppress optional stream start/finish/close/cancel events while retaining stream context and error logging.
+- Added a reproducible microbenchmark script and dependency-free resource-bound smoke tests to CI.
+- **Validation status:** formatter tests, context manager tests, smoke tests, and microbenchmarks run locally. Full Django request middleware tests, tox matrix, and Gunicorn load tests remain unverified because Django/asgiref are unavailable in this environment.
+
+## Unreleased — checkpoint 07 configuration stabilization
+
+- Construct only logging handlers, filters and formatters reachable from active routes in additive/isolated modes; unrelated declarative extensions no longer trigger unused factories or open files.
+- Honor an explicitly requested built-in `console` handler in `COMPONENTS.root_handlers` while keeping the automatic root-console suppression by default.
+- Close package-owned dependent handlers (such as `MemoryHandler.target`) when replacing active configurations, including handlers not attached directly to a logger.
+- Added stdlib activation smoke regressions, Django-facing regression tests, and CI hooks for the component smoke suite.
+- **Not release approved:** full Django tox matrix, package build, multiprocess verification, and refreshed Poetry lock/requirements exports remain outstanding.
+
+## Unreleased — extensible component architecture (06)
+
+- Added optional `DJANGO_LOGGING["COMPONENTS"]` with explicit component additions, preset replacement, disable rules, logger routing, and root/package handler attachments.
+- Reused Python's dictConfig component constructors in additive/isolated setup, fixing the previous divergence from legacy dictConfig formatter options.
+- Preserved default automatic initialization, additive host logger protection, and all existing rotation convenience settings.
+- Added compilation/reference checks, handler ownership and reconfiguration isolation, custom component regression tests, and standalone smoke harnesses.
+- **Not release approved:** complete Django tox matrix, Gunicorn integration, coverage and distribution build remain pending.
+
+## Unreleased — release verification and stabilization checkpoint (05)
+
+- Aligned Python support declarations to 3.10–3.14 and expanded Django dependency constraints and classifiers to include Django 6.1 on Python 3.12+.
+- Replaced the CI full-matrix-on-each-runner job with 11 explicit Python/Django tox environments. Made static checks and distribution build mandatory gates; tagged publishing now depends on the same verification workflow and uploads the verified distribution artifact.
+- Reworked `execution_tracker` to preserve pre-existing SQL debug query history and measure async functions after awaited completion. Asynchronous SQL query counting now fails explicitly when requested; `query_threshold=0` is supported.
+- Added Django regression tests, dependency-free execution-tracker smoke assertions, and a release matrix consistency checker.
+- **Verification status:** Static checks and dependency-free smoke tests can run here. Full Django integration tests, complete tox matrix, GitHub CI, package build, and multiprocess Gunicorn tests remain **unverified** and are release blockers.
+
+## Unreleased — production reliability checkpoint (04)
+
+- Bounded opt-in SMTP notifications with a maximum number of concurrent per-process workers; rejected events return `False` rather than spawning unlimited threads. Added SMTP socket timeouts, configuration validation, and fork-aware limiter reset.
+- Kept automatic logging initialization enabled with additive mode as default.
+- Compressed log rotation commits gzip output before removing the source; copy errors keep original files intact.
+- Added `LOG_ROTATION.TYPE="external"` for POSIX `WatchedFileHandler` integration with external rotators; multiprocess rotation is not claimed safe for built-in size/time handlers.
+- Archive command now recognizes only rotated log filenames, excludes symlinks/archive paths, preserves relative subdirectories, and uses collision-resistant timestamp names.
+- Legacy log-size auditing middleware is pass-through by default; explicitly enable `LOG_SIZE_AUDIT_IN_REQUEST` to restore synchronous request-time scans, or preferably schedule `logs_size_audit` externally.
+- `rotate_logs` no longer rotates the same handler twice when attached to several loggers.
+- **Compatibility changes:** request-time audits require explicit opt-in, SMTP transport now has a finite timeout, notification attempts can be dropped under burst load, and archiving skips arbitrary unrecognized filenames.
+
+## Unreleased — structured logging checkpoint
+
+- Added bounded JSON, XML and FLAT serialization with typed `extra` and context fields.
+- Added built-in and configurable structured-field redaction; exception modes and size/depth limits.
+- Fixed invalid XML element names and escaping of control characters; stabilized flat single-line output.
+- Changed JSON defaults to compact one-event-per-line output and removed automatic `key=value` parsing. **Compatibility change:** use `extra={...}` for structured fields instead of relying on parsing arbitrary messages.
+- Kept default automatic initialization in additive mode and retained existing formatter class names.
+- Prevented colored console formatter from modifying shared format templates during concurrent formatting.
+- Added configuration validation and regression coverage.
+
+## Unreleased — logging configuration checkpoint
+
+- Preserved plug-and-play automatic initialization; the default `additive` mode attaches package-owned file handlers to root without replacing existing handlers or root levels.
+- Added opt-in isolated `django_logging` namespace setup and explicit legacy `replace_root` mode.
+- Added a side-effect-free logging configuration builder and managed handler replacement.
+- Changed temporary `config_setup` to restore only the package logger rather than modifying the root logger registry.
+- Added configuration validation, regression tests, and migration guidance.
+- **Routing compatibility:** existing host handlers and logger levels are preserved by default instead of being replaced; see `CHECKPOINT_02_LOGGING_CONFIGURATION.md`.
+
 ## v2.1.0 (2026-06-12)
 
 ### ✨ Features
