@@ -4,7 +4,7 @@ requires = [ "poetry-core>=2,<3" ]
 
 [project]
 name = "dj-logging"
-version = "2.1.0"
+version = "3.0.0"
 description = "A package for logging in django applications"
 readme = "README.md"
 keywords = [ "django", "django logging", "logging" ]
