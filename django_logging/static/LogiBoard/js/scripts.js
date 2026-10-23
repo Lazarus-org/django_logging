@@ -112,7 +112,8 @@ function displayFolderContents(folder, container, zip, path) {
     container.innerHTML = '';
     if (path.length) {
         const backButton = document.createElement('div');
-        backButton.innerHTML = `<span class="inline-block text-lg mr-2">&larr;</span>Back`;
+        const backArrow = createElement('span', '\u2190', {class: 'inline-block text-lg mr-2'});
+        backButton.append(backArrow, document.createTextNode('Back'));
         backButton.classList.add('cursor-pointer', 'text-gray-500', 'mb-4', 'flex', 'items-center', 'text-sm');
         backButton.addEventListener('click', () => {
             const parentFolder = path.slice(0, -1).reduce((acc, part) => acc[part], folderTree);
@@ -127,7 +128,12 @@ function displayFolderContents(folder, container, zip, path) {
             const isFile = folder[item] === null;
             const fileElement = document.createElement('div');
             fileElement.classList.add('cursor-pointer', isFile ? 'text-blue-300' : 'text-yellow-300', 'mb-2');
-            fileElement.innerHTML = `<img src="${icons[isFile ? getIcon(item) : 'folder']}" class="inline-block w-5 h-5 mr-2" alt="">${item}`;
+            const icon = createElement('img', null, {
+                src: icons[isFile ? getIcon(item) : 'folder'],
+                class: 'inline-block w-5 h-5 mr-2',
+                alt: ''
+            });
+            fileElement.append(icon, document.createTextNode(item));
 
             fileElement.addEventListener('click', async () => {
 
